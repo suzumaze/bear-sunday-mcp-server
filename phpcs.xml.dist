@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<ruleset name="BEAR.Sunday MCP Server">
+    <description>Project coding standard.</description>
+    <file>src</file>
+    <file>tests</file>
+    <file>bin</file>
+    <arg name="colors"/>
+    <arg value="sp"/>
+    <rule ref="PSR12"/>
+</ruleset>
