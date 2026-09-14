@@ -1,0 +1,29 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+$autoloadCandidates = [
+    __DIR__ . '/../vendor/autoload.php',
+    __DIR__ . '/../../../autoload.php',
+    $GLOBALS['_composer_autoload_path'] ?? null,
+];
+
+$autoload = null;
+foreach ($autoloadCandidates as $candidate) {
+    if (is_string($candidate) && is_file($candidate)) {
+        $autoload = $candidate;
+        break;
+    }
+}
+if ($autoload === null) {
+    fwrite(STDERR, "Composer autoloader not found\n");
+    exit(1);
+}
+
+require $autoload;
+
+$arguments = $_SERVER['argv'] ?? [];
+array_shift($arguments);
+
+exit(\Suzumaze\BearSundayMcp\Application::run(array_values($arguments)));

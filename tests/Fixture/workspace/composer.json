@@ -1,0 +1,14 @@
+{
+    "name": "acme/bear-mcp-fixture",
+    "description": "Fixture project for the BEAR.Sunday MCP adapter",
+    "type": "project",
+    "license": "MIT",
+    "require": {
+        "php": "^8.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "Acme\\Demo\\": "src/"
+        }
+    }
+}

@@ -1,0 +1,88 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+/** @return array<string, mixed>|null */
+function readMessage(): ?array
+{
+    $length = null;
+    while (($line = fgets(STDIN)) !== false) {
+        $line = rtrim($line, "\r\n");
+        if ($line === '') {
+            break;
+        }
+        if (preg_match('/^Content-Length:\s*(\d+)$/i', $line, $matches) === 1) {
+            $length = (int) $matches[1];
+        }
+    }
+    if ($length === null) {
+        return null;
+    }
+
+    $body = '';
+    while (strlen($body) < $length && !feof(STDIN)) {
+        $chunk = fread(STDIN, $length - strlen($body));
+        if ($chunk === false || $chunk === '') {
+            return null;
+        }
+        $body .= $chunk;
+    }
+
+    $message = json_decode($body, true, 64, JSON_THROW_ON_ERROR);
+
+    return is_array($message) ? $message : null;
+}
+
+/** @param array<string, mixed> $message */
+function sendMessage(array $message): void
+{
+    $body = json_encode($message, JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES);
+    fwrite(STDOUT, sprintf("Content-Length: %d\r\n\r\n%s", strlen($body), $body));
+    fflush(STDOUT);
+}
+
+/** @param array<string, mixed> $data */
+function success(array $data): array
+{
+    return [
+        'status' => 'ok',
+        'data' => $data,
+        'candidates' => [],
+        'provenance' => [],
+    ];
+}
+
+while (($message = readMessage()) !== null) {
+    $method = $message['method'] ?? null;
+    if ($method === 'exit') {
+        break;
+    }
+    if (!array_key_exists('id', $message)) {
+        continue;
+    }
+
+    $result = match ($method) {
+        'initialize' => ['capabilities' => []],
+        'shutdown' => null,
+        'bear/project/info' => success([
+            'semanticApiVersion' => 1,
+            'workspaceName' => 'workspace',
+            'projectPath' => '.',
+            'composerPath' => 'composer.json',
+            'psr4Roots' => ['src'],
+            'excludedPsr4Roots' => [],
+            'resourceCount' => 1,
+            'capabilities' => [],
+            'versions' => [],
+            'compatibilityIssues' => [],
+        ]),
+        'bear/resource/list', 'bear/resource/describe', 'bear/schema/describeForResource' => success([
+            'method' => $method,
+            'params' => $message['params'] ?? [],
+        ]),
+        default => null,
+    };
+
+    sendMessage(['jsonrpc' => '2.0', 'id' => $message['id'], 'result' => $result]);
+}
