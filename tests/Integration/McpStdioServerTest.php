@@ -97,7 +97,9 @@ final class McpStdioServerTest extends TestCase
             'bear_alps_descriptor_lookup',
             'bear_project_info',
             'bear_resource_describe',
+            'bear_resource_incoming_relations',
             'bear_resource_list',
+            'bear_resource_references',
             'bear_route_lookup',
             'bear_schema_lookup',
             'bear_sql_lookup',
@@ -137,6 +139,19 @@ final class McpStdioServerTest extends TestCase
             ['descriptorId' => 'goArticle', 'contextPath' => null],
             $navigation['result']['structuredContent']['data']['params'],
         );
+
+        $references = $this->request('tools/call', [
+            'name' => 'bear_resource_references',
+            'arguments' => ['resourceUri' => 'app://self/user', 'limit' => 10],
+        ]);
+        self::assertSame(
+            'bear/resource/references',
+            $references['result']['structuredContent']['data']['method'],
+        );
+        self::assertSame(
+            ['uri' => 'app://self/user', 'contextPath' => null, 'limit' => 10],
+            $references['result']['structuredContent']['data']['params'],
+        );
     }
 
     public function testMalformedToolInputDoesNotTerminateTheServer(): void
@@ -159,6 +174,12 @@ final class McpStdioServerTest extends TestCase
             'arguments' => ['engine' => 'blade', 'name' => 'user'],
         ]);
         self::assertSame(-32602, $invalidEngine['error']['code']);
+
+        $invalidReferenceLimit = $this->request('tools/call', [
+            'name' => 'bear_resource_references',
+            'arguments' => ['resourceUri' => 'app://self/user', 'limit' => 0],
+        ]);
+        self::assertSame(-32602, $invalidReferenceLimit['error']['code']);
 
         $valid = $this->request('tools/call', [
             'name' => 'bear_project_info',

@@ -20,10 +20,11 @@ and AI clients.
 
 ## Status
 
-Version 0.2.0 provides nine read-only tools against BEAR Semantic API version 1. In
+Version 0.2.0 provides eleven read-only tools against BEAR Semantic API version 1. In
 addition to project, Resource, and schema facts, it resolves explicit Route names, SQL
-query IDs, Twig/Qiq template names, Resource templates, and ALPS descriptors. References
-and position-based navigation remain planned as small follow-up releases.
+query IDs, Twig/Qiq template names, Resource templates, and ALPS descriptors. It also finds
+static Resource references and incoming Link/Embed relations. Position-based navigation
+remains planned as a separate follow-up release.
 
 ## Requirements
 
@@ -181,6 +182,8 @@ Resolve the /thing/detail route to its Page Resource.
 Find the SQL file for query ID point_distance.
 Find the Qiq template for app://self/user.
 Describe the ALPS descriptor goArticle and its relationships.
+Find all static references to app://self/user.
+Find Link and Embed relations targeting app://self/user.
 ```
 
 ## Tools
@@ -196,6 +199,8 @@ Describe the ALPS descriptor goArticle and its relationships.
 | `bear_template_lookup` | `bear/template/resolve` | Explicit Twig or Qiq template name to file |
 | `bear_template_for_resource` | `bear/template/forResource` | Convention-based Twig or Qiq template for a Resource URI |
 | `bear_alps_descriptor_lookup` | `bear/alps/describeDescriptor` | ALPS descriptor facts and explicit local relationships |
+| `bear_resource_references` | `bear/resource/references` | Static Resource URI and Route references with bounded source ranges |
+| `bear_resource_incoming_relations` | `bear/resource/incomingRelations` | Link/Embed relations targeting a Resource URI |
 
 Every result keeps the core envelope unchanged:
 
@@ -252,9 +257,8 @@ without exposing the outside path.
 
 ## Deferred scope
 
-Resource reference and incoming-relation tools are intentionally deferred to the next small
-change. Position-based navigation needs a separate core/custom-request contract before it can
-be exposed safely; the adapter will not guess locations or duplicate semantic logic.
+Position-based navigation needs a separate core/custom-request contract before it can be
+exposed safely; the adapter will not guess locations or duplicate semantic logic.
 
 ## License
 
