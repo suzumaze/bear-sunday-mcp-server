@@ -71,7 +71,7 @@ final class PhpactorLanguageServer implements SemanticLspClient
         try {
             $initialize = $client->rpcRequest('initialize', [
                 'processId' => getmypid(),
-                'rootUri' => self::fileUri($workspace->root),
+                'rootUri' => FileUri::fromPath($workspace->root),
                 'capabilities' => (object) [],
                 'clientInfo' => [
                     'name' => 'bear-sunday-mcp-server',
@@ -90,7 +90,7 @@ final class PhpactorLanguageServer implements SemanticLspClient
         return $client;
     }
 
-    public function request(string $method, array $params): array
+    public function request(string $method, array $params): mixed
     {
         if ($this->busy) {
             throw new LspException('Concurrent LSP requests are not supported');
@@ -101,10 +101,6 @@ final class PhpactorLanguageServer implements SemanticLspClient
             $result = $this->rpcRequest($method, $params);
         } finally {
             $this->busy = false;
-        }
-
-        if (!is_array($result) || array_is_list($result)) {
-            throw new LspException('Phpactor returned an invalid semantic result');
         }
 
         return $result;
@@ -156,7 +152,7 @@ final class PhpactorLanguageServer implements SemanticLspClient
     /**
      * @param array<string, mixed> $params
      */
-    private function notify(string $method, array $params): void
+    public function notify(string $method, array $params): void
     {
         $this->send([
             'jsonrpc' => '2.0',
@@ -282,14 +278,5 @@ final class PhpactorLanguageServer implements SemanticLspClient
                 throw new LspException('Phpactor exited before responding');
             }
         }
-    }
-
-    private static function fileUri(string $path): string
-    {
-        $normalized = str_replace('\\', '/', $path);
-        $encoded = implode('/', array_map('rawurlencode', explode('/', $normalized)));
-        $encoded = preg_replace('/^([A-Za-z])%3A/', '$1:', $encoded) ?? $encoded;
-
-        return 'file://' . (str_starts_with($encoded, '/') ? '' : '/') . $encoded;
     }
 }

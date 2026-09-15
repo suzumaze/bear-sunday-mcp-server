@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+
+- `lsp_definition`, `lsp_references`, and `lsp_hover` as bounded adapters to Phpactor's
+  standard position-based LSP methods.
+- Saved-document validation, workspace-only Location filtering, traversal/symlink rejection,
+  deterministic ordering, and bounded Hover output for standard LSP tools.
+
 ## [0.2.0] - 2026-09-15
 
 ### Added

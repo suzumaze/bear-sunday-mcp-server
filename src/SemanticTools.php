@@ -195,7 +195,16 @@ final class SemanticTools
     private function forward(string $method, array $params): array
     {
         try {
-            return $this->validateEnvelope($this->client->request($method, $params));
+            $result = $this->client->request($method, $params);
+            if (!is_array($result) || array_is_list($result)) {
+                return self::failure(
+                    'parse_error',
+                    'invalid_lsp_response',
+                    'Phpactor returned an invalid BEAR semantic result.',
+                );
+            }
+
+            return $this->validateEnvelope($result);
         } catch (LspTimeoutException) {
             return self::failure('timeout', 'lsp_timeout', 'Phpactor did not respond before the timeout.');
         } catch (LspRpcException $exception) {

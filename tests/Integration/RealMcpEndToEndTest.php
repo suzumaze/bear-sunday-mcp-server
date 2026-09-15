@@ -50,6 +50,9 @@ final class RealMcpEndToEndTest extends TestCase
                 'bear_sql_lookup',
                 'bear_template_for_resource',
                 'bear_template_lookup',
+                'lsp_definition',
+                'lsp_hover',
+                'lsp_references',
             ], $names);
 
             $project = $client->callTool('bear_project_info')->structuredContent;
@@ -148,6 +151,36 @@ final class RealMcpEndToEndTest extends TestCase
                 ['app://self/dashboard', 'app://self/dashboard'],
                 array_column($relations['data']['items'], 'sourceUri'),
             );
+
+            $position = [
+                'path' => 'src/Resource/App/Dashboard.php',
+                'line' => 12,
+                'character' => 40,
+            ];
+            $definition = $client->callTool('lsp_definition', $position)->structuredContent;
+            self::assertIsArray($definition);
+            self::assertSame('ok', $definition['status']);
+            self::assertSame('src/Resource/App/User.php', $definition['data']['locations'][0]['path']);
+
+            $position['includeDeclaration'] = true;
+            $lspReferences = $client->callTool('lsp_references', $position)->structuredContent;
+            self::assertIsArray($lspReferences);
+            self::assertSame('ok', $lspReferences['status']);
+            self::assertContains(
+                'src/Resource/App/Dashboard.php',
+                array_column($lspReferences['data']['locations'], 'path'),
+            );
+            self::assertContains(
+                'src/Resource/App/User.php',
+                array_column($lspReferences['data']['locations'], 'path'),
+            );
+
+            unset($position['includeDeclaration']);
+            $hover = $client->callTool('lsp_hover', $position)->structuredContent;
+            self::assertIsArray($hover);
+            self::assertSame('ok', $hover['status']);
+            self::assertSame('markdown', $hover['data']['contents']['kind']);
+            self::assertStringContainsString('app://self/user', $hover['data']['contents']['value']);
         } finally {
             $client->disconnect();
         }

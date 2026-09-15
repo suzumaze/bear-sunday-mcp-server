@@ -8,9 +8,12 @@ interface SemanticLspClient
 {
     /**
      * @param array<string, mixed> $params
-     * @return array<string, mixed>
+     * @return mixed
      */
-    public function request(string $method, array $params): array;
+    public function request(string $method, array $params): mixed;
+
+    /** @param array<string, mixed> $params */
+    public function notify(string $method, array $params): void;
 
     public function close(): void;
 }

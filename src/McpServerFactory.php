@@ -9,7 +9,7 @@ use Mcp\Server;
 
 final class McpServerFactory
 {
-    public static function create(SemanticTools $tools): Server
+    public static function create(SemanticTools $tools, StandardLspTools $lspTools): Server
     {
         $annotations = new ToolAnnotations(
             readOnlyHint: true,
@@ -186,6 +186,51 @@ final class McpServerFactory
             ], ['resourceUri']),
             outputSchema: self::envelopeSchema(),
         );
+        $builder->addTool(
+            [$lspTools, 'definition'],
+            name: 'lsp_definition',
+            title: 'Go to definition with Phpactor',
+            description: 'Run standard textDocument/definition at a position in a saved workspace file.',
+            annotations: $annotations,
+            inputSchema: self::objectSchema([
+                'path' => self::documentPathSchema(),
+                'line' => self::lineSchema(),
+                'character' => self::characterSchema(),
+                'limit' => self::limitSchema('Maximum workspace locations to return.'),
+            ], ['path', 'line', 'character']),
+            outputSchema: self::envelopeSchema(),
+        );
+        $builder->addTool(
+            [$lspTools, 'references'],
+            name: 'lsp_references',
+            title: 'Find references with Phpactor',
+            description: 'Run standard textDocument/references at a position in a saved workspace file.',
+            annotations: $annotations,
+            inputSchema: self::objectSchema([
+                'path' => self::documentPathSchema(),
+                'line' => self::lineSchema(),
+                'character' => self::characterSchema(),
+                'includeDeclaration' => [
+                    'type' => 'boolean',
+                    'description' => 'Whether the declaration should be included in the standard LSP result.',
+                ],
+                'limit' => self::limitSchema('Maximum workspace locations to return.'),
+            ], ['path', 'line', 'character']),
+            outputSchema: self::envelopeSchema(),
+        );
+        $builder->addTool(
+            [$lspTools, 'hover'],
+            name: 'lsp_hover',
+            title: 'Inspect hover information with Phpactor',
+            description: 'Run standard textDocument/hover at a position in a saved workspace file.',
+            annotations: $annotations,
+            inputSchema: self::objectSchema([
+                'path' => self::documentPathSchema(),
+                'line' => self::lineSchema(),
+                'character' => self::characterSchema(),
+            ], ['path', 'line', 'character']),
+            outputSchema: self::envelopeSchema(),
+        );
 
         return $builder->build();
     }
@@ -227,6 +272,37 @@ final class McpServerFactory
             'maxLength' => 2048,
             'pattern' => '^(app|page)://',
             'description' => 'BEAR Resource URI.',
+        ];
+    }
+
+    /** @return array<string, mixed> */
+    private static function documentPathSchema(): array
+    {
+        return [
+            'type' => 'string',
+            'minLength' => 1,
+            'maxLength' => 4096,
+            'description' => 'Workspace-relative path to a saved document.',
+        ];
+    }
+
+    /** @return array<string, mixed> */
+    private static function lineSchema(): array
+    {
+        return [
+            'type' => 'integer',
+            'minimum' => 0,
+            'description' => 'Zero-based LSP line number.',
+        ];
+    }
+
+    /** @return array<string, mixed> */
+    private static function characterSchema(): array
+    {
+        return [
+            'type' => 'integer',
+            'minimum' => 0,
+            'description' => 'Zero-based UTF-16 LSP character offset.',
         ];
     }
 

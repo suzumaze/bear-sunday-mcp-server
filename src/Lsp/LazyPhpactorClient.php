@@ -20,7 +20,7 @@ final class LazyPhpactorClient implements SemanticLspClient
     ) {
     }
 
-    public function request(string $method, array $params): array
+    public function request(string $method, array $params): mixed
     {
         $this->client ??= PhpactorLanguageServer::start(
             $this->workspace,
@@ -29,6 +29,16 @@ final class LazyPhpactorClient implements SemanticLspClient
         );
 
         return $this->client->request($method, $params);
+    }
+
+    public function notify(string $method, array $params): void
+    {
+        $this->client ??= PhpactorLanguageServer::start(
+            $this->workspace,
+            $this->commandPrefix,
+            $this->timeout,
+        );
+        $this->client->notify($method, $params);
     }
 
     public function close(): void
