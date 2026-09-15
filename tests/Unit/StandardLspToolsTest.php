@@ -59,6 +59,70 @@ final class StandardLspToolsTest extends TestCase
                     'range' => self::range(12, 31, 12, 51),
                 ];
             }
+            if ($method === 'textDocument/completion') {
+                return [
+                    'isIncomplete' => true,
+                    'items' => [
+                        [
+                            'label' => 'app://self/user',
+                            'kind' => 12,
+                            'sortText' => '0001-user',
+                            'insertText' => 'user',
+                            'insertTextFormat' => 1,
+                        ],
+                        [
+                            'label' => 'app://self/dashboard',
+                            'kind' => 12,
+                            'sortText' => '0000-dashboard',
+                            'detail' => 'BEAR Resource URI',
+                            'documentation' => ['kind' => 'markdown', 'value' => '**Dashboard**'],
+                        ],
+                        [
+                            'label' => 'app://self/user',
+                            'kind' => 12,
+                            'sortText' => '0001-user',
+                            'insertText' => 'user',
+                            'insertTextFormat' => 1,
+                        ],
+                    ],
+                ];
+            }
+            if ($method === 'textDocument/documentSymbol') {
+                return [[
+                    'name' => 'Dashboard',
+                    'kind' => 5,
+                    'range' => self::range(10, 0, 17, 1),
+                    'selectionRange' => self::range(10, 12, 10, 21),
+                    'children' => [[
+                        'name' => 'onGet',
+                        'kind' => 6,
+                        'range' => self::range(14, 4, 16, 5),
+                        'selectionRange' => self::range(14, 20, 14, 25),
+                        'children' => [],
+                    ]],
+                ]];
+            }
+            if ($method === 'workspace/symbol') {
+                return [
+                    [
+                        'name' => 'User',
+                        'kind' => 5,
+                        'containerName' => 'Acme\\Demo\\Resource\\App',
+                        'location' => [
+                            'uri' => FileUri::fromPath($this->fixture . '/src/Resource/App/User.php'),
+                            'range' => self::range(8, 12, 8, 16),
+                        ],
+                    ],
+                    [
+                        'name' => 'Outside',
+                        'kind' => 5,
+                        'location' => [
+                            'uri' => FileUri::fromPath('/etc/passwd'),
+                            'range' => self::range(0, 0, 0, 1),
+                        ],
+                    ],
+                ];
+            }
 
             return null;
         });
@@ -129,6 +193,63 @@ final class StandardLspToolsTest extends TestCase
             'parse_error',
             $tools->definition('src/Resource/App/Dashboard.php', 12, 40)['status'],
         );
+        self::assertSame(
+            'parse_error',
+            $tools->completion('src/Resource/App/Dashboard.php', 12, 40)['status'],
+        );
+        self::assertSame(
+            'parse_error',
+            $tools->documentSymbols('src/Resource/App/Dashboard.php')['status'],
+        );
+        self::assertSame('parse_error', $tools->workspaceSymbols('Dashboard')['status']);
+    }
+
+    public function testNormalizesCompletionAndSymbols(): void
+    {
+        $completion = $this->tools->completion('src/Resource/App/Dashboard.php', 12, 40, 1);
+        self::assertSame('ok', $completion['status']);
+        self::assertSame(2, $completion['data']['total']);
+        self::assertTrue($completion['data']['isIncomplete']);
+        self::assertTrue($completion['data']['truncated']);
+        self::assertSame('app://self/dashboard', $completion['data']['items'][0]['label']);
+        self::assertSame('markdown', $completion['data']['items'][0]['documentation']['kind']);
+
+        $documentSymbols = $this->tools->documentSymbols('src/Resource/App/Dashboard.php');
+        self::assertSame('ok', $documentSymbols['status']);
+        self::assertSame(2, $documentSymbols['data']['total']);
+        self::assertSame(['Dashboard', 'onGet'], array_column($documentSymbols['data']['symbols'], 'name'));
+        self::assertSame('Dashboard', $documentSymbols['data']['symbols'][1]['containerName']);
+        self::assertSame(
+            'src/Resource/App/Dashboard.php',
+            $documentSymbols['data']['symbols'][1]['path'],
+        );
+
+        $workspaceSymbols = $this->tools->workspaceSymbols('User');
+        self::assertSame('ok', $workspaceSymbols['status']);
+        self::assertSame(1, $workspaceSymbols['data']['total']);
+        self::assertSame('User', $workspaceSymbols['data']['symbols'][0]['name']);
+        self::assertSame('src/Resource/App/User.php', $workspaceSymbols['data']['symbols'][0]['path']);
+        self::assertSame(
+            ['query' => 'User'],
+            $this->client->requests[2]['params'],
+        );
+    }
+
+    public function testBoundsCompletionFieldsWithoutSplittingUtf8(): void
+    {
+        $client = new InMemoryLspClient(static fn (): array => [[
+            'label' => 'resource',
+            'documentation' => str_repeat('あ', 4_000),
+        ]]);
+        $tools = new StandardLspTools($client, Workspace::fromPath($this->fixture));
+
+        $completion = $tools->completion('src/Resource/App/Dashboard.php', 12, 40);
+
+        self::assertSame('ok', $completion['status']);
+        self::assertTrue($completion['data']['truncated']);
+        $documentation = $completion['data']['items'][0]['documentation']['value'];
+        self::assertSame(1, preg_match('//u', $documentation));
+        self::assertLessThanOrEqual(8_192, strlen($documentation));
     }
 
     public function testBoundsHoverWithoutSplittingUtf8(): void

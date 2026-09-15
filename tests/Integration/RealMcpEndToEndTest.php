@@ -50,9 +50,12 @@ final class RealMcpEndToEndTest extends TestCase
                 'bear_sql_lookup',
                 'bear_template_for_resource',
                 'bear_template_lookup',
+                'lsp_completion',
                 'lsp_definition',
+                'lsp_document_symbols',
                 'lsp_hover',
                 'lsp_references',
+                'lsp_workspace_symbols',
             ], $names);
 
             $project = $client->callTool('bear_project_info')->structuredContent;
@@ -181,6 +184,39 @@ final class RealMcpEndToEndTest extends TestCase
             self::assertSame('ok', $hover['status']);
             self::assertSame('markdown', $hover['data']['contents']['kind']);
             self::assertStringContainsString('app://self/user', $hover['data']['contents']['value']);
+
+            $completion = $client->callTool('lsp_completion', [
+                'path' => 'src/Client.php',
+                'line' => 11,
+                'character' => 28,
+            ])->structuredContent;
+            self::assertIsArray($completion);
+            self::assertSame('ok', $completion['status']);
+            self::assertContains('app://self/user', array_column($completion['data']['items'], 'label'));
+
+            $documentSymbols = $client->callTool('lsp_document_symbols', [
+                'path' => 'src/Resource/App/Dashboard.php',
+            ])->structuredContent;
+            self::assertIsArray($documentSymbols);
+            self::assertSame('ok', $documentSymbols['status']);
+            self::assertSame(
+                ['Dashboard', 'onGet'],
+                array_column($documentSymbols['data']['symbols'], 'name'),
+            );
+
+            $workspaceSymbols = $client->callTool('lsp_workspace_symbols', [
+                'query' => 'Dashboard',
+            ])->structuredContent;
+            self::assertIsArray($workspaceSymbols);
+            self::assertSame('ok', $workspaceSymbols['status']);
+            self::assertSame(
+                'Acme\\Demo\\Resource\\App\\Dashboard',
+                $workspaceSymbols['data']['symbols'][0]['name'],
+            );
+            self::assertSame(
+                'src/Resource/App/Dashboard.php',
+                $workspaceSymbols['data']['symbols'][0]['path'],
+            );
         } finally {
             $client->disconnect();
         }

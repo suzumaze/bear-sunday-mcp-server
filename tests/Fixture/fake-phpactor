@@ -124,6 +124,37 @@ while (($message = readMessage()) !== null) {
             ],
             'range' => lspRange(12, 31, 51),
         ],
+        'textDocument/completion' => [
+            'isIncomplete' => true,
+            'items' => [[
+                'label' => 'app://self/user',
+                'kind' => 12,
+                'sortText' => '0001-user',
+                'insertText' => 'user',
+                'insertTextFormat' => 1,
+            ]],
+        ],
+        'textDocument/documentSymbol' => [[
+            'name' => 'Dashboard',
+            'kind' => 5,
+            'range' => lspRange(10, 0, 17),
+            'selectionRange' => lspRange(10, 12, 21),
+            'children' => [[
+                'name' => 'onGet',
+                'kind' => 6,
+                'range' => lspRange(14, 4, 16),
+                'selectionRange' => lspRange(14, 20, 25),
+                'children' => [],
+            ]],
+        ]],
+        'workspace/symbol' => [[
+            'name' => 'Acme\\Demo\\Resource\\App\\Dashboard',
+            'kind' => 5,
+            'location' => [
+                'uri' => $dashboardUri,
+                'range' => lspRange(10, 12, 21),
+            ],
+        ]],
         default => null,
     };
 

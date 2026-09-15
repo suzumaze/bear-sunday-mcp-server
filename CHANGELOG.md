@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+
+- `lsp_completion`, `lsp_document_symbols`, and `lsp_workspace_symbols` as bounded adapters
+  to Phpactor's standard LSP discovery methods.
+- Deterministic Completion and Symbol normalization, workspace-only Symbol filtering,
+  bounded text fields, and real Phpactor end-to-end coverage.
+
 ## [0.3.1] - 2026-09-15
 
 ### Fixed

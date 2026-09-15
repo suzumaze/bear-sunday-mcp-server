@@ -231,6 +231,48 @@ final class McpServerFactory
             ], ['path', 'line', 'character']),
             outputSchema: self::envelopeSchema(),
         );
+        $builder->addTool(
+            [$lspTools, 'completion'],
+            name: 'lsp_completion',
+            title: 'Complete with Phpactor',
+            description: 'Run standard textDocument/completion at a position in a saved workspace file.',
+            annotations: $annotations,
+            inputSchema: self::objectSchema([
+                'path' => self::documentPathSchema(),
+                'line' => self::lineSchema(),
+                'character' => self::characterSchema(),
+                'limit' => self::limitSchema('Maximum completion items to return.'),
+            ], ['path', 'line', 'character']),
+            outputSchema: self::envelopeSchema(),
+        );
+        $builder->addTool(
+            [$lspTools, 'documentSymbols'],
+            name: 'lsp_document_symbols',
+            title: 'List document symbols with Phpactor',
+            description: 'Run standard textDocument/documentSymbol for a saved workspace file.',
+            annotations: $annotations,
+            inputSchema: self::objectSchema([
+                'path' => self::documentPathSchema(),
+                'limit' => self::limitSchema('Maximum document symbols to return.'),
+            ], ['path']),
+            outputSchema: self::envelopeSchema(),
+        );
+        $builder->addTool(
+            [$lspTools, 'workspaceSymbols'],
+            name: 'lsp_workspace_symbols',
+            title: 'Search workspace symbols with Phpactor',
+            description: 'Run standard workspace/symbol and return only symbols in the configured workspace.',
+            annotations: $annotations,
+            inputSchema: self::objectSchema([
+                'query' => [
+                    'type' => 'string',
+                    'maxLength' => 512,
+                    'description' => 'Symbol query. An empty query requests the server default inventory.',
+                ],
+                'limit' => self::limitSchema('Maximum workspace symbols to return.'),
+            ]),
+            outputSchema: self::envelopeSchema(),
+        );
 
         return $builder->build();
     }
