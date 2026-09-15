@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-09-15
+
 ### Added
 
 - `bear_route_lookup` and `bear_sql_lookup` for explicit Route names and SQL query IDs.
@@ -30,6 +32,7 @@ All notable changes to this project will be documented in this file.
 - Bounded LSP framing, fixed workspace/process configuration, structured failure results, and
   fake and real stdio integration coverage.
 
-[Unreleased]: https://github.com/suzumaze/bear-sunday-mcp-server/compare/v0.1.1...HEAD
+[Unreleased]: https://github.com/suzumaze/bear-sunday-mcp-server/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/suzumaze/bear-sunday-mcp-server/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/suzumaze/bear-sunday-mcp-server/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/suzumaze/bear-sunday-mcp-server/releases/tag/v0.1.0
