@@ -43,7 +43,7 @@ Install the released server into a dedicated directory:
 composer create-project --no-dev --prefer-dist \
   suzumaze/bear-sunday-mcp-server \
   /absolute/path/to/bear-sunday-mcp-server \
-  '^0.1'
+  '^0.2'
 ```
 
 For development from the repository instead:
