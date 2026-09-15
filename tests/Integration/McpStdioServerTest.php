@@ -107,9 +107,11 @@ final class McpStdioServerTest extends TestCase
             'bear_template_lookup',
             'lsp_completion',
             'lsp_definition',
+            'lsp_document_links',
             'lsp_document_symbols',
             'lsp_hover',
             'lsp_references',
+            'lsp_type_definition',
             'lsp_workspace_symbols',
         ], $names);
         foreach ($tools as $tool) {
@@ -173,6 +175,20 @@ final class McpStdioServerTest extends TestCase
             $definition['result']['structuredContent']['data']['locations'][0]['path'],
         );
 
+        $typeDefinition = $this->request('tools/call', [
+            'name' => 'lsp_type_definition',
+            'arguments' => [
+                'path' => 'src/Resource/App/User.php',
+                'line' => 8,
+                'character' => 14,
+            ],
+        ]);
+        self::assertSame('ok', $typeDefinition['result']['structuredContent']['status']);
+        self::assertSame(
+            'var/json_schema/user.json',
+            $typeDefinition['result']['structuredContent']['data']['locations'][0]['path'],
+        );
+
         $completion = $this->request('tools/call', [
             'name' => 'lsp_completion',
             'arguments' => [
@@ -195,6 +211,17 @@ final class McpStdioServerTest extends TestCase
         self::assertSame(
             ['Dashboard', 'onGet'],
             array_column($documentSymbols['result']['structuredContent']['data']['symbols'], 'name'),
+        );
+
+        $documentLinks = $this->request('tools/call', [
+            'name' => 'lsp_document_links',
+            'arguments' => ['path' => 'src/Resource/App/Dashboard.php'],
+        ]);
+        self::assertSame('ok', $documentLinks['result']['structuredContent']['status']);
+        self::assertSame(2, $documentLinks['result']['structuredContent']['data']['total']);
+        self::assertSame(
+            'src/Resource/App/User.php',
+            $documentLinks['result']['structuredContent']['data']['links'][0]['targetPath'],
         );
 
         $workspaceSymbols = $this->request('tools/call', [
@@ -255,6 +282,15 @@ final class McpStdioServerTest extends TestCase
             ],
         ]);
         self::assertSame(-32602, $invalidCompletionLimit['error']['code']);
+
+        $invalidDocumentLinkLimit = $this->request('tools/call', [
+            'name' => 'lsp_document_links',
+            'arguments' => [
+                'path' => 'src/Resource/App/Dashboard.php',
+                'limit' => 0,
+            ],
+        ]);
+        self::assertSame(-32602, $invalidDocumentLinkLimit['error']['code']);
 
         $invalidSymbolQuery = $this->request('tools/call', [
             'name' => 'lsp_workspace_symbols',

@@ -52,9 +52,11 @@ final class RealMcpEndToEndTest extends TestCase
                 'bear_template_lookup',
                 'lsp_completion',
                 'lsp_definition',
+                'lsp_document_links',
                 'lsp_document_symbols',
                 'lsp_hover',
                 'lsp_references',
+                'lsp_type_definition',
                 'lsp_workspace_symbols',
             ], $names);
 
@@ -216,6 +218,29 @@ final class RealMcpEndToEndTest extends TestCase
             self::assertSame(
                 'src/Resource/App/Dashboard.php',
                 $workspaceSymbols['data']['symbols'][0]['path'],
+            );
+
+            $typeDefinition = $client->callTool('lsp_type_definition', [
+                'path' => 'src/Resource/App/User.php',
+                'line' => 8,
+                'character' => 14,
+            ])->structuredContent;
+            self::assertIsArray($typeDefinition);
+            self::assertSame('ok', $typeDefinition['status']);
+            self::assertSame(
+                'var/json_schema/user.json',
+                $typeDefinition['data']['locations'][0]['path'],
+            );
+
+            $documentLinks = $client->callTool('lsp_document_links', [
+                'path' => 'src/Resource/App/Dashboard.php',
+            ])->structuredContent;
+            self::assertIsArray($documentLinks);
+            self::assertSame('ok', $documentLinks['status']);
+            self::assertSame(2, $documentLinks['data']['total']);
+            self::assertSame(
+                ['src/Resource/App/User.php', 'src/Resource/App/User.php'],
+                array_column($documentLinks['data']['links'], 'targetPath'),
             );
         } finally {
             $client->disconnect();

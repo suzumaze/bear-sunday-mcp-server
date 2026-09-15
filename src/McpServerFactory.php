@@ -201,6 +201,20 @@ final class McpServerFactory
             outputSchema: self::envelopeSchema(),
         );
         $builder->addTool(
+            [$lspTools, 'typeDefinition'],
+            name: 'lsp_type_definition',
+            title: 'Go to type definition with Phpactor',
+            description: 'Run standard textDocument/typeDefinition at a position in a saved workspace file.',
+            annotations: $annotations,
+            inputSchema: self::objectSchema([
+                'path' => self::documentPathSchema(),
+                'line' => self::lineSchema(),
+                'character' => self::characterSchema(),
+                'limit' => self::limitSchema('Maximum workspace locations to return.'),
+            ], ['path', 'line', 'character']),
+            outputSchema: self::envelopeSchema(),
+        );
+        $builder->addTool(
             [$lspTools, 'references'],
             name: 'lsp_references',
             title: 'Find references with Phpactor',
@@ -254,6 +268,18 @@ final class McpServerFactory
             inputSchema: self::objectSchema([
                 'path' => self::documentPathSchema(),
                 'limit' => self::limitSchema('Maximum document symbols to return.'),
+            ], ['path']),
+            outputSchema: self::envelopeSchema(),
+        );
+        $builder->addTool(
+            [$lspTools, 'documentLinks'],
+            name: 'lsp_document_links',
+            title: 'List document links with Phpactor',
+            description: 'Run standard textDocument/documentLink and return only targets in the configured workspace.',
+            annotations: $annotations,
+            inputSchema: self::objectSchema([
+                'path' => self::documentPathSchema(),
+                'limit' => self::limitSchema('Maximum resolved document links to return.'),
             ], ['path']),
             outputSchema: self::envelopeSchema(),
         );
