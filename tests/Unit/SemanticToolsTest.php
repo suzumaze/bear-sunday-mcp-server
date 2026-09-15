@@ -57,6 +57,67 @@ final class SemanticToolsTest extends TestCase
         );
     }
 
+    public function testMapsM2NavigationToolsToSemanticApiV1WithoutChangingResults(): void
+    {
+        $client = new InMemoryLspClient(static function (string $method, array $params): array {
+            if ($method === 'bear/project/info') {
+                return self::projectInfoResult();
+            }
+
+            return self::ok(['method' => $method, 'params' => $params]);
+        });
+        $tools = new SemanticTools($client);
+        $tools->projectInfo();
+
+        self::assertSame(
+            self::ok([
+                'method' => 'bear/route/resolve',
+                'params' => ['route' => '/thing/detail', 'contextPath' => 'aura.route.php'],
+            ]),
+            $tools->routeLookup('/thing/detail', 'aura.route.php'),
+        );
+        self::assertSame(
+            self::ok([
+                'method' => 'bear/sql/resolve',
+                'params' => ['queryId' => 'point_distance', 'contextPath' => null],
+            ]),
+            $tools->sqlLookup('point_distance'),
+        );
+        self::assertSame(
+            self::ok([
+                'method' => 'bear/template/resolve',
+                'params' => [
+                    'engine' => 'qiq',
+                    'name' => './sibling',
+                    'contextPath' => 'var/qiq/template/Page/Nested/RelativeReferences.php',
+                ],
+            ]),
+            $tools->templateLookup(
+                'qiq',
+                './sibling',
+                'var/qiq/template/Page/Nested/RelativeReferences.php',
+            ),
+        );
+        self::assertSame(
+            self::ok([
+                'method' => 'bear/template/forResource',
+                'params' => [
+                    'uri' => 'app://self/user',
+                    'engine' => 'twig',
+                    'contextPath' => null,
+                ],
+            ]),
+            $tools->templateForResource('app://self/user', 'twig'),
+        );
+        self::assertSame(
+            self::ok([
+                'method' => 'bear/alps/describeDescriptor',
+                'params' => ['descriptorId' => 'goArticle', 'contextPath' => null],
+            ]),
+            $tools->alpsDescriptorLookup('goArticle'),
+        );
+    }
+
     public function testPreflightsTheApiOnlyOnceWhenProjectInfoWasNotCalled(): void
     {
         $client = new InMemoryLspClient(static fn (string $method): array => $method === 'bear/project/info'

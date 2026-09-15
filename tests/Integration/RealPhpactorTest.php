@@ -26,7 +26,7 @@ final class RealPhpactorTest extends TestCase
             $result = $client->request('bear/project/info', []);
             self::assertSame('ok', $result['status']);
             self::assertSame(1, $result['data']['semanticApiVersion']);
-            self::assertSame(1, $result['data']['resourceCount']);
+            self::assertSame(2, $result['data']['resourceCount']);
 
             $outside = $client->request('bear/resource/describe', [
                 'uri' => 'app://self/user',

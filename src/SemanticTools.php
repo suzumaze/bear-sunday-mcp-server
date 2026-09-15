@@ -82,6 +82,56 @@ final class SemanticTools
         ]);
     }
 
+    /** @return array<string, mixed> */
+    public function routeLookup(string $route, ?string $contextPath = null): array
+    {
+        return $this->query('bear/route/resolve', [
+            'route' => $route,
+            'contextPath' => $contextPath,
+        ]);
+    }
+
+    /** @return array<string, mixed> */
+    public function sqlLookup(string $queryId, ?string $contextPath = null): array
+    {
+        return $this->query('bear/sql/resolve', [
+            'queryId' => $queryId,
+            'contextPath' => $contextPath,
+        ]);
+    }
+
+    /** @return array<string, mixed> */
+    public function templateLookup(string $engine, string $name, ?string $contextPath = null): array
+    {
+        return $this->query('bear/template/resolve', [
+            'engine' => $engine,
+            'name' => $name,
+            'contextPath' => $contextPath,
+        ]);
+    }
+
+    /** @return array<string, mixed> */
+    public function templateForResource(
+        string $resourceUri,
+        string $engine,
+        ?string $contextPath = null,
+    ): array {
+        return $this->query('bear/template/forResource', [
+            'uri' => $resourceUri,
+            'engine' => $engine,
+            'contextPath' => $contextPath,
+        ]);
+    }
+
+    /** @return array<string, mixed> */
+    public function alpsDescriptorLookup(string $descriptorId, ?string $contextPath = null): array
+    {
+        return $this->query('bear/alps/describeDescriptor', [
+            'descriptorId' => $descriptorId,
+            'contextPath' => $contextPath,
+        ]);
+    }
+
     /**
      * @param array<string, mixed> $params
      * @return array<string, mixed>

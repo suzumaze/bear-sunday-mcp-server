@@ -10,7 +10,7 @@ use PHPUnit\Framework\TestCase;
 
 final class RealMcpEndToEndTest extends TestCase
 {
-    public function testRunsAllM1ToolsThroughMcpAndARealPhpactorProcess(): void
+    public function testRunsAllAvailableToolsThroughMcpAndARealPhpactorProcess(): void
     {
         $phpactor = getenv('BEAR_MCP_TEST_PHPACTOR');
         if (!is_string($phpactor) || $phpactor === '') {
@@ -39,10 +39,15 @@ final class RealMcpEndToEndTest extends TestCase
             $names = array_map(static fn ($tool): string => $tool->name, $client->listTools()->tools);
             sort($names);
             self::assertSame([
+                'bear_alps_descriptor_lookup',
                 'bear_project_info',
                 'bear_resource_describe',
                 'bear_resource_list',
+                'bear_route_lookup',
                 'bear_schema_lookup',
+                'bear_sql_lookup',
+                'bear_template_for_resource',
+                'bear_template_lookup',
             ], $names);
 
             $project = $client->callTool('bear_project_info')->structuredContent;
@@ -69,6 +74,49 @@ final class RealMcpEndToEndTest extends TestCase
             ])->structuredContent;
             self::assertIsArray($schema);
             self::assertContains($schema['status'], ['ok', 'not_found']);
+
+            $route = $client->callTool('bear_route_lookup', [
+                'route' => '/thing/detail',
+                'contextPath' => 'aura.route.php',
+            ])->structuredContent;
+            self::assertIsArray($route);
+            self::assertSame('ok', $route['status']);
+            self::assertSame('page://self/thing/detail', $route['data']['resource']['uri']);
+            self::assertSame('src/Resource/Page/Thing/Detail.php', $route['data']['resource']['path']);
+
+            $sql = $client->callTool('bear_sql_lookup', [
+                'queryId' => 'point_distance',
+                'contextPath' => 'src/Resource/App/User.php',
+            ])->structuredContent;
+            self::assertIsArray($sql);
+            self::assertSame('ok', $sql['status']);
+            self::assertSame('var/db/sql/point_distance.sql', $sql['data']['path']);
+
+            $template = $client->callTool('bear_template_lookup', [
+                'engine' => 'twig',
+                'name' => 'App/User.html.twig',
+            ])->structuredContent;
+            self::assertIsArray($template);
+            self::assertSame('ok', $template['status']);
+            self::assertSame('var/templates/App/User.html.twig', $template['data']['path']);
+
+            $resourceTemplate = $client->callTool('bear_template_for_resource', [
+                'resourceUri' => 'app://self/user',
+                'engine' => 'qiq',
+            ])->structuredContent;
+            self::assertIsArray($resourceTemplate);
+            self::assertSame('ok', $resourceTemplate['status']);
+            self::assertSame('var/qiq/template/App/User.php', $resourceTemplate['data']['path']);
+
+            $alps = $client->callTool('bear_alps_descriptor_lookup', [
+                'descriptorId' => 'goArticle',
+                'contextPath' => 'src/Resource/App/User.php',
+            ])->structuredContent;
+            self::assertIsArray($alps);
+            self::assertSame('ok', $alps['status']);
+            self::assertSame('safe', $alps['data']['type']);
+            self::assertSame('Article', $alps['data']['relationsOut'][0]['targetId']);
+            self::assertSame('Article', $alps['data']['relationsIn'][0]['sourceId']);
         } finally {
             $client->disconnect();
         }
