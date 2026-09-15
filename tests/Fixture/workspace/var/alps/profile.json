@@ -1,0 +1,19 @@
+{
+    "alps": {
+        "descriptor": [
+            {
+                "id": "Article",
+                "title": "Article",
+                "descriptor": [
+                    {"href": "#goArticle"}
+                ]
+            },
+            {
+                "id": "goArticle",
+                "type": "safe",
+                "rt": "#Article",
+                "title": "View Article"
+            }
+        ]
+    }
+}

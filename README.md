@@ -20,9 +20,10 @@ and AI clients.
 
 ## Status
 
-Version 0.1.1 provides the initial M1 surface against BEAR Semantic API version 1.
-Route, SQL, template, ALPS, references, and position-based navigation tools remain planned
-as small follow-up releases.
+Version 0.2.0 provides nine read-only tools against BEAR Semantic API version 1. In
+addition to project, Resource, and schema facts, it resolves explicit Route names, SQL
+query IDs, Twig/Qiq template names, Resource templates, and ALPS descriptors. References
+and position-based navigation remain planned as small follow-up releases.
 
 ## Requirements
 
@@ -176,6 +177,10 @@ After connecting, ask the client for facts rather than naming tools explicitly:
 List the Resources in this BEAR.Sunday project.
 Describe app://self/user, including methods, Link/Embed relations, templates, and schemas.
 Show the request schema for app://self/user.
+Resolve the /thing/detail route to its Page Resource.
+Find the SQL file for query ID point_distance.
+Find the Qiq template for app://self/user.
+Describe the ALPS descriptor goArticle and its relationships.
 ```
 
 ## Tools
@@ -186,6 +191,11 @@ Show the request schema for app://self/user.
 | `bear_resource_list` | `bear/resource/list` | Deterministic Resource URI inventory with scheme, prefix, and limit filters |
 | `bear_resource_describe` | `bear/resource/describe` | Resource methods, Link/Embed relations, templates, and schemas |
 | `bear_schema_lookup` | `bear/schema/describeForResource` | Bounded request/response Schema facts without raw JSON |
+| `bear_route_lookup` | `bear/route/resolve` | Explicit Aura Router route name to Page Resource |
+| `bear_sql_lookup` | `bear/sql/resolve` | Static SQL query ID to workspace-relative SQL file |
+| `bear_template_lookup` | `bear/template/resolve` | Explicit Twig or Qiq template name to file |
+| `bear_template_for_resource` | `bear/template/forResource` | Convention-based Twig or Qiq template for a Resource URI |
+| `bear_alps_descriptor_lookup` | `bear/alps/describeDescriptor` | ALPS descriptor facts and explicit local relationships |
 
 Every result keeps the core envelope unchanged:
 
@@ -204,7 +214,7 @@ missing custom LSP method returns `engine_unavailable`.
 
 ## Safety model
 
-- All four MCP tools declare `readOnlyHint: true`, `destructiveHint: false`, and `openWorldHint: false`.
+- All MCP tools declare `readOnlyHint: true`, `destructiveHint: false`, and `openWorldHint: false`.
 - No MCP tool accepts a command, executable path, workspace root, URL, or arbitrary LSP method.
 - The workspace root and Phpactor command are fixed before the MCP server starts.
 - The adapter never runs the BEAR application, renders templates, edits files, or accesses the network.
@@ -233,17 +243,18 @@ The normal suite uses a fake LSP server and exercises MCP `initialize`, `tools/l
 
 ```console
 BEAR_MCP_TEST_PHPACTOR=/absolute/path/to/phpactor \
-  vendor/bin/phpunit --filter RealPhpactorTest
+  vendor/bin/phpunit --filter 'Real(Phpactor|McpEndToEnd)Test'
 ```
 
-The real test verifies Semantic API version 1 and confirms that an outside-workspace context
-path is rejected without exposing the outside path.
+The real tests exercise every published MCP tool through a real Phpactor process, verify
+Semantic API version 1, and confirm that an outside-workspace context path is rejected
+without exposing the outside path.
 
 ## Deferred scope
 
-Route, SQL, template, ALPS, references, and position-based navigation tools are intentionally
-deferred to small follow-up changes. The core already exposes the relevant LSP requests; each
-future MCP tool should remain a name/schema mapping rather than duplicate semantic logic.
+Resource reference and incoming-relation tools are intentionally deferred to the next small
+change. Position-based navigation needs a separate core/custom-request contract before it can
+be exposed safely; the adapter will not guess locations or duplicate semantic logic.
 
 ## License
 

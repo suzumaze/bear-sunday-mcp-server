@@ -77,7 +77,7 @@ final class McpStdioServerTest extends TestCase
         }
     }
 
-    public function testListsOnlyReadOnlyM1ToolsAndCallsThroughToLsp(): void
+    public function testListsOnlyReadOnlyToolsAndCallsThroughToLsp(): void
     {
         $initialize = $this->request('initialize', [
             'protocolVersion' => '2025-11-25',
@@ -94,10 +94,15 @@ final class McpStdioServerTest extends TestCase
         $names = array_column($tools, 'name');
         sort($names);
         self::assertSame([
+            'bear_alps_descriptor_lookup',
             'bear_project_info',
             'bear_resource_describe',
             'bear_resource_list',
+            'bear_route_lookup',
             'bear_schema_lookup',
+            'bear_sql_lookup',
+            'bear_template_for_resource',
+            'bear_template_lookup',
         ], $names);
         foreach ($tools as $tool) {
             self::assertTrue($tool['annotations']['readOnlyHint'] ?? false);
@@ -119,6 +124,19 @@ final class McpStdioServerTest extends TestCase
             ['scheme' => 'app', 'prefix' => 'user', 'limit' => 10],
             $called['result']['structuredContent']['data']['params'],
         );
+
+        $navigation = $this->request('tools/call', [
+            'name' => 'bear_alps_descriptor_lookup',
+            'arguments' => ['descriptorId' => 'goArticle'],
+        ]);
+        self::assertSame(
+            'bear/alps/describeDescriptor',
+            $navigation['result']['structuredContent']['data']['method'],
+        );
+        self::assertSame(
+            ['descriptorId' => 'goArticle', 'contextPath' => null],
+            $navigation['result']['structuredContent']['data']['params'],
+        );
     }
 
     public function testMalformedToolInputDoesNotTerminateTheServer(): void
@@ -135,6 +153,12 @@ final class McpStdioServerTest extends TestCase
             'arguments' => ['limit' => 999],
         ]);
         self::assertSame(-32602, $invalid['error']['code']);
+
+        $invalidEngine = $this->request('tools/call', [
+            'name' => 'bear_template_lookup',
+            'arguments' => ['engine' => 'blade', 'name' => 'user'],
+        ]);
+        self::assertSame(-32602, $invalidEngine['error']['code']);
 
         $valid = $this->request('tools/call', [
             'name' => 'bear_project_info',

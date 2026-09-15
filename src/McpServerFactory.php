@@ -96,6 +96,70 @@ final class McpServerFactory
             ], ['resourceUri']),
             outputSchema: self::envelopeSchema(),
         );
+        $builder->addTool(
+            [$tools, 'routeLookup'],
+            name: 'bear_route_lookup',
+            title: 'Resolve a BEAR route',
+            description: 'Resolve an explicit Aura Router route name to its Page Resource; HTTP paths are not guessed.',
+            annotations: $annotations,
+            inputSchema: self::objectSchema([
+                'route' => self::identifierSchema('Explicit Aura Router route name.'),
+                'contextPath' => self::pathSchema('Optional workspace-relative context path.'),
+            ], ['route']),
+            outputSchema: self::envelopeSchema(),
+        );
+        $builder->addTool(
+            [$tools, 'sqlLookup'],
+            name: 'bear_sql_lookup',
+            title: 'Resolve a BEAR SQL query',
+            description: 'Resolve a static BEAR SQL query ID to its workspace-relative SQL file '
+                . 'without returning SQL text.',
+            annotations: $annotations,
+            inputSchema: self::objectSchema([
+                'queryId' => self::identifierSchema('Static DbQuery or @Query identifier.'),
+                'contextPath' => self::pathSchema('Optional workspace-relative context path.'),
+            ], ['queryId']),
+            outputSchema: self::envelopeSchema(),
+        );
+        $builder->addTool(
+            [$tools, 'templateLookup'],
+            name: 'bear_template_lookup',
+            title: 'Resolve a BEAR template reference',
+            description: 'Resolve one explicit Twig or Qiq template name; relative Qiq names require contextPath.',
+            annotations: $annotations,
+            inputSchema: self::objectSchema([
+                'engine' => self::templateEngineSchema(),
+                'name' => self::identifierSchema('Static template name supported by the BEAR extension.'),
+                'contextPath' => self::pathSchema('Optional workspace-relative source template path.'),
+            ], ['engine', 'name']),
+            outputSchema: self::envelopeSchema(),
+        );
+        $builder->addTool(
+            [$tools, 'templateForResource'],
+            name: 'bear_template_for_resource',
+            title: 'Resolve a Resource template',
+            description: 'Resolve an existing convention-based Twig or Qiq template for a BEAR Resource URI.',
+            annotations: $annotations,
+            inputSchema: self::objectSchema([
+                'resourceUri' => self::uriSchema(),
+                'engine' => self::templateEngineSchema(),
+                'contextPath' => self::pathSchema('Optional workspace-relative context path.'),
+            ], ['resourceUri', 'engine']),
+            outputSchema: self::envelopeSchema(),
+        );
+        $builder->addTool(
+            [$tools, 'alpsDescriptorLookup'],
+            name: 'bear_alps_descriptor_lookup',
+            title: 'Describe an ALPS descriptor',
+            description: 'Describe an explicit descriptor and its local relationships in the JSON ALPS profile '
+                . 'selected by apidoc.xml.',
+            annotations: $annotations,
+            inputSchema: self::objectSchema([
+                'descriptorId' => self::identifierSchema('Exact ALPS descriptor ID.'),
+                'contextPath' => self::pathSchema('Optional workspace-relative context path.'),
+            ], ['descriptorId']),
+            outputSchema: self::envelopeSchema(),
+        );
 
         return $builder->build();
     }
@@ -137,6 +201,27 @@ final class McpServerFactory
             'maxLength' => 2048,
             'pattern' => '^(app|page)://',
             'description' => 'BEAR Resource URI.',
+        ];
+    }
+
+    /** @return array<string, mixed> */
+    private static function identifierSchema(string $description): array
+    {
+        return [
+            'type' => 'string',
+            'minLength' => 1,
+            'maxLength' => 2048,
+            'description' => $description,
+        ];
+    }
+
+    /** @return array<string, mixed> */
+    private static function templateEngineSchema(): array
+    {
+        return [
+            'type' => 'string',
+            'enum' => ['twig', 'qiq'],
+            'description' => 'Template engine.',
         ];
     }
 

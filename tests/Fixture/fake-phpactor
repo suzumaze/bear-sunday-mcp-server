@@ -77,7 +77,14 @@ while (($message = readMessage()) !== null) {
             'versions' => [],
             'compatibilityIssues' => [],
         ]),
-        'bear/resource/list', 'bear/resource/describe', 'bear/schema/describeForResource' => success([
+        'bear/resource/list',
+        'bear/resource/describe',
+        'bear/schema/describeForResource',
+        'bear/route/resolve',
+        'bear/sql/resolve',
+        'bear/template/resolve',
+        'bear/template/forResource',
+        'bear/alps/describeDescriptor' => success([
             'method' => $method,
             'params' => $message['params'] ?? [],
         ]),
