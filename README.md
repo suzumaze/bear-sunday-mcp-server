@@ -20,22 +20,48 @@ and AI clients.
 
 ## Status
 
-The initial M1 surface is implemented against BEAR Semantic API version 1. It is intended
-for review and integration testing before the first tagged release.
+Version 0.1.0 provides the initial M1 surface against BEAR Semantic API version 1.
+Route, SQL, template, ALPS, references, and position-based navigation tools remain planned
+as small follow-up releases.
 
 ## Requirements
 
 - PHP 8.2 or newer
-- Phpactor with `suzumaze/bear-phpactor-extension` 0.1.5 or newer in the same Composer environment
+- Phpactor with `suzumaze/bear-phpactor-extension` 0.1.5 or newer installed in Phpactor's
+  Composer environment
 - An MCP host that supports stdio servers
 
 The MCP SDK is fixed to the compatible `0.8.x` line because its public API is not yet 1.0.
 
-## Install and run
+## Install
+
+Install the released server into a dedicated directory:
 
 ```console
+composer create-project --no-dev --prefer-dist \
+  suzumaze/bear-sunday-mcp-server \
+  /absolute/path/to/bear-sunday-mcp-server \
+  '^0.1'
+```
+
+For development from the repository instead:
+
+```console
+git clone https://github.com/suzumaze/bear-sunday-mcp-server.git \
+  /absolute/path/to/bear-sunday-mcp-server
+cd /absolute/path/to/bear-sunday-mcp-server
 composer install
-vendor/bin/bear-sunday-mcp \
+```
+
+Use the Phpactor binary configured by
+[`phpactor-setup-for-bear-sunday`](https://github.com/suzumaze/phpactor-setup-for-bear-sunday)
+or another Phpactor installation that actually loads the BEAR extension. You do not need a
+second Phpactor installation when the setup package already provides one.
+
+## Run directly
+
+```console
+/absolute/path/to/bear-sunday-mcp-server/vendor/bin/bear-sunday-mcp \
   --workspace=/absolute/path/to/bear-project \
   --phpactor=/absolute/path/to/phpactor
 ```
@@ -45,13 +71,70 @@ The adapter then checks `PHPACTOR_BIN`, `WORKSPACE/vendor/bin/phpactor`, and fin
 `phpactor` command on `PATH`. A configured command is passed directly to `proc_open` as an
 argument array; shell command strings and appended arguments are rejected.
 
+The process normally appears to wait silently because MCP messages use stdin and stdout.
+
+## Configure Codex
+
+Register one BEAR.Sunday workspace with Codex CLI:
+
+```console
+codex mcp add bear-sunday -- \
+  /absolute/path/to/bear-sunday-mcp-server/vendor/bin/bear-sunday-mcp \
+  --workspace=/absolute/path/to/bear-project \
+  --phpactor=/absolute/path/to/phpactor
+codex mcp list
+```
+
+Codex CLI, the Codex app, and the Codex IDE extension on the same host share MCP
+configuration. Restart the app or IDE extension after adding the server; use `/mcp` in the
+CLI to inspect it. See the
+[`Codex MCP documentation`](https://learn.chatgpt.com/docs/extend/mcp).
+
+The equivalent `~/.codex/config.toml` entry is:
+
+```toml
+[mcp_servers.bear_sunday]
+command = "/absolute/path/to/bear-sunday-mcp-server/vendor/bin/bear-sunday-mcp"
+args = [
+    "--workspace=/absolute/path/to/bear-project",
+    "--phpactor=/absolute/path/to/phpactor",
+]
+startup_timeout_sec = 20
+tool_timeout_sec = 60
+enabled = true
+```
+
+## Configure Claude Code
+
+Register the server for one local project without committing machine-specific paths:
+
+```console
+cd /absolute/path/to/bear-project
+claude mcp add --scope local --transport stdio bear-sunday -- \
+  /absolute/path/to/bear-sunday-mcp-server/vendor/bin/bear-sunday-mcp \
+  --workspace=/absolute/path/to/bear-project \
+  --phpactor=/absolute/path/to/phpactor
+claude mcp list
+claude mcp get bear-sunday
+```
+
+Use `/mcp` inside Claude Code to inspect the connection and available tools. See the
+[`Claude Code MCP documentation`](https://code.claude.com/docs/en/mcp).
+
+For a trusted project shared by a team, use `--scope project` or commit an `.mcp.json` file.
+Do not commit personal absolute paths; use paths valid for every team member or document the
+required substitution.
+
+## Configure another MCP client
+
 For MCP hosts that use an `mcpServers` JSON object:
 
 ```json
 {
   "mcpServers": {
     "bear-sunday": {
-      "command": "/absolute/path/to/vendor/bin/bear-sunday-mcp",
+      "type": "stdio",
+      "command": "/absolute/path/to/bear-sunday-mcp-server/vendor/bin/bear-sunday-mcp",
       "args": [
         "--workspace=/absolute/path/to/bear-project",
         "--phpactor=/absolute/path/to/phpactor"
@@ -61,9 +144,39 @@ For MCP hosts that use an `mcpServers` JSON object:
 }
 ```
 
-Use the Phpactor binary configured by
-[`phpactor-setup-for-bear-sunday`](https://github.com/suzumaze/phpactor-setup-for-bear-sunday)
-or another Phpactor installation that actually loads the BEAR extension.
+The initial transport is local stdio. Browser-only Claude.ai or ChatGPT sessions cannot
+start this local process directly; supporting those environments would require a separately
+secured Streamable HTTP deployment.
+
+Each configured server is fixed to one workspace. Give entries distinct names, such as
+`bear-project-a` and `bear-project-b`, when using multiple BEAR.Sunday projects.
+
+## Connect a generic LSP client
+
+An editor, CLI, or AI client with native LSP support can skip MCP and start Phpactor
+directly:
+
+```text
+command: /absolute/path/to/phpactor
+args:
+  - language-server
+  - --working-dir=/absolute/path/to/bear-project
+```
+
+Standard clients can use Definition, Type Definition, References, Hover, Completion, and
+Document Link. A client able to send custom requests can also call the read-only `bear/*`
+Semantic API directly. MCP is only the adapter that presents selected custom requests as
+named AI tools.
+
+## Try it from an AI client
+
+After connecting, ask the client for facts rather than naming tools explicitly:
+
+```text
+List the Resources in this BEAR.Sunday project.
+Describe app://self/user, including methods, Link/Embed relations, templates, and schemas.
+Show the request schema for app://self/user.
+```
 
 ## Tools
 
