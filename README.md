@@ -8,7 +8,7 @@ through the Phpactor Language Server.
 MCP client
     ↓ stdio MCP
 bear-sunday-mcp-server
-    ↓ stdio LSP (bear/* requests)
+    ↓ stdio LSP (bear/* and standard requests)
 Phpactor + bear-phpactor-extension
     ↓
 saved files in one BEAR.Sunday workspace
@@ -20,11 +20,12 @@ and AI clients.
 
 ## Status
 
-Version 0.2.0 provides eleven read-only tools against BEAR Semantic API version 1. In
+Version 0.3.0 provides fourteen read-only tools against BEAR Semantic API version 1 and
+Phpactor's standard LSP. In
 addition to project, Resource, and schema facts, it resolves explicit Route names, SQL
 query IDs, Twig/Qiq template names, Resource templates, and ALPS descriptors. It also finds
-static Resource references and incoming Link/Embed relations. Position-based navigation
-remains planned as a separate follow-up release.
+static Resource references and incoming Link/Embed relations. Definition, References, and
+Hover can also be queried at a position in a saved workspace file.
 
 ## Requirements
 
@@ -184,6 +185,7 @@ Find the Qiq template for app://self/user.
 Describe the ALPS descriptor goArticle and its relationships.
 Find all static references to app://self/user.
 Find Link and Embed relations targeting app://self/user.
+At app://self/user in src/Resource/App/Dashboard.php, show its definition, references, and hover.
 ```
 
 ## Tools
@@ -201,6 +203,9 @@ Find Link and Embed relations targeting app://self/user.
 | `bear_alps_descriptor_lookup` | `bear/alps/describeDescriptor` | ALPS descriptor facts and explicit local relationships |
 | `bear_resource_references` | `bear/resource/references` | Static Resource URI and Route references with bounded source ranges |
 | `bear_resource_incoming_relations` | `bear/resource/incomingRelations` | Link/Embed relations targeting a Resource URI |
+| `lsp_definition` | `textDocument/definition` | Definition locations at a saved workspace position |
+| `lsp_references` | `textDocument/references` | Reference locations at a saved workspace position |
+| `lsp_hover` | `textDocument/hover` | Hover content at a saved workspace position |
 
 Every result keeps the core envelope unchanged:
 
@@ -224,6 +229,9 @@ missing custom LSP method returns `engine_unavailable`.
 - The workspace root and Phpactor command are fixed before the MCP server starts.
 - The adapter never runs the BEAR application, renders templates, edits files, or accesses the network.
 - Semantic responses come only from saved workspace files through the core's canonical path and symlink checks.
+- Position tools reject traversal and outside-workspace symlinks, read at most 1 MiB per saved document,
+  and temporarily open that exact snapshot through standard LSP.
+- Position results expose workspace-relative locations only, with at most 200 locations and 64 KiB of Hover text.
 - MCP and LSP frames, paths, result counts, timeouts, and retained child-process stderr are bounded.
 - Malformed tool input is rejected by JSON Schema without terminating the server.
 
@@ -257,8 +265,9 @@ without exposing the outside path.
 
 ## Deferred scope
 
-Position-based navigation needs a separate core/custom-request contract before it can be
-exposed safely; the adapter will not guess locations or duplicate semantic logic.
+Other standard LSP methods such as Completion, Type Definition, Document Link, and Symbols
+remain directly available to native LSP clients. They can be added to MCP only with bounded,
+method-specific result schemas; the adapter will not expose an arbitrary LSP passthrough.
 
 ## License
 

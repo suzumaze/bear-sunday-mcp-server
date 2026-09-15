@@ -53,6 +53,23 @@ function success(array $data): array
     ];
 }
 
+/** @return array<string, array{line:int, character:int}> */
+function lspRange(int $line, int $start, int $end): array
+{
+    return [
+        'start' => ['line' => $line, 'character' => $start],
+        'end' => ['line' => $line, 'character' => $end],
+    ];
+}
+
+function fileUri(string $path): string
+{
+    $normalized = str_replace('\\', '/', $path);
+    $encoded = implode('/', array_map('rawurlencode', explode('/', $normalized)));
+
+    return 'file://' . (str_starts_with($encoded, '/') ? '' : '/') . $encoded;
+}
+
 while (($message = readMessage()) !== null) {
     $method = $message['method'] ?? null;
     if ($method === 'exit') {
@@ -62,6 +79,8 @@ while (($message = readMessage()) !== null) {
         continue;
     }
 
+    $userUri = fileUri(__DIR__ . '/workspace/src/Resource/App/User.php');
+    $dashboardUri = fileUri(__DIR__ . '/workspace/src/Resource/App/Dashboard.php');
     $result = match ($method) {
         'initialize' => ['capabilities' => []],
         'shutdown' => null,
@@ -90,6 +109,21 @@ while (($message = readMessage()) !== null) {
             'method' => $method,
             'params' => $message['params'] ?? [],
         ]),
+        'textDocument/definition' => [
+            'uri' => $userUri,
+            'range' => lspRange(8, 12, 16),
+        ],
+        'textDocument/references' => [
+            ['uri' => $dashboardUri, 'range' => lspRange(12, 31, 51)],
+            ['uri' => $dashboardUri, 'range' => lspRange(13, 31, 46)],
+        ],
+        'textDocument/hover' => [
+            'contents' => [
+                'kind' => 'markdown',
+                'value' => '**BEAR Resource** `app://self/user`',
+            ],
+            'range' => lspRange(12, 31, 51),
+        ],
         default => null,
     };
 

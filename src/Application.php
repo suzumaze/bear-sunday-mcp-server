@@ -24,7 +24,10 @@ final class Application
 
         $client = new LazyPhpactorClient($workspace, $command, $options->timeout);
         try {
-            return McpServerFactory::create(new SemanticTools($client))->run(new StdioTransport());
+            return McpServerFactory::create(
+                new SemanticTools($client),
+                new StandardLspTools($client, $workspace),
+            )->run(new StdioTransport());
         } finally {
             $client->close();
         }

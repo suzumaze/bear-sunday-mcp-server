@@ -105,6 +105,9 @@ final class McpStdioServerTest extends TestCase
             'bear_sql_lookup',
             'bear_template_for_resource',
             'bear_template_lookup',
+            'lsp_definition',
+            'lsp_hover',
+            'lsp_references',
         ], $names);
         foreach ($tools as $tool) {
             self::assertTrue($tool['annotations']['readOnlyHint'] ?? false);
@@ -152,6 +155,20 @@ final class McpStdioServerTest extends TestCase
             ['uri' => 'app://self/user', 'contextPath' => null, 'limit' => 10],
             $references['result']['structuredContent']['data']['params'],
         );
+
+        $definition = $this->request('tools/call', [
+            'name' => 'lsp_definition',
+            'arguments' => [
+                'path' => 'src/Resource/App/Dashboard.php',
+                'line' => 12,
+                'character' => 40,
+            ],
+        ]);
+        self::assertSame('ok', $definition['result']['structuredContent']['status']);
+        self::assertSame(
+            'src/Resource/App/User.php',
+            $definition['result']['structuredContent']['data']['locations'][0]['path'],
+        );
     }
 
     public function testMalformedToolInputDoesNotTerminateTheServer(): void
@@ -180,6 +197,16 @@ final class McpStdioServerTest extends TestCase
             'arguments' => ['resourceUri' => 'app://self/user', 'limit' => 0],
         ]);
         self::assertSame(-32602, $invalidReferenceLimit['error']['code']);
+
+        $invalidPosition = $this->request('tools/call', [
+            'name' => 'lsp_hover',
+            'arguments' => [
+                'path' => 'src/Resource/App/Dashboard.php',
+                'line' => -1,
+                'character' => 0,
+            ],
+        ]);
+        self::assertSame(-32602, $invalidPosition['error']['code']);
 
         $valid = $this->request('tools/call', [
             'name' => 'bear_project_info',

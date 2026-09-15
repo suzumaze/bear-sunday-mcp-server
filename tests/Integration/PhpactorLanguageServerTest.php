@@ -27,6 +27,14 @@ final class PhpactorLanguageServerTest extends TestCase
             self::assertSame('ok', $result['status']);
             self::assertSame('bear/resource/list', $result['data']['method']);
             self::assertSame(['scheme' => 'app'], $result['data']['params']);
+
+            $locations = $client->request('textDocument/references', [
+                'textDocument' => ['uri' => 'file:///fixture.php'],
+                'position' => ['line' => 0, 'character' => 0],
+                'context' => ['includeDeclaration' => false],
+            ]);
+            self::assertIsArray($locations);
+            self::assertCount(2, $locations);
         } finally {
             $client->close();
         }
