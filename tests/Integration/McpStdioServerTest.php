@@ -105,9 +105,12 @@ final class McpStdioServerTest extends TestCase
             'bear_sql_lookup',
             'bear_template_for_resource',
             'bear_template_lookup',
+            'lsp_completion',
             'lsp_definition',
+            'lsp_document_symbols',
             'lsp_hover',
             'lsp_references',
+            'lsp_workspace_symbols',
         ], $names);
         foreach ($tools as $tool) {
             self::assertTrue($tool['annotations']['readOnlyHint'] ?? false);
@@ -169,6 +172,40 @@ final class McpStdioServerTest extends TestCase
             'src/Resource/App/User.php',
             $definition['result']['structuredContent']['data']['locations'][0]['path'],
         );
+
+        $completion = $this->request('tools/call', [
+            'name' => 'lsp_completion',
+            'arguments' => [
+                'path' => 'src/Resource/App/Dashboard.php',
+                'line' => 12,
+                'character' => 40,
+            ],
+        ]);
+        self::assertSame('ok', $completion['result']['structuredContent']['status']);
+        self::assertSame(
+            'app://self/user',
+            $completion['result']['structuredContent']['data']['items'][0]['label'],
+        );
+
+        $documentSymbols = $this->request('tools/call', [
+            'name' => 'lsp_document_symbols',
+            'arguments' => ['path' => 'src/Resource/App/Dashboard.php'],
+        ]);
+        self::assertSame('ok', $documentSymbols['result']['structuredContent']['status']);
+        self::assertSame(
+            ['Dashboard', 'onGet'],
+            array_column($documentSymbols['result']['structuredContent']['data']['symbols'], 'name'),
+        );
+
+        $workspaceSymbols = $this->request('tools/call', [
+            'name' => 'lsp_workspace_symbols',
+            'arguments' => ['query' => 'Dashboard'],
+        ]);
+        self::assertSame('ok', $workspaceSymbols['result']['structuredContent']['status']);
+        self::assertSame(
+            'src/Resource/App/Dashboard.php',
+            $workspaceSymbols['result']['structuredContent']['data']['symbols'][0]['path'],
+        );
     }
 
     public function testMalformedToolInputDoesNotTerminateTheServer(): void
@@ -207,6 +244,23 @@ final class McpStdioServerTest extends TestCase
             ],
         ]);
         self::assertSame(-32602, $invalidPosition['error']['code']);
+
+        $invalidCompletionLimit = $this->request('tools/call', [
+            'name' => 'lsp_completion',
+            'arguments' => [
+                'path' => 'src/Resource/App/Dashboard.php',
+                'line' => 12,
+                'character' => 40,
+                'limit' => 201,
+            ],
+        ]);
+        self::assertSame(-32602, $invalidCompletionLimit['error']['code']);
+
+        $invalidSymbolQuery = $this->request('tools/call', [
+            'name' => 'lsp_workspace_symbols',
+            'arguments' => ['query' => str_repeat('x', 513)],
+        ]);
+        self::assertSame(-32602, $invalidSymbolQuery['error']['code']);
 
         $valid = $this->request('tools/call', [
             'name' => 'bear_project_info',

@@ -20,12 +20,12 @@ and AI clients.
 
 ## Status
 
-Version 0.3.1 provides fourteen read-only tools against BEAR Semantic API version 1 and
-Phpactor's standard LSP. In
-addition to project, Resource, and schema facts, it resolves explicit Route names, SQL
+The server provides seventeen read-only tools against BEAR Semantic API version 1 and
+Phpactor's standard LSP. In addition to project, Resource, and schema facts, it resolves explicit Route names, SQL
 query IDs, Twig/Qiq template names, Resource templates, and ALPS descriptors. It also finds
 static Resource references and incoming Link/Embed relations. Definition, References, and
-Hover can also be queried at a position in a saved workspace file.
+Hover can be queried at a position in a saved workspace file; Completion, document symbols,
+and workspace symbol search are also available.
 
 ## Requirements
 
@@ -166,10 +166,10 @@ args:
   - --working-dir=/absolute/path/to/bear-project
 ```
 
-Standard clients can use Definition, Type Definition, References, Hover, Completion, and
-Document Link. A client able to send custom requests can also call the read-only `bear/*`
-Semantic API directly. MCP is only the adapter that presents selected custom requests as
-named AI tools.
+Standard clients can use Definition, Type Definition, References, Hover, Completion,
+Document Link, Document Symbols, and Workspace Symbols. A client able to send custom
+requests can also call the read-only `bear/*` Semantic API directly. MCP is only the adapter
+that presents selected custom requests as named AI tools.
 
 ## Try it from an AI client
 
@@ -186,6 +186,9 @@ Describe the ALPS descriptor goArticle and its relationships.
 Find all static references to app://self/user.
 Find Link and Embed relations targeting app://self/user.
 At app://self/user in src/Resource/App/Dashboard.php, show its definition, references, and hover.
+Complete the Resource URI at zero-based line 11, character 28 in src/Client.php.
+List the symbols in src/Resource/App/Dashboard.php.
+Find workspace symbols matching Dashboard.
 ```
 
 ## Tools
@@ -206,6 +209,9 @@ At app://self/user in src/Resource/App/Dashboard.php, show its definition, refer
 | `lsp_definition` | `textDocument/definition` | Definition locations at a saved workspace position |
 | `lsp_references` | `textDocument/references` | Reference locations at a saved workspace position |
 | `lsp_hover` | `textDocument/hover` | Hover content at a saved workspace position |
+| `lsp_completion` | `textDocument/completion` | Bounded completion items at a saved workspace position |
+| `lsp_document_symbols` | `textDocument/documentSymbol` | Flattened symbol inventory for a saved workspace file |
+| `lsp_workspace_symbols` | `workspace/symbol` | Workspace-only symbol search |
 
 Every result keeps the core envelope unchanged:
 
@@ -231,7 +237,8 @@ missing custom LSP method returns `engine_unavailable`.
 - Semantic responses come only from saved workspace files through the core's canonical path and symlink checks.
 - Position tools reject traversal and outside-workspace symlinks, read at most 1 MiB per saved document,
   and temporarily open that exact snapshot through standard LSP.
-- Position results expose workspace-relative locations only, with at most 200 locations and 64 KiB of Hover text.
+- Standard LSP results expose workspace-relative paths only, with at most 200 result items,
+  64 KiB of Hover text, and 8 KiB per Completion or Symbol text field.
 - MCP and LSP frames, paths, result counts, timeouts, and retained child-process stderr are bounded.
 - Malformed tool input is rejected by JSON Schema without terminating the server.
 
@@ -265,9 +272,9 @@ without exposing the outside path.
 
 ## Deferred scope
 
-Other standard LSP methods such as Completion, Type Definition, Document Link, and Symbols
-remain directly available to native LSP clients. They can be added to MCP only with bounded,
-method-specific result schemas; the adapter will not expose an arbitrary LSP passthrough.
+Other standard LSP methods such as Type Definition and Document Link remain directly
+available to native LSP clients. They can be added to MCP only with bounded, method-specific
+result schemas; the adapter will not expose an arbitrary LSP passthrough.
 
 ## License
 
