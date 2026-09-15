@@ -20,12 +20,12 @@ and AI clients.
 
 ## Status
 
-The server provides seventeen read-only tools against BEAR Semantic API version 1 and
-Phpactor's standard LSP. In addition to project, Resource, and schema facts, it resolves explicit Route names, SQL
-query IDs, Twig/Qiq template names, Resource templates, and ALPS descriptors. It also finds
-static Resource references and incoming Link/Embed relations. Definition, References, and
-Hover can be queried at a position in a saved workspace file; Completion, document symbols,
-and workspace symbol search are also available.
+Version 0.4.0 provides seventeen read-only tools against BEAR Semantic API version 1 and
+Phpactor's standard LSP. In addition to project, Resource, and schema facts, it resolves
+explicit Route names, SQL query IDs, Twig/Qiq template names, Resource templates, and ALPS
+descriptors. It also finds static Resource references and incoming Link/Embed relations.
+Definition, References, and Hover can be queried at a position in a saved workspace file;
+Completion, document symbols, and workspace symbol search are also available.
 
 ## Requirements
 
@@ -44,7 +44,7 @@ Install the released server into a dedicated directory:
 composer create-project --no-dev --prefer-dist \
   suzumaze/bear-sunday-mcp-server \
   /absolute/path/to/bear-sunday-mcp-server \
-  '^0.3'
+  '^0.4'
 ```
 
 For development from the repository instead:
