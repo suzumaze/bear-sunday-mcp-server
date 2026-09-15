@@ -7,6 +7,7 @@ namespace Suzumaze\BearSundayMcp\Tests\Unit;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Suzumaze\BearSundayMcp\Lsp\FileUri;
+use Suzumaze\BearSundayMcp\Lsp\LspRpcException;
 use Suzumaze\BearSundayMcp\StandardLspTools;
 use Suzumaze\BearSundayMcp\Tests\Support\InMemoryLspClient;
 use Suzumaze\BearSundayMcp\Workspace;
@@ -154,6 +155,31 @@ final class StandardLspToolsTest extends TestCase
 
         self::assertSame('ok', $tools->hover('unicode.txt', 0, 2)['status']);
         self::assertSame('invalid_input', $tools->hover('unicode.txt', 0, 4)['status']);
+    }
+
+    public function testRetriesOneTransientInternalLspError(): void
+    {
+        $attempt = 0;
+        $client = new InMemoryLspClient(function () use (&$attempt): array {
+            if (++$attempt === 1) {
+                throw new LspRpcException(-32603);
+            }
+
+            return [[
+                'uri' => FileUri::fromPath($this->fixture . '/src/Resource/App/Dashboard.php'),
+                'range' => self::range(12, 30, 12, 52),
+            ]];
+        });
+        $tools = new StandardLspTools($client, Workspace::fromPath($this->fixture));
+
+        $result = $tools->references('src/Resource/App/Dashboard.php', 12, 40);
+
+        self::assertSame('ok', $result['status']);
+        self::assertSame(2, $attempt);
+        self::assertSame(
+            ['textDocument/didOpen', 'textDocument/didClose', 'textDocument/didOpen', 'textDocument/didClose'],
+            array_column($client->notifications, 'method'),
+        );
     }
 
     /** @return array<string, array{line:int,character:int}> */
