@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Suzumaze\BearSundayMcp\Lsp;
 
+use Suzumaze\BearSundayMcp\Version;
 use Suzumaze\BearSundayMcp\Workspace;
 
 final class PhpactorLanguageServer implements SemanticLspClient
@@ -74,7 +75,7 @@ final class PhpactorLanguageServer implements SemanticLspClient
                 'capabilities' => (object) [],
                 'clientInfo' => [
                     'name' => 'bear-sunday-mcp-server',
-                    'version' => '0.1.0-dev',
+                    'version' => Version::CURRENT,
                 ],
             ]);
             if (!is_array($initialize)) {
