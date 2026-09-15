@@ -59,7 +59,7 @@ final class StandardLspTools
     public function hover(string $path, int $line, int $character): array
     {
         try {
-            [$document, $raw] = $this->requestAt('textDocument/hover', $path, $line, $character);
+            [$document, $raw] = $this->requestAtWithRetry('textDocument/hover', $path, $line, $character);
         } catch (\Throwable $exception) {
             return $this->exceptionResult($exception);
         }
@@ -116,7 +116,7 @@ final class StandardLspTools
         }
 
         try {
-            [$document, $raw] = $this->requestAt($method, $path, $line, $character, $extra);
+            [$document, $raw] = $this->requestAtWithRetry($method, $path, $line, $character, $extra);
         } catch (\Throwable $exception) {
             return $this->exceptionResult($exception);
         }
@@ -183,6 +183,31 @@ final class StandardLspTools
         }
 
         return [$document, $raw];
+    }
+
+    /**
+     * Phpactor can return one transient InternalError while its reference index warms up.
+     * These allowlisted standard requests are read-only and safe to retry once.
+     *
+     * @param array<string, mixed> $extra
+     * @return array{WorkspaceDocument, mixed}
+     */
+    private function requestAtWithRetry(
+        string $method,
+        string $path,
+        int $line,
+        int $character,
+        array $extra = [],
+    ): array {
+        try {
+            return $this->requestAt($method, $path, $line, $character, $extra);
+        } catch (LspRpcException $exception) {
+            if ($exception->rpcCode !== -32603) {
+                throw $exception;
+            }
+
+            return $this->requestAt($method, $path, $line, $character, $extra);
+        }
     }
 
     private function validPosition(string $contents, int $line, int $character): bool
@@ -367,6 +392,13 @@ final class StandardLspTools
                 'engine_unavailable',
                 'lsp_method_unavailable',
                 'Phpactor does not expose the requested standard LSP method.',
+            );
+        }
+        if ($exception instanceof LspRpcException) {
+            return self::failure(
+                'engine_unavailable',
+                'lsp_request_failed',
+                'Phpactor rejected the standard LSP request.',
             );
         }
         if ($exception instanceof LspException) {

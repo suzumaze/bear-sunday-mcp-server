@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Fixed
+
+- Retry one transient Phpactor `InternalError` for read-only standard LSP tools, which can
+  occur while the References index warms up on the first request.
+- Classify non-method-not-found LSP RPC failures as request failures instead of process failures.
+
 ## [0.3.0] - 2026-09-15
 
 ### Added
