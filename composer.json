@@ -1,8 +1,20 @@
 {
     "name": "suzumaze/bear-sunday-mcp-server",
     "description": "Read-only MCP adapter for BEAR.Sunday semantics exposed by Phpactor LSP",
+    "keywords": [
+        "bear-sunday",
+        "language-server",
+        "lsp",
+        "mcp",
+        "phpactor"
+    ],
     "type": "project",
     "license": "MIT",
+    "homepage": "https://github.com/suzumaze/bear-sunday-mcp-server",
+    "support": {
+        "issues": "https://github.com/suzumaze/bear-sunday-mcp-server/issues",
+        "source": "https://github.com/suzumaze/bear-sunday-mcp-server"
+    },
     "require": {
         "php": "^8.2",
         "mcp/sdk": "^0.8.1"
