@@ -81,6 +81,7 @@ while (($message = readMessage()) !== null) {
 
     $userUri = fileUri(__DIR__ . '/workspace/src/Resource/App/User.php');
     $dashboardUri = fileUri(__DIR__ . '/workspace/src/Resource/App/Dashboard.php');
+    $userSchemaUri = fileUri(__DIR__ . '/workspace/var/json_schema/user.json');
     $result = match ($method) {
         'initialize' => ['capabilities' => []],
         'shutdown' => null,
@@ -112,6 +113,10 @@ while (($message = readMessage()) !== null) {
         'textDocument/definition' => [
             'uri' => $userUri,
             'range' => lspRange(8, 12, 16),
+        ],
+        'textDocument/typeDefinition' => [
+            'uri' => $userSchemaUri,
+            'range' => lspRange(2, 2, 2),
         ],
         'textDocument/references' => [
             ['uri' => $dashboardUri, 'range' => lspRange(12, 31, 51)],
@@ -147,6 +152,16 @@ while (($message = readMessage()) !== null) {
                 'children' => [],
             ]],
         ]],
+        'textDocument/documentLink' => [
+            [
+                'range' => lspRange(12, 31, 51),
+                'target' => $userUri,
+            ],
+            [
+                'range' => lspRange(13, 31, 46),
+                'target' => $userUri,
+            ],
+        ],
         'workspace/symbol' => [[
             'name' => 'Acme\\Demo\\Resource\\App\\Dashboard',
             'kind' => 5,

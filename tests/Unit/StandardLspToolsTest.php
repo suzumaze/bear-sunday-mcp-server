@@ -33,6 +33,12 @@ final class StandardLspToolsTest extends TestCase
                     'range' => $range,
                 ];
             }
+            if ($method === 'textDocument/typeDefinition') {
+                return [
+                    'uri' => FileUri::fromPath($this->fixture . '/var/json_schema/user.json'),
+                    'range' => self::range(2, 2, 2, 2),
+                ];
+            }
             if ($method === 'textDocument/references') {
                 return [
                     [
@@ -101,6 +107,27 @@ final class StandardLspToolsTest extends TestCase
                         'children' => [],
                     ]],
                 ]];
+            }
+            if ($method === 'textDocument/documentLink') {
+                return [
+                    [
+                        'range' => self::range(13, 31, 13, 46),
+                        'target' => FileUri::fromPath($this->fixture . '/src/Resource/App/User.php'),
+                    ],
+                    [
+                        'range' => self::range(12, 31, 12, 51),
+                        'target' => FileUri::fromPath($this->fixture . '/src/Resource/App/User.php'),
+                    ],
+                    [
+                        'range' => self::range(12, 31, 12, 51),
+                        'target' => FileUri::fromPath($this->fixture . '/src/Resource/App/User.php'),
+                    ],
+                    [
+                        'range' => self::range(14, 0, 14, 7),
+                        'target' => FileUri::fromPath('/etc/passwd'),
+                    ],
+                    ['range' => self::range(15, 0, 15, 7)],
+                ];
             }
             if ($method === 'workspace/symbol') {
                 return [
@@ -195,6 +222,10 @@ final class StandardLspToolsTest extends TestCase
         );
         self::assertSame(
             'parse_error',
+            $tools->typeDefinition('src/Resource/App/User.php', 8, 14)['status'],
+        );
+        self::assertSame(
+            'parse_error',
             $tools->completion('src/Resource/App/Dashboard.php', 12, 40)['status'],
         );
         self::assertSame(
@@ -202,6 +233,30 @@ final class StandardLspToolsTest extends TestCase
             $tools->documentSymbols('src/Resource/App/Dashboard.php')['status'],
         );
         self::assertSame('parse_error', $tools->workspaceSymbols('Dashboard')['status']);
+        self::assertSame(
+            'parse_error',
+            $tools->documentLinks('src/Resource/App/Dashboard.php')['status'],
+        );
+    }
+
+    public function testNormalizesTypeDefinitionAndDocumentLinks(): void
+    {
+        $typeDefinition = $this->tools->typeDefinition('src/Resource/App/User.php', 8, 14);
+        self::assertSame('ok', $typeDefinition['status']);
+        self::assertSame(
+            'var/json_schema/user.json',
+            $typeDefinition['data']['locations'][0]['path'],
+        );
+
+        $documentLinks = $this->tools->documentLinks('src/Resource/App/Dashboard.php', 1);
+        self::assertSame('ok', $documentLinks['status']);
+        self::assertSame(2, $documentLinks['data']['total']);
+        self::assertTrue($documentLinks['data']['truncated']);
+        self::assertSame(12, $documentLinks['data']['links'][0]['range']['start']['line']);
+        self::assertSame(
+            'src/Resource/App/User.php',
+            $documentLinks['data']['links'][0]['targetPath'],
+        );
     }
 
     public function testNormalizesCompletionAndSymbols(): void

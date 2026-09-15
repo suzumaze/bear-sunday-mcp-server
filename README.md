@@ -20,12 +20,13 @@ and AI clients.
 
 ## Status
 
-Version 0.4.0 provides seventeen read-only tools against BEAR Semantic API version 1 and
+The server provides nineteen read-only tools against BEAR Semantic API version 1 and
 Phpactor's standard LSP. In addition to project, Resource, and schema facts, it resolves
 explicit Route names, SQL query IDs, Twig/Qiq template names, Resource templates, and ALPS
 descriptors. It also finds static Resource references and incoming Link/Embed relations.
-Definition, References, and Hover can be queried at a position in a saved workspace file;
-Completion, document symbols, and workspace symbol search are also available.
+Definition, Type Definition, References, and Hover can be queried at a position in a saved
+workspace file; Completion, Document Links, document symbols, and workspace symbol search
+are also available.
 
 ## Requirements
 
@@ -189,6 +190,8 @@ At app://self/user in src/Resource/App/Dashboard.php, show its definition, refer
 Complete the Resource URI at zero-based line 11, character 28 in src/Client.php.
 List the symbols in src/Resource/App/Dashboard.php.
 Find workspace symbols matching Dashboard.
+Find the type definition of the User Resource class.
+List resolved Resource URI and template links in src/Resource/App/Dashboard.php.
 ```
 
 ## Tools
@@ -207,9 +210,11 @@ Find workspace symbols matching Dashboard.
 | `bear_resource_references` | `bear/resource/references` | Static Resource URI and Route references with bounded source ranges |
 | `bear_resource_incoming_relations` | `bear/resource/incomingRelations` | Link/Embed relations targeting a Resource URI |
 | `lsp_definition` | `textDocument/definition` | Definition locations at a saved workspace position |
+| `lsp_type_definition` | `textDocument/typeDefinition` | Type-definition locations, including Resource convention JSON Schemas |
 | `lsp_references` | `textDocument/references` | Reference locations at a saved workspace position |
 | `lsp_hover` | `textDocument/hover` | Hover content at a saved workspace position |
 | `lsp_completion` | `textDocument/completion` | Bounded completion items at a saved workspace position |
+| `lsp_document_links` | `textDocument/documentLink` | Resolved Resource URI and template links in a saved document |
 | `lsp_document_symbols` | `textDocument/documentSymbol` | Flattened symbol inventory for a saved workspace file |
 | `lsp_workspace_symbols` | `workspace/symbol` | Workspace-only symbol search |
 
@@ -272,9 +277,9 @@ without exposing the outside path.
 
 ## Deferred scope
 
-Other standard LSP methods such as Type Definition and Document Link remain directly
-available to native LSP clients. They can be added to MCP only with bounded, method-specific
-result schemas; the adapter will not expose an arbitrary LSP passthrough.
+The original standard-LSP discovery scope is now covered. Additional methods will be added
+only when they expose concrete BEAR or Phpactor value through a bounded, method-specific
+schema; the adapter will not expose an arbitrary LSP passthrough.
 
 ## License
 

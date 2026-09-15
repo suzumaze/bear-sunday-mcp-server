@@ -40,6 +40,22 @@ final class StandardLspTools
     }
 
     /** @return array<string, mixed> */
+    public function typeDefinition(
+        string $path,
+        int $line,
+        int $character,
+        int $limit = 50,
+    ): array {
+        return $this->locations(
+            'textDocument/typeDefinition',
+            $path,
+            $line,
+            $character,
+            $limit,
+        );
+    }
+
+    /** @return array<string, mixed> */
     public function references(
         string $path,
         int $line,
@@ -215,6 +231,40 @@ final class StandardLspTools
             'symbols' => array_slice($symbols, 0, $limit),
             'total' => $total,
             'truncated' => $normalized['truncated'] || $total > $limit,
+        ], $provenance);
+    }
+
+    /** @return array<string, mixed> */
+    public function documentLinks(string $path, int $limit = 100): array
+    {
+        if ($limit < 1 || $limit > self::MAX_LOCATIONS) {
+            return self::failure('invalid_input', 'invalid_limit', 'Document Link limit must be between 1 and 200.');
+        }
+
+        try {
+            [$document, $raw] = $this->requestDocumentWithRetry('textDocument/documentLink', $path);
+        } catch (\Throwable $exception) {
+            return $this->exceptionResult($exception);
+        }
+
+        $provenance = $this->provenance('textDocument/documentLink', $document);
+        if ($raw === null || $raw === []) {
+            return $this->envelope('not_found', null, $provenance);
+        }
+        $links = $this->normalizeDocumentLinks($raw);
+        if ($links === null) {
+            return self::failure('parse_error', 'invalid_lsp_response', 'Phpactor returned invalid Document Links.');
+        }
+        if ($links === []) {
+            return $this->envelope('not_found', null, $provenance);
+        }
+
+        $total = count($links);
+
+        return $this->envelope('ok', [
+            'links' => array_slice($links, 0, $limit),
+            'total' => $total,
+            'truncated' => $total > $limit,
         ], $provenance);
     }
 
@@ -759,6 +809,64 @@ final class StandardLspTools
             $deduplicated[json_encode($symbol, JSON_THROW_ON_ERROR)] = $symbol;
         }
         $symbols = array_values($deduplicated);
+    }
+
+    /** @return list<array<string, mixed>>|null */
+    private function normalizeDocumentLinks(mixed $raw): ?array
+    {
+        if (!is_array($raw) || !array_is_list($raw)) {
+            return null;
+        }
+
+        $links = [];
+        foreach ($raw as $item) {
+            if (!is_array($item) || array_is_list($item)) {
+                return null;
+            }
+            $range = $this->range($item['range'] ?? null);
+            if ($range === null) {
+                return null;
+            }
+            if (!array_key_exists('target', $item) || $item['target'] === null) {
+                continue;
+            }
+            if (!is_string($item['target'])) {
+                return null;
+            }
+            $absolute = FileUri::toPath($item['target']);
+            if ($absolute === null) {
+                continue;
+            }
+            $targetPath = $this->workspace->relativeExistingFile($absolute);
+            if ($targetPath === null) {
+                continue;
+            }
+            $links[] = [
+                'range' => $range,
+                'targetPath' => $targetPath,
+            ];
+        }
+
+        usort($links, static fn (array $left, array $right): int => [
+            $left['range']['start']['line'],
+            $left['range']['start']['character'],
+            $left['range']['end']['line'],
+            $left['range']['end']['character'],
+            $left['targetPath'],
+        ] <=> [
+            $right['range']['start']['line'],
+            $right['range']['start']['character'],
+            $right['range']['end']['line'],
+            $right['range']['end']['character'],
+            $right['targetPath'],
+        ]);
+
+        $deduplicated = [];
+        foreach ($links as $link) {
+            $deduplicated[json_encode($link, JSON_THROW_ON_ERROR)] = $link;
+        }
+
+        return array_values($deduplicated);
     }
 
     /** @return array{start:array{line:int,character:int},end:array{line:int,character:int}}|null */

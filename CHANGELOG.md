@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+
+- `lsp_type_definition` for standard Type Definition queries, including BEAR Resource
+  convention JSON Schema targets.
+- `lsp_document_links` for resolved Resource URI and Twig/Qiq template links in a saved
+  document, with workspace-only target filtering and deterministic bounds.
+
 ## [0.4.0] - 2026-09-15
 
 ### Added
