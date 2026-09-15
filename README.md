@@ -20,7 +20,7 @@ and AI clients.
 
 ## Status
 
-Version 0.1.0 provides the initial M1 surface against BEAR Semantic API version 1.
+Version 0.1.1 provides the initial M1 surface against BEAR Semantic API version 1.
 Route, SQL, template, ALPS, references, and position-based navigation tools remain planned
 as small follow-up releases.
 
@@ -61,7 +61,7 @@ second Phpactor installation when the setup package already provides one.
 ## Run directly
 
 ```console
-/absolute/path/to/bear-sunday-mcp-server/vendor/bin/bear-sunday-mcp \
+/absolute/path/to/bear-sunday-mcp-server/bin/bear-sunday-mcp \
   --workspace=/absolute/path/to/bear-project \
   --phpactor=/absolute/path/to/phpactor
 ```
@@ -79,7 +79,7 @@ Register one BEAR.Sunday workspace with Codex CLI:
 
 ```console
 codex mcp add bear-sunday -- \
-  /absolute/path/to/bear-sunday-mcp-server/vendor/bin/bear-sunday-mcp \
+  /absolute/path/to/bear-sunday-mcp-server/bin/bear-sunday-mcp \
   --workspace=/absolute/path/to/bear-project \
   --phpactor=/absolute/path/to/phpactor
 codex mcp list
@@ -94,7 +94,7 @@ The equivalent `~/.codex/config.toml` entry is:
 
 ```toml
 [mcp_servers.bear_sunday]
-command = "/absolute/path/to/bear-sunday-mcp-server/vendor/bin/bear-sunday-mcp"
+command = "/absolute/path/to/bear-sunday-mcp-server/bin/bear-sunday-mcp"
 args = [
     "--workspace=/absolute/path/to/bear-project",
     "--phpactor=/absolute/path/to/phpactor",
@@ -111,7 +111,7 @@ Register the server for one local project without committing machine-specific pa
 ```console
 cd /absolute/path/to/bear-project
 claude mcp add --scope local --transport stdio bear-sunday -- \
-  /absolute/path/to/bear-sunday-mcp-server/vendor/bin/bear-sunday-mcp \
+  /absolute/path/to/bear-sunday-mcp-server/bin/bear-sunday-mcp \
   --workspace=/absolute/path/to/bear-project \
   --phpactor=/absolute/path/to/phpactor
 claude mcp list
@@ -134,7 +134,7 @@ For MCP hosts that use an `mcpServers` JSON object:
   "mcpServers": {
     "bear-sunday": {
       "type": "stdio",
-      "command": "/absolute/path/to/bear-sunday-mcp-server/vendor/bin/bear-sunday-mcp",
+      "command": "/absolute/path/to/bear-sunday-mcp-server/bin/bear-sunday-mcp",
       "args": [
         "--workspace=/absolute/path/to/bear-project",
         "--phpactor=/absolute/path/to/phpactor"

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Suzumaze\BearSundayMcp\Tests\Integration;
 
 use PHPUnit\Framework\TestCase;
+use Suzumaze\BearSundayMcp\Version;
 
 final class McpStdioServerTest extends TestCase
 {
@@ -84,6 +85,7 @@ final class McpStdioServerTest extends TestCase
             'clientInfo' => ['name' => 'phpunit', 'version' => '1.0.0'],
         ]);
         self::assertSame('2025-11-25', $initialize['result']['protocolVersion']);
+        self::assertSame(Version::CURRENT, $initialize['result']['serverInfo']['version']);
         $this->notify('notifications/initialized');
 
         $listed = $this->request('tools/list', []);

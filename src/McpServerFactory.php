@@ -9,8 +9,6 @@ use Mcp\Server;
 
 final class McpServerFactory
 {
-    public const VERSION = '0.1.0-dev';
-
     public static function create(SemanticTools $tools): Server
     {
         $annotations = new ToolAnnotations(
@@ -21,7 +19,7 @@ final class McpServerFactory
         );
         $builder = Server::builder()->setServerInfo(
             'bear-sunday-mcp-server',
-            self::VERSION,
+            Version::CURRENT,
             'Read-only bridge to BEAR.Sunday Semantic API v1 over Phpactor LSP.',
         );
 
