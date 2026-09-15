@@ -160,6 +160,32 @@ final class McpServerFactory
             ], ['descriptorId']),
             outputSchema: self::envelopeSchema(),
         );
+        $builder->addTool(
+            [$tools, 'resourceReferences'],
+            name: 'bear_resource_references',
+            title: 'Find BEAR Resource references',
+            description: 'Find bounded, deterministic static URI and Route references to a Resource.',
+            annotations: $annotations,
+            inputSchema: self::objectSchema([
+                'resourceUri' => self::uriSchema(),
+                'contextPath' => self::pathSchema('Optional workspace-relative context path.'),
+                'limit' => self::limitSchema('Maximum number of references to return.'),
+            ], ['resourceUri']),
+            outputSchema: self::envelopeSchema(),
+        );
+        $builder->addTool(
+            [$tools, 'resourceIncomingRelations'],
+            name: 'bear_resource_incoming_relations',
+            title: 'Find incoming BEAR Resource relations',
+            description: 'Find bounded, deterministic Link and Embed relations targeting a Resource.',
+            annotations: $annotations,
+            inputSchema: self::objectSchema([
+                'resourceUri' => self::uriSchema(),
+                'contextPath' => self::pathSchema('Optional workspace-relative context path.'),
+                'limit' => self::limitSchema('Maximum number of incoming relations to return.'),
+            ], ['resourceUri']),
+            outputSchema: self::envelopeSchema(),
+        );
 
         return $builder->build();
     }
@@ -222,6 +248,17 @@ final class McpServerFactory
             'type' => 'string',
             'enum' => ['twig', 'qiq'],
             'description' => 'Template engine.',
+        ];
+    }
+
+    /** @return array<string, mixed> */
+    private static function limitSchema(string $description): array
+    {
+        return [
+            'type' => 'integer',
+            'minimum' => 1,
+            'maximum' => 200,
+            'description' => $description,
         ];
     }
 

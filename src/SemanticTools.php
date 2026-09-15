@@ -132,6 +132,32 @@ final class SemanticTools
         ]);
     }
 
+    /** @return array<string, mixed> */
+    public function resourceReferences(
+        string $resourceUri,
+        ?string $contextPath = null,
+        int $limit = 50,
+    ): array {
+        return $this->query('bear/resource/references', [
+            'uri' => $resourceUri,
+            'contextPath' => $contextPath,
+            'limit' => $limit,
+        ]);
+    }
+
+    /** @return array<string, mixed> */
+    public function resourceIncomingRelations(
+        string $resourceUri,
+        ?string $contextPath = null,
+        int $limit = 50,
+    ): array {
+        return $this->query('bear/resource/incomingRelations', [
+            'uri' => $resourceUri,
+            'contextPath' => $contextPath,
+            'limit' => $limit,
+        ]);
+    }
+
     /**
      * @param array<string, mixed> $params
      * @return array<string, mixed>

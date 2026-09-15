@@ -9,7 +9,9 @@ All notable changes to this project will be documented in this file.
 - `bear_route_lookup` and `bear_sql_lookup` for explicit Route names and SQL query IDs.
 - `bear_template_lookup` and `bear_template_for_resource` for Twig/Qiq template resolution.
 - `bear_alps_descriptor_lookup` for ALPS descriptor facts and explicit relationships.
-- Real Phpactor MCP end-to-end coverage for all nine tools.
+- `bear_resource_references` and `bear_resource_incoming_relations` for bounded static
+  references and Link/Embed relationships.
+- Real Phpactor MCP end-to-end coverage for all eleven tools.
 
 ## [0.1.1] - 2026-09-15
 

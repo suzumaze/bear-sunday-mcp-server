@@ -42,7 +42,9 @@ final class RealMcpEndToEndTest extends TestCase
                 'bear_alps_descriptor_lookup',
                 'bear_project_info',
                 'bear_resource_describe',
+                'bear_resource_incoming_relations',
                 'bear_resource_list',
+                'bear_resource_references',
                 'bear_route_lookup',
                 'bear_schema_lookup',
                 'bear_sql_lookup',
@@ -117,6 +119,35 @@ final class RealMcpEndToEndTest extends TestCase
             self::assertSame('safe', $alps['data']['type']);
             self::assertSame('Article', $alps['data']['relationsOut'][0]['targetId']);
             self::assertSame('Article', $alps['data']['relationsIn'][0]['sourceId']);
+
+            $references = $client->callTool('bear_resource_references', [
+                'resourceUri' => 'app://self/user',
+            ])->structuredContent;
+            self::assertIsArray($references);
+            self::assertSame('ok', $references['status']);
+            self::assertSame(2, $references['data']['total']);
+            self::assertFalse($references['data']['truncated']);
+            self::assertSame(
+                ['app://self/user{?id}', 'app://self/user'],
+                array_column($references['data']['references'], 'identifier'),
+            );
+            self::assertSame(
+                ['src/Resource/App/Dashboard.php', 'src/Resource/App/Dashboard.php'],
+                array_column($references['data']['references'], 'path'),
+            );
+
+            $relations = $client->callTool('bear_resource_incoming_relations', [
+                'resourceUri' => 'app://self/user',
+            ])->structuredContent;
+            self::assertIsArray($relations);
+            self::assertSame('ok', $relations['status']);
+            self::assertTrue($relations['data']['available']);
+            self::assertSame(2, $relations['data']['total']);
+            self::assertSame(['embed', 'link'], array_column($relations['data']['items'], 'kind'));
+            self::assertSame(
+                ['app://self/dashboard', 'app://self/dashboard'],
+                array_column($relations['data']['items'], 'sourceUri'),
+            );
         } finally {
             $client->disconnect();
         }

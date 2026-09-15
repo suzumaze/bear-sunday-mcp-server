@@ -118,6 +118,42 @@ final class SemanticToolsTest extends TestCase
         );
     }
 
+    public function testMapsM2ReferenceToolsToSemanticApiV1WithoutChangingResults(): void
+    {
+        $client = new InMemoryLspClient(static function (string $method, array $params): array {
+            if ($method === 'bear/project/info') {
+                return self::projectInfoResult();
+            }
+
+            return self::ok(['method' => $method, 'params' => $params]);
+        });
+        $tools = new SemanticTools($client);
+        $tools->projectInfo();
+
+        self::assertSame(
+            self::ok([
+                'method' => 'bear/resource/references',
+                'params' => [
+                    'uri' => 'app://self/user',
+                    'contextPath' => 'src/Resource/App/Dashboard.php',
+                    'limit' => 25,
+                ],
+            ]),
+            $tools->resourceReferences('app://self/user', 'src/Resource/App/Dashboard.php', 25),
+        );
+        self::assertSame(
+            self::ok([
+                'method' => 'bear/resource/incomingRelations',
+                'params' => [
+                    'uri' => 'app://self/user',
+                    'contextPath' => null,
+                    'limit' => 50,
+                ],
+            ]),
+            $tools->resourceIncomingRelations('app://self/user'),
+        );
+    }
+
     public function testPreflightsTheApiOnlyOnceWhenProjectInfoWasNotCalled(): void
     {
         $client = new InMemoryLspClient(static fn (string $method): array => $method === 'bear/project/info'

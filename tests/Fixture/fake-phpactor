@@ -84,7 +84,9 @@ while (($message = readMessage()) !== null) {
         'bear/sql/resolve',
         'bear/template/resolve',
         'bear/template/forResource',
-        'bear/alps/describeDescriptor' => success([
+        'bear/alps/describeDescriptor',
+        'bear/resource/references',
+        'bear/resource/incomingRelations' => success([
             'method' => $method,
             'params' => $message['params'] ?? [],
         ]),
