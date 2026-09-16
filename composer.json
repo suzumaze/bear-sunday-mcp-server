@@ -17,7 +17,6 @@
     },
     "require": {
         "php": "^8.2",
-        "koriym/semantic-logger": "^0.9",
         "mcp/sdk": "^0.8.1"
     },
     "require-dev": {

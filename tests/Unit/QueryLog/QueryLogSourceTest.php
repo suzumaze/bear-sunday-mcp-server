@@ -56,25 +56,18 @@ final class QueryLogSourceTest extends TestCase
         self::assertSame('var/query-log.jsonl', $batch->sessions[0]->provenancePath);
     }
 
-    public function testRejectsTooSmallLimit(): void
+    public function testBoundsLimitsAndRejectsInvalidSessionIds(): void
     {
         $source = QueryLogSource::directory($this->workspace, 'var/query-log');
 
-        $this->expectException(\InvalidArgumentException::class);
-        $source->sessions(0);
-    }
-
-    public function testRejectsTooLargeLimit(): void
-    {
-        $source = QueryLogSource::directory($this->workspace, 'var/query-log');
-
-        $this->expectException(\InvalidArgumentException::class);
-        $source->sessions(101);
-    }
-
-    public function testRejectsInvalidSessionIds(): void
-    {
-        $source = QueryLogSource::directory($this->workspace, 'var/query-log');
+        foreach ([0, 101] as $limit) {
+            try {
+                $source->sessions($limit);
+                self::fail('An out-of-range limit must be rejected.');
+            } catch (\InvalidArgumentException) {
+                self::assertTrue(true);
+            }
+        }
 
         $this->expectException(\InvalidArgumentException::class);
         $source->find('../latest.json');
