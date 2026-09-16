@@ -284,6 +284,9 @@ The original standard-LSP discovery scope is now covered. Additional methods wil
 only when they expose concrete BEAR or Phpactor value through a bounded, method-specific
 schema; the adapter will not expose an arbitrary LSP passthrough.
 
+Design notes for integrating agent workflows without moving subjective policy into the
+semantic core are documented in [BEAR.Skills integration (Japanese)](docs/bear-skills-integration.ja.md).
+
 ## License
 
 MIT
