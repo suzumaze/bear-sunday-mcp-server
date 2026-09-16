@@ -24,6 +24,29 @@ final class CliOptionsTest extends TestCase
         self::assertSame('/workspace', $options->workspace);
         self::assertSame('/bin/phpactor', $options->phpactor);
         self::assertSame(3.5, $options->timeout);
+        self::assertNull($options->queryLogDir);
+        self::assertNull($options->queryLogFile);
+    }
+
+    public function testParsesOneQueryLogSource(): void
+    {
+        $directory = CliOptions::parse(['--workspace=/workspace', '--query-log-dir=var/log/query']);
+        $file = CliOptions::parse(['--workspace=/workspace', '--query-log-file=var/log/query.jsonl']);
+
+        self::assertSame('var/log/query', $directory->queryLogDir);
+        self::assertNull($directory->queryLogFile);
+        self::assertNull($file->queryLogDir);
+        self::assertSame('var/log/query.jsonl', $file->queryLogFile);
+    }
+
+    public function testRejectsMultipleQueryLogSources(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        CliOptions::parse([
+            '--workspace=/workspace',
+            '--query-log-dir=var/log/query',
+            '--query-log-file=var/log/query.jsonl',
+        ]);
     }
 
     public function testRequiresWorkspace(): void
