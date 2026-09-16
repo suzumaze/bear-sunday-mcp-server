@@ -176,6 +176,9 @@ that presents selected custom requests as named AI tools.
 
 After connecting, ask the client for facts rather than naming tools explicitly:
 
+For task-oriented walkthroughs, result interpretation, and a comparison with text search,
+see [Use cases](docs/use-cases.md) ([日本語](docs/use-cases.ja.md)).
+
 ```text
 List the Resources in this BEAR.Sunday project.
 Describe app://self/user, including methods, Link/Embed relations, templates, and schemas.
