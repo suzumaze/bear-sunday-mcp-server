@@ -75,41 +75,6 @@ final class Workspace
         return str_replace(DIRECTORY_SEPARATOR, '/', substr($canonical, strlen($prefix)));
     }
 
-    public function configuredDirectory(string $relativePath): string
-    {
-        return $this->configuredPath($relativePath, true);
-    }
-
-    public function configuredFile(string $relativePath): string
-    {
-        return $this->configuredPath($relativePath, false);
-    }
-
-    private function configuredPath(string $relativePath, bool $directory): string
-    {
-        $normalized = str_replace('\\', '/', $relativePath);
-        if (!$this->validRelativePath($normalized)) {
-            throw new \InvalidArgumentException('Configured paths must be workspace-relative');
-        }
-        foreach (explode('/', $normalized) as $segment) {
-            if ($segment === '' || $segment === '.') {
-                throw new \InvalidArgumentException(
-                    'Configured paths must not contain empty or current-directory segments',
-                );
-            }
-        }
-        $absolute = realpath($this->root . '/' . $normalized);
-        if ($absolute === false || ($directory ? !is_dir($absolute) : !is_file($absolute))) {
-            throw new \InvalidArgumentException('Configured query log path does not exist');
-        }
-        $prefix = rtrim($this->root, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
-        if (!str_starts_with($absolute, $prefix)) {
-            throw new \InvalidArgumentException('Configured query log path resolves outside the workspace');
-        }
-
-        return $absolute;
-    }
-
     private function validRelativePath(string $path): bool
     {
         if ($path === '' || str_contains($path, "\0") || str_starts_with($path, '/')) {

@@ -91,32 +91,4 @@ final class WorkspaceTest extends TestCase
             }
         }
     }
-
-    public function testResolvesConfiguredQueryLogPathsInsideTheWorkspace(): void
-    {
-        $workspace = Workspace::fromPath(__DIR__ . '/../Fixture/workspace');
-
-        self::assertSame(
-            realpath(__DIR__ . '/../Fixture/workspace/var/query-log'),
-            $workspace->configuredDirectory('var/query-log'),
-        );
-        self::assertSame(
-            realpath(__DIR__ . '/../Fixture/workspace/var/query-log.jsonl'),
-            $workspace->configuredFile('var/query-log.jsonl'),
-        );
-    }
-
-    public function testRejectsUnsafeConfiguredPaths(): void
-    {
-        $workspace = Workspace::fromPath(__DIR__ . '/../Fixture/workspace');
-
-        foreach (['../query-log', 'var//query-log', './var/query-log'] as $path) {
-            try {
-                $workspace->configuredDirectory($path);
-                self::fail('An unsafe configured path must be rejected.');
-            } catch (\InvalidArgumentException) {
-                self::assertTrue(true);
-            }
-        }
-    }
 }

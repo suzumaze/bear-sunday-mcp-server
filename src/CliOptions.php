@@ -10,8 +10,6 @@ final class CliOptions
         public readonly string $workspace,
         public readonly ?string $phpactor,
         public readonly float $timeout,
-        public readonly ?string $queryLogDir,
-        public readonly ?string $queryLogFile,
     ) {
     }
 
@@ -27,10 +25,7 @@ final class CliOptions
 
             $parts = explode('=', substr($argument, 2), 2);
             $name = $parts[0];
-            if (
-                !in_array($name, ['workspace', 'phpactor', 'timeout', 'query-log-dir', 'query-log-file'], true)
-                || isset($values[$name])
-            ) {
+            if (!in_array($name, ['workspace', 'phpactor', 'timeout'], true) || isset($values[$name])) {
                 throw new \InvalidArgumentException('Unknown or repeated option');
             }
 
@@ -60,12 +55,7 @@ final class CliOptions
         }
 
         $phpactor = $values['phpactor'] ?? null;
-        $queryLogDir = $values['query-log-dir'] ?? null;
-        $queryLogFile = $values['query-log-file'] ?? null;
-        if ($queryLogDir !== null && $queryLogFile !== null) {
-            throw new \InvalidArgumentException('The query log directory and file options are mutually exclusive');
-        }
 
-        return new self($workspace, $phpactor, $timeout, $queryLogDir, $queryLogFile);
+        return new self($workspace, $phpactor, $timeout);
     }
 }
