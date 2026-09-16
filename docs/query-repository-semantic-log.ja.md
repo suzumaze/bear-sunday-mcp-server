@@ -1,5 +1,21 @@
 # BEAR.QueryRepositoryセマンティックログ連携設計
 
+## Status: deferred
+
+2026-09-16時点では、この文書は将来の連携案であり、MCP serverへruntime log toolを登録しません。
+QueryRepositoryのセマンティックログは新しく、public reader APIとformat/version contractもまだ
+確定していないためです。MCP側で語彙とtree解釈を先に固定すると、upstreamとの二重実装になります。
+
+現在の配布物はログファイルを読み取らず、`koriym/semantic-logger`へのruntime依存も追加しません。
+再開条件は次のとおりです。
+
+- upstreamがstableなreader APIまたはversioned format contractを公開する。
+- unknown contextとschema migrationの互換方針が定まる。
+- 実利用者がruntime evidenceを必要とするユースケースを提示する。
+- raw logをMCP境界へ出さず、local validationとredactionを保証できる。
+
+以下はその条件を満たした後に再評価する設計記録です。
+
 ## 目的
 
 Phpactor Semantic APIが返す「保存済みsourceから分かる事実」に、BEAR.QueryRepositoryの

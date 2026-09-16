@@ -30,6 +30,9 @@ Definition, Type Definition, References, and Hover can be queried at a position 
 workspace file; Completion, Document Links, document symbols, and workspace symbol search
 are also available.
 
+See [Project status](docs/project-status.md) ([日本語](docs/project-status.ja.md)) for the
+implemented boundary, real-workspace verification evidence, and deferred experiments.
+
 ## Requirements
 
 - PHP 8.2 or newer

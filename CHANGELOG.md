@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Documentation
+
+- Record end-to-end verification against a temporary, read-only copy of a production-scale
+  276-Resource BEAR.Sunday workspace.
+- Mark QueryRepository semantic-log MCP integration as deferred until its upstream reader
+  and format contracts stabilize; no runtime-log tool or dependency is shipped.
+
 ## [0.6.0] - 2026-09-16
 
 ### Added
