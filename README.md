@@ -20,10 +20,12 @@ and AI clients.
 
 ## Status
 
-Version 0.5.0 provides nineteen read-only tools against BEAR Semantic API version 1 and
+Version 0.6.0 provides twenty-two read-only tools against BEAR Semantic API version 1 and
 Phpactor's standard LSP. In addition to project, Resource, and schema facts, it resolves
 explicit Route names, SQL query IDs, Twig/Qiq template names, Resource templates, and ALPS
-descriptors. It also finds static Resource references and incoming Link/Embed relations.
+descriptors. It also exposes allowlisted Resource attribute facts, a bounded attribute
+inventory, presence-only contract comparison, static Resource references, and incoming
+Link/Embed relations.
 Definition, Type Definition, References, and Hover can be queried at a position in a saved
 workspace file; Completion, Document Links, document symbols, and workspace symbol search
 are also available.
@@ -31,7 +33,7 @@ are also available.
 ## Requirements
 
 - PHP 8.2 or newer
-- Phpactor with `suzumaze/bear-phpactor-extension` 0.1.5 or newer installed in Phpactor's
+- Phpactor with `suzumaze/bear-phpactor-extension` 0.1.6 or newer installed in Phpactor's
   Composer environment
 - An MCP host that supports stdio servers
 
@@ -45,7 +47,7 @@ Install the released server into a dedicated directory:
 composer create-project --no-dev --prefer-dist \
   suzumaze/bear-sunday-mcp-server \
   /absolute/path/to/bear-sunday-mcp-server \
-  '^0.5'
+  '^0.6'
 ```
 
 For development from the repository instead:
@@ -189,6 +191,9 @@ Find the Qiq template for app://self/user.
 Describe the ALPS descriptor goArticle and its relationships.
 Find all static references to app://self/user.
 Find Link and Embed relations targeting app://self/user.
+Show the supported attributes on app://self/user and mark dynamic arguments explicitly.
+Audit cache, Link, Embed, Schema, and ALPS attributes across App Resources.
+Compare onPost request-name presence for app://self/user across Resource, Schema, and ALPS.
 At app://self/user in src/Resource/App/Dashboard.php, show its definition, references, and hover.
 Complete the Resource URI at zero-based line 11, character 28 in src/Client.php.
 List the symbols in src/Resource/App/Dashboard.php.
@@ -204,6 +209,9 @@ List resolved Resource URI and template links in src/Resource/App/Dashboard.php.
 | `bear_project_info` | `bear/project/info` | API version, capabilities, package versions, PSR-4 roots, and Resource count |
 | `bear_resource_list` | `bear/resource/list` | Deterministic Resource URI inventory with scheme, prefix, and limit filters |
 | `bear_resource_describe` | `bear/resource/describe` | Resource methods, Link/Embed relations, templates, and schemas |
+| `bear_resource_attributes` | `bear/resource/attributes` | Allowlisted class/method attributes with bounded static arguments and explicit dynamic markers |
+| `bear_resource_attribute_index` | `bear/resource/attributeIndex` | Bounded workspace attribute facts with per-Resource status |
+| `bear_contract_compare` | `bear/contract/compare` | Exact name presence across Resource request parameters, JSON Schema, and ALPS; no type/meaning claim |
 | `bear_schema_lookup` | `bear/schema/describeForResource` | Bounded request/response Schema facts without raw JSON |
 | `bear_route_lookup` | `bear/route/resolve` | Explicit Aura Router route name to Page Resource |
 | `bear_sql_lookup` | `bear/sql/resolve` | Static SQL query ID to workspace-relative SQL file |

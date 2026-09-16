@@ -15,6 +15,8 @@ semantic model.
 | Who links to or embeds it? | Attribute text requiring manual interpretation | Typed incoming and outgoing Link/Embed relations |
 | What file implements a route, SQL ID, or template? | Candidate text matches | A resolved target or an explicit semantic failure status |
 | What does an ALPS descriptor relate to? | JSON text matches | Explicit local descriptor relationships |
+| Which cache or Resource attributes are present? | Short-name matches, aliases, comments, and dynamic values mixed together | FQN-allowlisted class/method facts with typed static arguments and explicit `dynamic` markers |
+| Did Resource, Schema, and ALPS names drift? | Separate searches and manual set comparison | Per-surface status plus a deterministic presence matrix |
 
 The server does not claim that every search problem is semantic. Comments, arbitrary
 configuration, unsupported framework extensions, and dynamically constructed values still
@@ -76,7 +78,36 @@ The corresponding tools are `bear_route_lookup`, `bear_template_for_resource`,
 Resolution is deliberately conservative. Dynamic expressions, custom loaders, external
 ALPS links, and ambiguous conventions are not guessed.
 
-## 4. Navigate from an exact source position
+## 4. Audit Resource attributes
+
+Ask:
+
+```text
+Audit App Resources for Cacheable, Purge, Refresh, Link, Embed, JsonSchema, and Alps
+attributes. Separate static arguments from dynamic expressions and show per-file failures.
+```
+
+Use `bear_resource_attribute_index` for the bounded workspace view, then
+`bear_resource_attributes` for one Resource. The index has `total`/`truncated` and an
+independent `status` per Resource, so one malformed file does not erase facts from the
+others. Only the documented FQNs are recognized; application PHP is never evaluated.
+
+## 5. Compare contract name presence
+
+Ask:
+
+```text
+For app://self/user onPost, compare request-name presence across Resource parameters,
+the request JSON Schema, and its ALPS operation descriptor.
+```
+
+Use `bear_contract_compare` with `schemaKind: request`. Each surface reports its own
+`status`, `subject`, and names. A comparison appears only when two or more surfaces are
+available. Equal names are evidence of spelling presence only—not type, constraint,
+meaning, or runtime compatibility. For response comparison the Resource body surface is
+currently `unsupported`; Schema and an ALPS `rt` representation can still be compared.
+
+## 6. Navigate from an exact source position
 
 When the client already knows a saved file and cursor position, use the standard LSP tools:
 
@@ -93,7 +124,7 @@ Line and character are zero-based. Character positions use the LSP UTF-16 conven
 Identifier-based BEAR tools are preferable when the client has a Resource URI or another
 BEAR identifier but no reliable cursor position.
 
-## 5. Validate an AI-generated change
+## 7. Validate an AI-generated change
 
 The server never edits files, but it can verify that a saved change is visible through the
 same semantic layer used by the IDE:
@@ -102,13 +133,15 @@ same semantic layer used by the IDE:
 2. Save them.
 3. Confirm the Resource appears in `bear_resource_list`.
 4. Confirm its methods and relations with `bear_resource_describe`.
-5. Resolve its schema and template.
-6. Check references or document links from the call site.
-7. Run the project's tests and static analysis separately.
+5. Re-read supported attributes with `bear_resource_attributes`.
+6. Run `bear_contract_compare` for the changed request/response surface.
+7. Resolve its schema and template.
+8. Check references or document links from the call site.
+9. Run the project's tests and static analysis separately.
 
 This catches convention and resolution mistakes. It does not prove runtime behavior.
 
-## 6. Interpret results safely
+## 8. Interpret results safely
 
 Every BEAR Semantic API result preserves the same envelope:
 
@@ -143,4 +176,3 @@ The MCP server is read-only and operates on saved files. It does not:
 - replace general source search for unsupported concepts.
 
 Those activities belong to an agent workflow or a specialized runtime evidence provider.
-

@@ -14,6 +14,8 @@ BEAR.Sunday MCP Serverは、保存済みの1つのworkspaceについて、AIク�
 | 誰がLink/Embedしているか | 属性テキストを人が解釈 | 種類付きのincoming/outgoing Link・Embed relation |
 | Route、SQL ID、templateの実体は何か | 候補となる文字列一致 | 解決済みtarget、または明示的なsemantic failure status |
 | ALPS descriptorは何と関係するか | JSON文字列の一致 | 明示されたlocal descriptor relationship |
+| cache属性やResource属性はどこにあるか | short name、alias、comment、動的値が混在 | FQN allowlist済みのclass/method facts、型付きstatic引数、明示的な`dynamic` marker |
+| Resource、Schema、ALPSの名前がずれていないか | 個別検索後に人が集合比較 | 面ごとのstatusと決定的なpresence matrix |
 
 すべての検索問題をsemanticに扱うとは主張しません。コメント、任意の設定、未対応のframework拡張、
 動的に組み立てられた値は、引き続きsource確認やテキスト検索が必要です。
@@ -72,7 +74,35 @@ ALPS descriptor goArticleを説明してください。
 
 解決は意図的に保守的です。動的な式、custom loader、外部ALPS link、曖昧な規約は推測しません。
 
-## 4. 正確なsource位置から移動する
+## 4. Resource属性を監査する
+
+質問例:
+
+```text
+App ResourceのCacheable、Purge、Refresh、Link、Embed、JsonSchema、Alps属性を監査し、
+静的引数と動的式を分け、file単位の失敗も表示してください。
+```
+
+workspaceのbounded viewには`bear_resource_attribute_index`、単一Resourceの詳細には
+`bear_resource_attributes`を使います。indexには`total`/`truncated`とResourceごとの独立した
+`status`があるため、1つの壊れたfileで他のfactsを失いません。文書化されたFQNだけを認識し、
+application PHPは実行しません。
+
+## 5. Contract名のpresenceを比較する
+
+質問例:
+
+```text
+app://self/userのonPostについて、Resource parameter、request JSON Schema、
+ALPS operation descriptor間のrequest名presenceを比較してください。
+```
+
+`schemaKind: request`で`bear_contract_compare`を使います。各面は独立した`status`、`subject`、
+名前を返し、2面以上が利用できる場合だけ比較を生成します。同名は綴りのpresenceの根拠にすぎず、
+型、制約、意味、runtime互換性の一致を証明しません。response比較ではResource body面は現在
+`unsupported`ですが、SchemaとALPSの`rt`先representationは比較できます。
+
+## 6. 正確なsource位置から移動する
 
 保存済みファイルとcursor位置が分かる場合は、標準LSP toolを使います。
 
@@ -88,7 +118,7 @@ ALPS descriptor goArticleを説明してください。
 lineとcharacterは0-basedで、characterはLSPのUTF-16規約です。Resource URIなどのBEAR識別子は
 分かるが信頼できるcursor位置がない場合は、identifier-basedのBEAR toolを優先します。
 
-## 5. AIが生成した変更を検証する
+## 7. AIが生成した変更を検証する
 
 サーバー自身はファイルを編集しませんが、保存した変更がIDEと同じsemantic layerから認識されるかを
 確認できます。
@@ -97,13 +127,15 @@ lineとcharacterは0-basedで、characterはLSPのUTF-16規約です。Resource 
 2. ファイルを保存する。
 3. `bear_resource_list`にResourceが現れることを確認する。
 4. `bear_resource_describe`でmethodとrelationを確認する。
-5. schemaとtemplateを解決する。
-6. 呼び出し元からreferenceまたはdocument linkを確認する。
-7. projectのtestとstatic analysisは別に実行する。
+5. `bear_resource_attributes`で対応属性を再取得する。
+6. 変更したrequest/response面を`bear_contract_compare`で比較する。
+7. schemaとtemplateを解決する。
+8. 呼び出し元からreferenceまたはdocument linkを確認する。
+9. projectのtestとstatic analysisは別に実行する。
 
 これは規約や解決の誤りを検出します。runtime behaviorを証明するものではありません。
 
-## 6. 結果を安全に解釈する
+## 8. 結果を安全に解釈する
 
 すべてのBEAR Semantic API resultは同じenvelopeを保ちます。
 
@@ -137,4 +169,3 @@ MCP serverはread-onlyで、保存済みファイルだけを扱います。次�
 - 未対応概念に対する一般的なsource searchの代替
 
 これらはagent workflow、または専用のruntime evidence providerの責務です。
-

@@ -40,7 +40,10 @@ final class RealMcpEndToEndTest extends TestCase
             sort($names);
             self::assertSame([
                 'bear_alps_descriptor_lookup',
+                'bear_contract_compare',
                 'bear_project_info',
+                'bear_resource_attribute_index',
+                'bear_resource_attributes',
                 'bear_resource_describe',
                 'bear_resource_incoming_relations',
                 'bear_resource_list',
@@ -78,6 +81,31 @@ final class RealMcpEndToEndTest extends TestCase
             ])->structuredContent;
             self::assertIsArray($resource);
             self::assertSame('ok', $resource['status']);
+
+            $attributes = $client->callTool('bear_resource_attributes', [
+                'resourceUri' => 'app://self/dashboard',
+            ])->structuredContent;
+            self::assertIsArray($attributes);
+            self::assertSame('ok', $attributes['status']);
+            self::assertSame(['Embed', 'Link'], array_column($attributes['data']['attributes'], 'name'));
+
+            $attributeIndex = $client->callTool('bear_resource_attribute_index', [
+                'scheme' => 'app',
+                'prefix' => 'dashboard',
+            ])->structuredContent;
+            self::assertIsArray($attributeIndex);
+            self::assertSame('ok', $attributeIndex['status']);
+            self::assertSame('ok', $attributeIndex['data']['items'][0]['status']);
+            self::assertSame(2, count($attributeIndex['data']['items'][0]['attributes']));
+
+            $contract = $client->callTool('bear_contract_compare', [
+                'resourceUri' => 'app://self/user',
+                'descriptorId' => 'Article',
+            ])->structuredContent;
+            self::assertIsArray($contract);
+            self::assertSame('ok', $contract['status']);
+            self::assertSame(['schema', 'alps'], $contract['data']['comparison']['compared']);
+            self::assertSame(['name'], $contract['data']['comparison']['onlyInSchema']);
 
             $schema = $client->callTool('bear_schema_lookup', [
                 'resourceUri' => 'app://self/user',

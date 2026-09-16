@@ -70,6 +70,45 @@ final class SemanticTools
     }
 
     /** @return array<string, mixed> */
+    public function resourceAttributes(string $resourceUri, ?string $contextPath = null): array
+    {
+        return $this->query('bear/resource/attributes', [
+            'uri' => $resourceUri,
+            'contextPath' => $contextPath,
+        ]);
+    }
+
+    /** @return array<string, mixed> */
+    public function resourceAttributeIndex(
+        ?string $scheme = null,
+        string $prefix = '',
+        int $limit = 50,
+    ): array {
+        return $this->query('bear/resource/attributeIndex', [
+            'scheme' => $scheme,
+            'prefix' => $prefix,
+            'limit' => $limit,
+        ]);
+    }
+
+    /** @return array<string, mixed> */
+    public function contractCompare(
+        string $resourceUri,
+        string $method = 'onGet',
+        string $schemaKind = 'response',
+        ?string $descriptorId = null,
+        ?string $contextPath = null,
+    ): array {
+        return $this->query('bear/contract/compare', [
+            'uri' => $resourceUri,
+            'method' => $method,
+            'schemaKind' => $schemaKind,
+            'descriptorId' => $descriptorId,
+            'contextPath' => $contextPath,
+        ]);
+    }
+
+    /** @return array<string, mixed> */
     public function schemaLookup(
         string $resourceUri,
         string $kind = 'response',

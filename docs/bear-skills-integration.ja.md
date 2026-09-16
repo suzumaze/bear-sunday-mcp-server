@@ -63,7 +63,10 @@ Skillへ残すもの:
 `bear-clean-style`のようなproject opinionを、BEAR全体の必須規則としてSemantic APIへ入れては
 いけません。Semantic APIは観測可能なfactsを返し、Skillがproject方針と照合します。
 
-## 追加するSemantic API
+## Semantic API実装状況
+
+2026-09-16時点で、以下のResource attribute factsとcontract comparisonはcoreとMCP adapterに
+実装済みです。Project diagnosticsは引き続き設計候補です。
 
 ### 1. Resource attribute facts
 
@@ -83,6 +86,10 @@ bear/resource/attributeIndex
 - 対応済みattributeのstatic argument
 - attributeとmethodのsource range
 - unsupported/dynamic argumentの明示
+
+実装では重複を避け、methodとparameterは既存の`bear_resource_describe`、属性は
+`bear_resource_attributes` / `bear_resource_attribute_index`から取得します。return typeの
+構造化取得は未対応で、対応済みと見なしてはいけません。
 
 初期対応attribute:
 
@@ -126,7 +133,7 @@ bear/contract/compare
 }
 ```
 
-### 3. Project diagnostics
+### 3. Project diagnostics（未実装）
 
 ```text
 bear/project/diagnostics
@@ -179,4 +186,3 @@ bear/project/diagnostics
 - MCP toolはread-onlyのままにする。
 - Skillなしでもresponseの意味がtool descriptionと文書から分かる。
 - SkillはMCPが利用できない場合も従来workflowへfallbackできる。
-

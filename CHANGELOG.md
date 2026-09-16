@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-09-16
+
+### Added
+
+- `bear_resource_attributes` and `bear_resource_attribute_index` for allowlisted,
+  bounded Resource metadata with explicit dynamic values and per-Resource status.
+- `bear_contract_compare` for presence-only Resource, JSON Schema, and ALPS name
+  comparison without claiming type, meaning, or behavioral compatibility.
+- English and Japanese audit/contract workflows and a BEAR.Skills responsibility map.
+
 ## [0.5.0] - 2026-09-15
 
 ### Added
@@ -67,7 +77,8 @@ All notable changes to this project will be documented in this file.
 - Bounded LSP framing, fixed workspace/process configuration, structured failure results, and
   fake and real stdio integration coverage.
 
-[Unreleased]: https://github.com/suzumaze/bear-sunday-mcp-server/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/suzumaze/bear-sunday-mcp-server/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/suzumaze/bear-sunday-mcp-server/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/suzumaze/bear-sunday-mcp-server/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/suzumaze/bear-sunday-mcp-server/compare/v0.3.1...v0.4.0
 [0.3.1]: https://github.com/suzumaze/bear-sunday-mcp-server/compare/v0.3.0...v0.3.1
