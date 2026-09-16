@@ -286,6 +286,8 @@ schema; the adapter will not expose an arbitrary LSP passthrough.
 
 Design notes for integrating agent workflows without moving subjective policy into the
 semantic core are documented in [BEAR.Skills integration (Japanese)](docs/bear-skills-integration.ja.md).
+The proposed read-only boundary for optional runtime cache evidence is documented in
+[BEAR.QueryRepository semantic log integration (Japanese)](docs/query-repository-semantic-log.ja.md).
 
 ## License
 
