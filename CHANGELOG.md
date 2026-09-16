@@ -4,13 +4,6 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-### Documentation
-
-- Record end-to-end verification against a temporary, read-only copy of a production-scale
-  276-Resource BEAR.Sunday workspace.
-- Mark QueryRepository semantic-log MCP integration as deferred until its upstream reader
-  and format contracts stabilize; no runtime-log tool or dependency is shipped.
-
 ## [0.6.0] - 2026-09-16
 
 ### Added
@@ -20,6 +13,18 @@ All notable changes to this project will be documented in this file.
 - `bear_contract_compare` for presence-only Resource, JSON Schema, and ALPS name
   comparison without claiming type, meaning, or behavioral compatibility.
 - English and Japanese audit/contract workflows and a BEAR.Skills responsibility map.
+
+### Changed
+
+- Disable Phpactor language-server auto-configuration for MCP-managed processes so
+  inspecting a workspace does not create or rewrite its `.phpactor.json` file.
+
+### Documentation
+
+- Record end-to-end verification against a temporary, read-only copy of a production-scale
+  276-Resource BEAR.Sunday workspace.
+- Mark QueryRepository semantic-log MCP integration as deferred until its upstream reader
+  and format contracts stabilize; no runtime-log tool or dependency is shipped.
 
 ## [0.5.0] - 2026-09-15
 
