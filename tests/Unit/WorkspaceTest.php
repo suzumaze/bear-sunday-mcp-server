@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Suzumaze\BearSundayMcp\Tests\Unit;
 
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Suzumaze\BearSundayMcp\Workspace;
 use Suzumaze\BearSundayMcp\WorkspaceFileException;
@@ -106,17 +107,20 @@ final class WorkspaceTest extends TestCase
         );
     }
 
-    public function testRejectsUnsafeConfiguredPaths(): void
+    #[DataProvider('unsafeConfiguredPathProvider')]
+    public function testRejectsUnsafeConfiguredPaths(string $path): void
     {
         $workspace = Workspace::fromPath(__DIR__ . '/../Fixture/workspace');
 
-        foreach (['../query-log', 'var//query-log', './var/query-log'] as $path) {
-            try {
-                $workspace->configuredDirectory($path);
-                self::fail('An unsafe configured path must be rejected.');
-            } catch (\InvalidArgumentException) {
-                self::assertTrue(true);
-            }
-        }
+        $this->expectException(\InvalidArgumentException::class);
+        $workspace->configuredDirectory($path);
+    }
+
+    /** @return iterable<string, array{string}> */
+    public static function unsafeConfiguredPathProvider(): iterable
+    {
+        yield 'traversal' => ['../query-log'];
+        yield 'empty segment' => ['var//query-log'];
+        yield 'current directory' => ['./var/query-log'];
     }
 }
