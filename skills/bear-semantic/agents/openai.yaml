@@ -1,0 +1,4 @@
+interface:
+  display_name: "BEAR Semantic"
+  short_description: "Inspect BEAR.Sunday projects with semantic MCP"
+  default_prompt: "Use $bear-semantic to inspect this BEAR.Sunday project before searching or editing."

@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+
+- Add a distributable `bear-semantic` agent skill that applies the semantic-first workflow and
+  falls back safely when the MCP tools are unavailable.
+
 ### Documentation
 
 - Add a complete Japanese reference for all 22 MCP tools and connect it to the README,

@@ -34,6 +34,7 @@ flowchart TB
     end
 
     M5 --> R1["core v0.1.6 / MCP v0.6.0<br/>公開・手元更新完了"]
+    R1 --> S1["bear-semantic Skill<br/>mainに実装・未リリース"]
 ```
 
 ## 公開状況
@@ -43,6 +44,7 @@ flowchart TB
 | `suzumaze/bear-phpactor-extension` | [`v0.1.6`](https://github.com/suzumaze/bear-phpactor-extension/releases/tag/v0.1.6) | GitHub Release・Packagist公開済み |
 | `suzumaze/bear-sunday-mcp-server` | [`v0.6.0`](https://github.com/suzumaze/bear-sunday-mcp-server/releases/tag/v0.6.0) | GitHub Release・Packagist公開済み |
 | MCP tool inventory | 22 tools | 日本語・英語manual整備済み |
+| `bear-semantic` agent Skill | unreleased | `main`に実装、次回配布対象 |
 
 ## Grepから進歩した点
 

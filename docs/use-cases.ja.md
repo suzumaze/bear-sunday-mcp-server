@@ -7,6 +7,16 @@ BEAR.Sunday MCP Serverは、保存済みの1つのworkspaceについて、AIク�
 利用できる22 toolの入力と結果は[MCPツール一覧](tools.ja.md)、実装・検証状況は
 [プロジェクト現在地点](project-status.ja.md)にまとめています。
 
+## AIクライアント用Skill
+
+同梱する[`bear-semantic` Skill](../skills/bear-semantic/SKILL.md)は、AIにこの文書の基本手順を
+適用させます。既知のBEAR識別子にはsemantic toolを先に使い、statusとprovenanceを確認し、
+対象外の部分だけを検索します。MCPを利用できない場合は、通常のLSP、`rg`、source確認へ
+fallbackします。
+
+SkillはMCP serverをinstall・起動・設定しません。また、BEAR applicationのComposer依存にも
+なりません。MCP serverの接続とSkillの登録は、それぞれAIクライアント側で行います。
+
 ## Grepとの違い
 
 | 質問 | テキスト検索 | Semantic MCPの結果 |

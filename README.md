@@ -208,6 +208,18 @@ Find the type definition of the User Resource class.
 List resolved Resource URI and template links in src/Resource/App/Dashboard.php.
 ```
 
+## Optional agent skill
+
+MCP exposes the tools, while the bundled [`bear-semantic` skill](skills/bear-semantic/SKILL.md)
+teaches an agent when to prefer them over text search, how to interpret bounded results, and how
+to verify an authorized edit. Install the `skills/bear-semantic` directory using the normal skill
+mechanism of your AI client. It is optional and does not become a Composer dependency of the
+BEAR.Sunday application.
+
+The skill checks `bear_project_info` first and falls back to standard LSP navigation, `rg`, and
+source inspection when this MCP server is unavailable. Tool schemas and safety rules remain in
+the server, so the MCP interface is usable without the skill.
+
 ## Tools
 
 The complete Japanese reference is available in [MCPツール一覧](docs/tools.ja.md).

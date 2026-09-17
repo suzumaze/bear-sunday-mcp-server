@@ -9,6 +9,20 @@ BEAR.Skillsが持つ判断手順をMCP serverへ複製するのではなく、Sk
 [`bearsunday/BEAR.Skills` 1.x](https://github.com/bearsunday/BEAR.Skills/tree/1.x)
 （commit `0adb369acc07a720638374bd70a1d9d02966fd40`）です。
 
+## 実装した共通Skill
+
+MCP serverには、汎用の[`bear-semantic` Skill](../skills/bear-semantic/SKILL.md)を同梱します。
+これは個別の設計Skillを置き換えず、次の共通処理だけを担当します。
+
+- `bear_project_info`によるcapability確認
+- BEAR identifierにはsemantic tool、source位置にはLSP toolを選ぶrouting
+- status、ambiguity、truncation、provenanceの解釈
+- 対象外だけをsource検索するfallback
+- 編集後に同じsemantic queryを再実行する検証手順
+
+将来BEAR.Skills側へ取り込む場合も、この共通Skillを各Skillへ複製せず、個別Skillから共通手順を
+参照する形にします。MCP toolがないagentでは従来workflowへfallbackします。
+
 ## 責務の分離
 
 ```text
