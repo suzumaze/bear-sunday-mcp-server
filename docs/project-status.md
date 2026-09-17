@@ -1,7 +1,10 @@
 # Project status
 
-This is the combined implementation and verification status of the Phpactor extension and
-MCP server as of 2026-09-16.
+This is the combined implementation, verification, and release status of the Phpactor extension
+and MCP server as of 2026-09-17.
+
+See the [complete tool inventory](../README.md#tools) ([Japanese](tools.ja.md)) and the
+[task-oriented use cases](use-cases.md) ([Japanese](use-cases.ja.md)).
 
 ```mermaid
 flowchart TB
@@ -19,7 +22,7 @@ flowchart TB
         M2["Grep comparison and task-oriented use cases<br/>complete"]
         M3["BEAR.Skills responsibility map<br/>complete"]
         M4["Real Phpactor fixture E2E<br/>22 tools, 86 assertions<br/>complete"]
-        M5["Temporary copy of a 276-Resource workspace<br/>verified"]
+        M5["276-Resource workspace<br/>read-only connection verified"]
         M1 --> M2 --> M3 --> M4 --> M5
     end
 
@@ -31,8 +34,16 @@ flowchart TB
         D1 -.-> D2
     end
 
-    M5 --> R1["Next: confirm release boundary and finish manuals"]
+    M5 --> R1["core v0.1.6 / MCP v0.6.0<br/>released and locally verified"]
 ```
+
+## Release status
+
+| Component | Version | Status |
+|---|---|---|
+| `suzumaze/bear-phpactor-extension` | [`v0.1.6`](https://github.com/suzumaze/bear-phpactor-extension/releases/tag/v0.1.6) | GitHub Release and Packagist published |
+| `suzumaze/bear-sunday-mcp-server` | [`v0.6.0`](https://github.com/suzumaze/bear-sunday-mcp-server/releases/tag/v0.6.0) | GitHub Release and Packagist published |
+| MCP tool inventory | 22 tools | English and Japanese manuals complete |
 
 ## What improved beyond grep
 
@@ -45,12 +56,15 @@ extensions remain outside the semantic model and still require source inspection
 
 ## Real-workspace evidence
 
-The customer workspace was never modified directly. Verification used only a temporary copy
-under `/private/tmp`; the copy, verifier, and Phpactor trust entry were removed afterward.
+Initial verification used a temporary copy of the customer workspace under `/private/tmp`.
+After release, the installed release binaries were also started against the original workspace
+in read-only mode. Neither check modified project files, and the original Git worktree remained
+clean.
 
 | Check | Result |
 |---|---|
 | MCP inventory | 22 tools |
+| Release handshake | MCP `0.6.0`, core `v0.1.6`, no compatibility issues |
 | Project info | `ok`, Semantic API v1 |
 | Resource inventory | 276 Resources |
 | Bounded list | 20 returned; repeated result was byte-identical |

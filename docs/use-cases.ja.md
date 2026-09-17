@@ -4,6 +4,9 @@ BEAR.Sunday MCP Serverは、保存済みの1つのworkspaceについて、AIク�
 事実を提供します。テキスト検索を完全に置き換えるものではありません。対応済みのBEAR概念は
 最初にSemantic toolで調べ、返されたファイルを読み、Semantic Model外のコードだけを検索します。
 
+利用できる22 toolの入力と結果は[MCPツール一覧](tools.ja.md)、実装・検証状況は
+[プロジェクト現在地点](project-status.ja.md)にまとめています。
+
 ## Grepとの違い
 
 | 質問 | テキスト検索 | Semantic MCPの結果 |

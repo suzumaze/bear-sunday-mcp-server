@@ -1,6 +1,9 @@
 # プロジェクト現在地点
 
-2026-09-16時点の、Phpactor extensionとMCP serverを合わせた実装・検証状況です。
+2026-09-17時点の、Phpactor extensionとMCP serverを合わせた実装・検証・公開状況です。
+
+全22 toolの入力と結果は[MCPツール一覧](tools.ja.md)、具体的な調査手順は
+[ユースケース](use-cases.ja.md)を参照してください。
 
 ```mermaid
 flowchart TB
@@ -18,7 +21,7 @@ flowchart TB
         M2["Grepとの差とtask-oriented use cases<br/>完了"]
         M3["BEAR.Skills責務対応表<br/>完了"]
         M4["実Phpactor fixture E2E<br/>22 tools・86 assertions<br/>完了"]
-        M5["276-Resource実規模workspace<br/>一時複製で疎通<br/>完了"]
+        M5["276-Resource実規模workspace<br/>read-only疎通<br/>完了"]
         M1 --> M2 --> M3 --> M4 --> M5
     end
 
@@ -30,8 +33,16 @@ flowchart TB
         D1 -.-> D2
     end
 
-    M5 --> R1["次: release境界の確認とmanual整備"]
+    M5 --> R1["core v0.1.6 / MCP v0.6.0<br/>公開・手元更新完了"]
 ```
+
+## 公開状況
+
+| component | version | 状態 |
+|---|---|---|
+| `suzumaze/bear-phpactor-extension` | [`v0.1.6`](https://github.com/suzumaze/bear-phpactor-extension/releases/tag/v0.1.6) | GitHub Release・Packagist公開済み |
+| `suzumaze/bear-sunday-mcp-server` | [`v0.6.0`](https://github.com/suzumaze/bear-sunday-mcp-server/releases/tag/v0.6.0) | GitHub Release・Packagist公開済み |
+| MCP tool inventory | 22 tools | 日本語・英語manual整備済み |
 
 ## Grepから進歩した点
 
@@ -49,12 +60,14 @@ source確認を引き続き使います。
 
 ## 実環境で確認したこと
 
-顧客workspaceは直接変更せず、`/private/tmp`の一時複製だけを使用しました。検証後は複製、検証script、
-Phpactor trust entryを除去し、元workspaceがcleanであることを確認しました。
+初回検証は顧客workspaceの`/private/tmp`一時複製で行いました。release後には、現在の配布版を
+元workspaceへread-onlyで接続して再確認しました。どちらの検証でもproject fileは変更せず、
+元workspaceのGit状態がcleanであることを確認しました。
 
 | 検査 | 結果 |
 |---|---|
 | MCP tool inventory | 22 tools |
+| release handshake | MCP `0.6.0`、core `v0.1.6`、compatibility issueなし |
 | `bear_project_info` | `ok`, Semantic API v1 |
 | Resource inventory | 276 Resources |
 | bounded list | 20件を返し、再実行結果はbyte-identical |

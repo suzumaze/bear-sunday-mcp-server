@@ -32,6 +32,9 @@ are also available.
 
 See [Project status](docs/project-status.md) ([日本語](docs/project-status.ja.md)) for the
 implemented boundary, real-workspace verification evidence, and deferred experiments.
+See the [tool table below](#tools) ([日本語の全22ツール一覧](docs/tools.ja.md)) for the
+complete inventory, and [Use cases](docs/use-cases.md) ([日本語](docs/use-cases.ja.md))
+for task-oriented workflows.
 
 ## Requirements
 
@@ -206,6 +209,8 @@ List resolved Resource URI and template links in src/Resource/App/Dashboard.php.
 ```
 
 ## Tools
+
+The complete Japanese reference is available in [MCPツール一覧](docs/tools.ja.md).
 
 | MCP tool | BEAR Semantic API v1 request | Purpose |
 |---|---|---|

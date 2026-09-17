@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Documentation
+
+- Add a complete Japanese reference for all 22 MCP tools and connect it to the README,
+  Japanese use cases, and project-status documents.
+- Record the published v0.1.6 core / v0.6.0 server boundary and the post-release read-only
+  real-workspace verification.
+
 ## [0.6.0] - 2026-09-16
 
 ### Added
