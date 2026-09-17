@@ -51,6 +51,7 @@ final class PhpactorLanguageServer implements SemanticLspClient
             ...$commandPrefix,
             'language-server',
             '--working-dir=' . $workspace->root,
+            '--config-extra={"language_server_configuration.auto_config":false}',
         ];
         $descriptors = [
             0 => ['pipe', 'r'],

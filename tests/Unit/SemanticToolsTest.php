@@ -154,6 +154,56 @@ final class SemanticToolsTest extends TestCase
         );
     }
 
+    public function testMapsAttributeAndContractToolsWithoutChangingSemanticResults(): void
+    {
+        $client = new InMemoryLspClient(static function (string $method, array $params): array {
+            if ($method === 'bear/project/info') {
+                return self::projectInfoResult();
+            }
+
+            return self::ok(['method' => $method, 'params' => $params]);
+        });
+        $tools = new SemanticTools($client);
+        $tools->projectInfo();
+
+        self::assertSame(
+            self::ok([
+                'method' => 'bear/resource/attributes',
+                'params' => [
+                    'uri' => 'app://self/dashboard',
+                    'contextPath' => 'src/Resource/App/Dashboard.php',
+                ],
+            ]),
+            $tools->resourceAttributes('app://self/dashboard', 'src/Resource/App/Dashboard.php'),
+        );
+        self::assertSame(
+            self::ok([
+                'method' => 'bear/resource/attributeIndex',
+                'params' => ['scheme' => 'app', 'prefix' => 'dash', 'limit' => 25],
+            ]),
+            $tools->resourceAttributeIndex('app', 'dash', 25),
+        );
+        self::assertSame(
+            self::ok([
+                'method' => 'bear/contract/compare',
+                'params' => [
+                    'uri' => 'app://self/user',
+                    'method' => 'onPost',
+                    'schemaKind' => 'request',
+                    'descriptorId' => 'createUser',
+                    'contextPath' => 'src/Resource/App/User.php',
+                ],
+            ]),
+            $tools->contractCompare(
+                'app://self/user',
+                'onPost',
+                'request',
+                'createUser',
+                'src/Resource/App/User.php',
+            ),
+        );
+    }
+
     public function testPreflightsTheApiOnlyOnceWhenProjectInfoWasNotCalled(): void
     {
         $client = new InMemoryLspClient(static fn (string $method): array => $method === 'bear/project/info'

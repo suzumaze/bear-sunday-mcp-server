@@ -95,7 +95,10 @@ final class McpStdioServerTest extends TestCase
         sort($names);
         self::assertSame([
             'bear_alps_descriptor_lookup',
+            'bear_contract_compare',
             'bear_project_info',
+            'bear_resource_attribute_index',
+            'bear_resource_attributes',
             'bear_resource_describe',
             'bear_resource_incoming_relations',
             'bear_resource_list',
@@ -133,6 +136,51 @@ final class McpStdioServerTest extends TestCase
         self::assertSame(
             ['scheme' => 'app', 'prefix' => 'user', 'limit' => 10],
             $called['result']['structuredContent']['data']['params'],
+        );
+
+        $attributes = $this->request('tools/call', [
+            'name' => 'bear_resource_attributes',
+            'arguments' => ['resourceUri' => 'app://self/dashboard'],
+        ]);
+        self::assertSame(
+            'bear/resource/attributes',
+            $attributes['result']['structuredContent']['data']['method'],
+        );
+        self::assertSame(
+            ['uri' => 'app://self/dashboard', 'contextPath' => null],
+            $attributes['result']['structuredContent']['data']['params'],
+        );
+
+        $attributeIndex = $this->request('tools/call', [
+            'name' => 'bear_resource_attribute_index',
+            'arguments' => ['scheme' => 'app', 'prefix' => 'dash', 'limit' => 10],
+        ]);
+        self::assertSame(
+            'bear/resource/attributeIndex',
+            $attributeIndex['result']['structuredContent']['data']['method'],
+        );
+
+        $contract = $this->request('tools/call', [
+            'name' => 'bear_contract_compare',
+            'arguments' => [
+                'resourceUri' => 'app://self/user',
+                'method' => 'onPost',
+                'schemaKind' => 'request',
+            ],
+        ]);
+        self::assertSame(
+            'bear/contract/compare',
+            $contract['result']['structuredContent']['data']['method'],
+        );
+        self::assertSame(
+            [
+                'uri' => 'app://self/user',
+                'method' => 'onPost',
+                'schemaKind' => 'request',
+                'descriptorId' => null,
+                'contextPath' => null,
+            ],
+            $contract['result']['structuredContent']['data']['params'],
         );
 
         $navigation = $this->request('tools/call', [
@@ -261,6 +309,12 @@ final class McpStdioServerTest extends TestCase
             'arguments' => ['resourceUri' => 'app://self/user', 'limit' => 0],
         ]);
         self::assertSame(-32602, $invalidReferenceLimit['error']['code']);
+
+        $invalidContractKind = $this->request('tools/call', [
+            'name' => 'bear_contract_compare',
+            'arguments' => ['resourceUri' => 'app://self/user', 'schemaKind' => 'behavior'],
+        ]);
+        self::assertSame(-32602, $invalidContractKind['error']['code']);
 
         $invalidPosition = $this->request('tools/call', [
             'name' => 'lsp_hover',

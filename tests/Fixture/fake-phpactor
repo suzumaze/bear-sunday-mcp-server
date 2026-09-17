@@ -70,6 +70,31 @@ function fileUri(string $path): string
     return 'file://' . (str_starts_with($encoded, '/') ? '' : '/') . $encoded;
 }
 
+$workingDirectory = null;
+$autoConfigEnabled = true;
+foreach (array_slice($argv, 1) as $argument) {
+    if (str_starts_with($argument, '--working-dir=')) {
+        $workingDirectory = substr($argument, strlen('--working-dir='));
+        continue;
+    }
+    if (!str_starts_with($argument, '--config-extra=')) {
+        continue;
+    }
+
+    $config = json_decode(substr($argument, strlen('--config-extra=')), true);
+    if (is_array($config) && ($config['language_server_configuration.auto_config'] ?? null) === false) {
+        $autoConfigEnabled = false;
+    }
+}
+
+if (
+    $autoConfigEnabled
+    && is_string($workingDirectory)
+    && is_file($workingDirectory . '/.simulate-phpactor-auto-config')
+) {
+    file_put_contents($workingDirectory . '/.phpactor.json', "{}\n");
+}
+
 while (($message = readMessage()) !== null) {
     $method = $message['method'] ?? null;
     if ($method === 'exit') {
@@ -99,6 +124,9 @@ while (($message = readMessage()) !== null) {
         ]),
         'bear/resource/list',
         'bear/resource/describe',
+        'bear/resource/attributes',
+        'bear/resource/attributeIndex',
+        'bear/contract/compare',
         'bear/schema/describeForResource',
         'bear/route/resolve',
         'bear/sql/resolve',

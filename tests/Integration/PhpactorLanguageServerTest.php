@@ -14,6 +14,33 @@ use Suzumaze\BearSundayMcp\Workspace;
 #[CoversClass(LspFrameCodec::class)]
 final class PhpactorLanguageServerTest extends TestCase
 {
+    public function testDisablesPhpactorAutoConfiguration(): void
+    {
+        $workspace = sys_get_temp_dir() . '/bear-mcp-auto-config-' . bin2hex(random_bytes(8));
+        self::assertTrue(mkdir($workspace));
+        self::assertNotFalse(file_put_contents($workspace . '/.simulate-phpactor-auto-config', "\n"));
+
+        try {
+            $client = PhpactorLanguageServer::start(
+                Workspace::fromPath($workspace),
+                [__DIR__ . '/../Fixture/fake-phpactor'],
+                2,
+            );
+            $client->close();
+
+            self::assertFileDoesNotExist($workspace . '/.phpactor.json');
+        } finally {
+            if (isset($client)) {
+                $client->close();
+            }
+            if (is_file($workspace . '/.phpactor.json')) {
+                unlink($workspace . '/.phpactor.json');
+            }
+            unlink($workspace . '/.simulate-phpactor-auto-config');
+            rmdir($workspace);
+        }
+    }
+
     public function testRunsInitializeQueryShutdownAgainstAStdioLanguageServer(): void
     {
         $client = PhpactorLanguageServer::start(

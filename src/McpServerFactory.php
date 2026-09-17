@@ -79,6 +79,60 @@ final class McpServerFactory
             outputSchema: self::envelopeSchema(),
         );
         $builder->addTool(
+            [$tools, 'resourceAttributes'],
+            name: 'bear_resource_attributes',
+            title: 'Describe BEAR Resource attributes',
+            description: 'Return allowlisted class and Resource-method attributes with bounded static arguments; '
+                . 'dynamic expressions are marked rather than evaluated.',
+            annotations: $annotations,
+            inputSchema: self::objectSchema([
+                'resourceUri' => self::uriSchema(),
+                'contextPath' => self::pathSchema('Optional workspace-relative context path.'),
+            ], ['resourceUri']),
+            outputSchema: self::envelopeSchema(),
+        );
+        $builder->addTool(
+            [$tools, 'resourceAttributeIndex'],
+            name: 'bear_resource_attribute_index',
+            title: 'Index BEAR Resource attributes',
+            description: 'List bounded Resource attribute facts with an independent semantic status per Resource.',
+            annotations: $annotations,
+            inputSchema: self::objectSchema([
+                'scheme' => [
+                    'type' => 'string',
+                    'enum' => ['app', 'page'],
+                    'description' => 'Optional Resource URI scheme filter.',
+                ],
+                'prefix' => [
+                    'type' => 'string',
+                    'maxLength' => 2048,
+                    'description' => 'Optional URI path prefix without the scheme.',
+                ],
+                'limit' => self::limitSchema('Maximum number of Resources to inspect.'),
+            ]),
+            outputSchema: self::envelopeSchema(),
+        );
+        $builder->addTool(
+            [$tools, 'contractCompare'],
+            name: 'bear_contract_compare',
+            title: 'Compare BEAR contract surfaces',
+            description: 'Compare exact name presence across a Resource request surface, JSON Schema, and ALPS. '
+                . 'This does not claim type, meaning, or behavioral compatibility.',
+            annotations: $annotations,
+            inputSchema: self::objectSchema([
+                'resourceUri' => self::uriSchema(),
+                'method' => self::identifierSchema('Exact Resource method name such as onGet or onPost.'),
+                'schemaKind' => [
+                    'type' => 'string',
+                    'enum' => ['request', 'response'],
+                    'description' => 'Contract surface to compare.',
+                ],
+                'descriptorId' => self::identifierSchema('Optional explicit ALPS descriptor ID override.'),
+                'contextPath' => self::pathSchema('Optional workspace-relative context path.'),
+            ], ['resourceUri']),
+            outputSchema: self::envelopeSchema(),
+        );
+        $builder->addTool(
             [$tools, 'schemaLookup'],
             name: 'bear_schema_lookup',
             title: 'Describe a Resource schema',
