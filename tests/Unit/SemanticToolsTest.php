@@ -204,6 +204,38 @@ final class SemanticToolsTest extends TestCase
         );
     }
 
+    public function testPreservesPartialNotFoundDataForAMissingResourceTemplate(): void
+    {
+        $partial = [
+            'status' => 'not_found',
+            'data' => [
+                'resource' => [
+                    'uri' => 'app://self/dashboard',
+                    'fqn' => 'Acme\\Resource\\App\\Dashboard',
+                    'path' => 'src/Resource/App/Dashboard.php',
+                ],
+                'engine' => 'twig',
+                'path' => null,
+                'searched' => ['var/templates/App/Dashboard.html.twig'],
+            ],
+            'candidates' => [],
+            'provenance' => [[
+                'source' => 'file',
+                'path' => 'src/Resource/App/Dashboard.php',
+                'freshness' => 'saved',
+            ]],
+            'error' => [
+                'code' => 'semantic_not_found',
+                'message' => 'No semantic target was found.',
+            ],
+        ];
+        $client = new InMemoryLspClient(static fn (string $method): array =>
+            $method === 'bear/project/info' ? self::projectInfoResult() : $partial);
+        $tools = new SemanticTools($client);
+
+        self::assertSame($partial, $tools->templateForResource('app://self/dashboard', 'twig'));
+    }
+
     public function testPreflightsTheApiOnlyOnceWhenProjectInfoWasNotCalled(): void
     {
         $client = new InMemoryLspClient(static fn (string $method): array => $method === 'bear/project/info'

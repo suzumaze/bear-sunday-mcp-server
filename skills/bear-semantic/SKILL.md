@@ -46,6 +46,15 @@ Treat contract comparison as presence-only unless the result explicitly proves m
 names do not prove matching types or meaning. Preserve ambiguity instead of selecting a candidate
 without evidence.
 
+Treat Resource attribute arguments as explicit source syntax only unless `argumentPolicy` says
+otherwise. An omitted argument does not prove that its constructor has no default. Do not invent
+or hardcode installed-package defaults.
+
+Treat `lsp_workspace_symbols` as a Phpactor index query for class, function, and constant records.
+It does not search methods, its index freshness is unknown, and an empty result is inconclusive.
+Use `lsp_document_symbols` for a known file and fall back to source search for methods or saved
+files that may not yet be indexed.
+
 ## Respect the boundary
 
 - Treat all MCP results as facts about saved source, not runtime behavior.

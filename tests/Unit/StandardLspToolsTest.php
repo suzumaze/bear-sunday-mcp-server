@@ -284,10 +284,51 @@ final class StandardLspToolsTest extends TestCase
         self::assertSame(1, $workspaceSymbols['data']['total']);
         self::assertSame('User', $workspaceSymbols['data']['symbols'][0]['name']);
         self::assertSame('src/Resource/App/User.php', $workspaceSymbols['data']['symbols'][0]['path']);
+        self::assertSame([
+            'source' => 'phpactor_workspace_index',
+            'recordTypes' => ['class', 'function', 'constant'],
+            'includesMethods' => false,
+            'indexFreshness' => 'unknown',
+            'emptyResultIsDefinitive' => false,
+        ], $workspaceSymbols['data']['coverage']);
+        self::assertSame('unknown', $workspaceSymbols['provenance'][0]['freshness']);
         self::assertSame(
             ['query' => 'User'],
             $this->client->requests[2]['params'],
         );
+    }
+
+    public function testWorkspaceSymbolAbsenceIsExplicitlyInconclusive(): void
+    {
+        $tools = new StandardLspTools(
+            new InMemoryLspClient(static fn (): array => []),
+            Workspace::fromPath($this->fixture),
+        );
+
+        $result = $tools->workspaceSymbols('MissingMethod');
+
+        self::assertSame('not_found', $result['status']);
+        self::assertSame([], $result['data']['symbols']);
+        self::assertFalse($result['data']['coverage']['includesMethods']);
+        self::assertFalse($result['data']['coverage']['emptyResultIsDefinitive']);
+        self::assertSame('unknown', $result['provenance'][0]['freshness']);
+    }
+
+    public function testWorkspaceSymbolFailureStillExplainsCoverage(): void
+    {
+        $tools = new StandardLspTools(
+            new InMemoryLspClient(static function (): never {
+                throw new LspRpcException(-32603);
+            }),
+            Workspace::fromPath($this->fixture),
+        );
+
+        $result = $tools->workspaceSymbols('Dashboard');
+
+        self::assertSame('engine_unavailable', $result['status']);
+        self::assertSame([], $result['data']['symbols']);
+        self::assertSame('unknown', $result['data']['coverage']['indexFreshness']);
+        self::assertFalse($result['data']['coverage']['emptyResultIsDefinitive']);
     }
 
     public function testBoundsCompletionFieldsWithoutSplittingUtf8(): void

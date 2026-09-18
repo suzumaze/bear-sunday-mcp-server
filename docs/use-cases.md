@@ -91,6 +91,9 @@ Use `bear_resource_attribute_index` for the bounded workspace view, then
 `bear_resource_attributes` for one Resource. The index has `total`/`truncated` and an
 independent `status` per Resource, so one malformed file does not erase facts from the
 others. Only the documented FQNs are recognized; application PHP is never evaluated.
+Both tools return an explicit-only argument policy. An omitted attribute argument does
+not mean that the constructor has no default, and installed-package defaults are not
+expanded or guessed.
 
 ## 5. Compare contract name presence
 
@@ -123,6 +126,12 @@ When the client already knows a saved file and cursor position, use the standard
 Line and character are zero-based. Character positions use the LSP UTF-16 convention.
 Identifier-based BEAR tools are preferable when the client has a Resource URI or another
 BEAR identifier but no reliable cursor position.
+
+`lsp_workspace_symbols` is narrower than document symbols. Phpactor's workspace provider
+returns indexed class, function, and constant records, not methods. Its index freshness is
+reported as unknown, so an empty result is not proof of absence and a newly saved file may
+not be indexed yet. For a known file, use `lsp_document_symbols`; for method discovery or
+an inconclusive empty result, fall back to source search.
 
 ## 7. Validate an AI-generated change
 

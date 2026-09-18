@@ -28,7 +28,8 @@ inventory, presence-only contract comparison, static Resource references, and in
 Link/Embed relations.
 Definition, Type Definition, References, and Hover can be queried at a position in a saved
 workspace file; Completion, Document Links, document symbols, and workspace symbol search
-are also available.
+are also available. Workspace symbol search covers Phpactor's indexed class, function, and
+constant records, not methods, and does not claim that its index is current.
 
 See [Project status](docs/project-status.md) ([日本語](docs/project-status.ja.md)) for the
 implemented boundary, real-workspace verification evidence, and deferred experiments.
@@ -197,13 +198,14 @@ Find the Qiq template for app://self/user.
 Describe the ALPS descriptor goArticle and its relationships.
 Find all static references to app://self/user.
 Find Link and Embed relations targeting app://self/user.
-Show the supported attributes on app://self/user and mark dynamic arguments explicitly.
+Show the supported attributes on app://self/user, mark dynamic arguments explicitly, and
+do not infer omitted constructor defaults.
 Audit cache, Link, Embed, Schema, and ALPS attributes across App Resources.
 Compare onPost request-name presence for app://self/user across Resource, Schema, and ALPS.
 At app://self/user in src/Resource/App/Dashboard.php, show its definition, references, and hover.
 Complete the Resource URI at zero-based line 11, character 28 in src/Client.php.
 List the symbols in src/Resource/App/Dashboard.php.
-Find workspace symbols matching Dashboard.
+Find indexed workspace class, function, or constant symbols matching Dashboard.
 Find the type definition of the User Resource class.
 List resolved Resource URI and template links in src/Resource/App/Dashboard.php.
 ```
@@ -229,14 +231,14 @@ The complete Japanese reference is available in [MCPツール一覧](docs/tools.
 | `bear_project_info` | `bear/project/info` | API version, capabilities, package versions, PSR-4 roots, and Resource count |
 | `bear_resource_list` | `bear/resource/list` | Deterministic Resource URI inventory with scheme, prefix, and limit filters |
 | `bear_resource_describe` | `bear/resource/describe` | Resource methods, Link/Embed relations, templates, and schemas |
-| `bear_resource_attributes` | `bear/resource/attributes` | Allowlisted class/method attributes with bounded static arguments and explicit dynamic markers |
-| `bear_resource_attribute_index` | `bear/resource/attributeIndex` | Bounded workspace attribute facts with per-Resource status |
+| `bear_resource_attributes` | `bear/resource/attributes` | Allowlisted class/method attributes with explicit source arguments and dynamic markers; constructor defaults are not expanded |
+| `bear_resource_attribute_index` | `bear/resource/attributeIndex` | Bounded workspace attribute facts with per-Resource status and explicit-only argument policy |
 | `bear_contract_compare` | `bear/contract/compare` | Exact name presence across Resource request parameters, JSON Schema, and ALPS; no type/meaning claim |
 | `bear_schema_lookup` | `bear/schema/describeForResource` | Bounded request/response Schema facts without raw JSON |
 | `bear_route_lookup` | `bear/route/resolve` | Explicit Aura Router route name to Page Resource |
 | `bear_sql_lookup` | `bear/sql/resolve` | Static SQL query ID to workspace-relative SQL file |
 | `bear_template_lookup` | `bear/template/resolve` | Explicit Twig or Qiq template name to file |
-| `bear_template_for_resource` | `bear/template/forResource` | Convention-based Twig or Qiq template for a Resource URI |
+| `bear_template_for_resource` | `bear/template/forResource` | Convention-based Twig or Qiq template; missing templates retain resolved Resource and searched paths |
 | `bear_alps_descriptor_lookup` | `bear/alps/describeDescriptor` | ALPS descriptor facts and explicit local relationships |
 | `bear_resource_references` | `bear/resource/references` | Static Resource URI and Route references with bounded source ranges |
 | `bear_resource_incoming_relations` | `bear/resource/incomingRelations` | Link/Embed relations targeting a Resource URI |
@@ -247,7 +249,7 @@ The complete Japanese reference is available in [MCPツール一覧](docs/tools.
 | `lsp_completion` | `textDocument/completion` | Bounded completion items at a saved workspace position |
 | `lsp_document_links` | `textDocument/documentLink` | Resolved Resource URI and template links in a saved document |
 | `lsp_document_symbols` | `textDocument/documentSymbol` | Flattened symbol inventory for a saved workspace file |
-| `lsp_workspace_symbols` | `workspace/symbol` | Workspace-only symbol search |
+| `lsp_workspace_symbols` | `workspace/symbol` | Phpactor-indexed class/function/constant search; methods excluded and index freshness unknown |
 
 Every result keeps the core envelope unchanged:
 
@@ -263,6 +265,12 @@ Every result keeps the core envelope unchanged:
 Failures are tool results with stable semantic statuses rather than PHP exception traces.
 An unsupported Semantic API major version returns `unsupported`. Missing Phpactor or a
 missing custom LSP method returns `engine_unavailable`.
+
+`lsp_workspace_symbols.data.coverage` records the exact boundary: Phpactor class,
+function, and constant index records are included; methods are not. Its provenance uses
+`freshness: "unknown"` because a saved workspace file does not prove that Phpactor has
+indexed a newly created file. Treat `not_found` as inconclusive and use
+`lsp_document_symbols` for a known file or source search for unsupported member discovery.
 
 ## Safety model
 
