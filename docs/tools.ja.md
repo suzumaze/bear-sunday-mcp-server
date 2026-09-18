@@ -1,6 +1,6 @@
 # MCPツール一覧
 
-BEAR.Sunday MCP Server 0.6.0は、BEAR Semantic API v1とPhpactorの標準LSPを
+BEAR.Sunday MCP Server 0.7.0は、BEAR Semantic API v1とPhpactorの標準LSPを
 用途別の22個のread-only toolとして公開します。
 
 - Resource URIなど、調べたいBEAR識別子が分かる場合は`bear_*` toolを使います。

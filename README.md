@@ -20,7 +20,7 @@ and AI clients.
 
 ## Status
 
-Version 0.6.0 provides twenty-two read-only tools against BEAR Semantic API version 1 and
+Version 0.7.0 provides twenty-two read-only tools against BEAR Semantic API version 1 and
 Phpactor's standard LSP. In addition to project, Resource, and schema facts, it resolves
 explicit Route names, SQL query IDs, Twig/Qiq template names, Resource templates, and ALPS
 descriptors. It also exposes allowlisted Resource attribute facts, a bounded attribute

@@ -1,6 +1,6 @@
 # プロジェクト現在地点
 
-2026-09-17時点の、Phpactor extensionとMCP serverを合わせた実装・検証・公開状況です。
+2026-09-18時点の、Phpactor extensionとMCP serverを合わせた実装・検証・公開状況です。
 
 全22 toolの入力と結果は[MCPツール一覧](tools.ja.md)、具体的な調査手順は
 [ユースケース](use-cases.ja.md)を参照してください。
@@ -34,7 +34,7 @@ flowchart TB
     end
 
     M5 --> R1["core v0.1.6 / MCP v0.6.0<br/>公開・手元更新完了"]
-    R1 --> S1["bear-semantic Skill<br/>mainに実装・未リリース"]
+    R1 --> S1["MCP v0.7.0<br/>bear-semantic Skill同梱・公開"]
 ```
 
 ## 公開状況
@@ -42,9 +42,9 @@ flowchart TB
 | component | version | 状態 |
 |---|---|---|
 | `suzumaze/bear-phpactor-extension` | [`v0.1.6`](https://github.com/suzumaze/bear-phpactor-extension/releases/tag/v0.1.6) | GitHub Release・Packagist公開済み |
-| `suzumaze/bear-sunday-mcp-server` | [`v0.6.0`](https://github.com/suzumaze/bear-sunday-mcp-server/releases/tag/v0.6.0) | GitHub Release・Packagist公開済み |
+| `suzumaze/bear-sunday-mcp-server` | [`v0.7.0`](https://github.com/suzumaze/bear-sunday-mcp-server/releases/tag/v0.7.0) | GitHub Release・Packagist公開済み |
 | MCP tool inventory | 22 tools | 日本語・英語manual整備済み |
-| `bear-semantic` agent Skill | unreleased | `main`に実装、次回配布対象 |
+| `bear-semantic` agent Skill | bundled in `v0.7.0` | Codex・Claude Codeで利用可能 |
 
 ## Grepから進歩した点
 
