@@ -169,6 +169,10 @@ recordだけを返し、methodは対象外です。index freshnessは`unknown`�
 ```
 
 - `status`は成功、欠落、曖昧、不正入力、parse error、engine unavailableを区別します。
+- `data`が存在して非nullになるのは`status: ok`だけで、null memberはstdio wire上で省略されます。
+  失敗時の任意の`partial`は、失敗までに確定した
+  狭い範囲の事実であり、成功として扱いません。Resource templateだけが無い場合は、解決済み
+  Resourceと探索pathをこの形で保持できます。
 - `candidates`は推測で1件を選ばず、件数制限された候補を保持します。
 - `provenance`は結果の根拠となった保存済みworkspace fileとrangeを示します。
 - pathはworkspace相対です。固定されたrootの外にあるファイルは公開しません。

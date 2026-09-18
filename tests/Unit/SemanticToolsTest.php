@@ -208,7 +208,8 @@ final class SemanticToolsTest extends TestCase
     {
         $partial = [
             'status' => 'not_found',
-            'data' => [
+            'data' => null,
+            'partial' => [
                 'resource' => [
                     'uri' => 'app://self/dashboard',
                     'fqn' => 'Acme\\Resource\\App\\Dashboard',

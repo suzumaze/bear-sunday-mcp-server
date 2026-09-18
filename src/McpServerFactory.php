@@ -195,7 +195,8 @@ final class McpServerFactory
             name: 'bear_template_for_resource',
             title: 'Resolve a Resource template',
             description: 'Resolve a convention-based Twig or Qiq template for a BEAR Resource URI. When the '
-                . 'Resource exists but no template does, not_found includes the Resource and searched paths.',
+                . 'Resource exists but no template does, not_found has no success data and includes the Resource '
+                . 'and searched paths in partial.',
             annotations: $annotations,
             inputSchema: self::objectSchema([
                 'resourceUri' => self::uriSchema(),
@@ -470,7 +471,7 @@ final class McpServerFactory
     {
         return [
             'type' => 'object',
-            'required' => ['status', 'data', 'candidates', 'provenance'],
+            'required' => ['status', 'candidates', 'provenance'],
             'properties' => [
                 'status' => [
                     'type' => 'string',
@@ -487,6 +488,10 @@ final class McpServerFactory
                     ],
                 ],
                 'data' => ['type' => ['object', 'null']],
+                'partial' => [
+                    'type' => ['object', 'null'],
+                    'description' => 'Optional facts proven by a failed semantic query; status remains authoritative.',
+                ],
                 'candidates' => ['type' => 'array'],
                 'provenance' => ['type' => 'array'],
                 'error' => ['type' => 'object'],

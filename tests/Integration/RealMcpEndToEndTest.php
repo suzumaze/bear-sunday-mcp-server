@@ -154,15 +154,16 @@ final class RealMcpEndToEndTest extends TestCase
             ])->structuredContent;
             self::assertIsArray($missingResourceTemplate);
             self::assertSame('not_found', $missingResourceTemplate['status']);
+            self::assertArrayNotHasKey('data', $missingResourceTemplate);
             self::assertSame(
                 'src/Resource/App/Dashboard.php',
-                $missingResourceTemplate['data']['resource']['path'],
+                $missingResourceTemplate['partial']['resource']['path'],
             );
-            self::assertNull($missingResourceTemplate['data']['path'] ?? null);
+            self::assertArrayNotHasKey('path', $missingResourceTemplate['partial']);
             self::assertSame([
                 'src/Resource/App/Dashboard.html.twig',
                 'var/templates/App/Dashboard.html.twig',
-            ], $missingResourceTemplate['data']['searched']);
+            ], $missingResourceTemplate['partial']['searched']);
 
             $alps = $client->callTool('bear_alps_descriptor_lookup', [
                 'descriptorId' => 'goArticle',

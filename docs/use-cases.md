@@ -165,6 +165,10 @@ Every BEAR Semantic API result preserves the same envelope:
 
 - `status` distinguishes success, absence, ambiguity, invalid input, parse errors, and an
   unavailable engine.
+- `data` is present and non-null only for `status: ok`; null members are omitted on the
+  stdio wire. An optional `partial` on a failure contains
+  narrower facts proven before that failure and must not be treated as success. A missing
+  Resource template can preserve the resolved Resource and searched paths this way.
 - `candidates` preserves bounded alternatives instead of selecting one by guesswork.
 - `provenance` identifies saved workspace files and ranges that support the result.
 - Paths are workspace-relative. The adapter does not expose files outside its fixed root.

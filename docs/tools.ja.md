@@ -24,7 +24,7 @@ BEAR.Sunday MCP Server 0.7.0は、BEAR Semantic API v1とPhpactorの標準LSPを
 | `bear_route_lookup` | `bear/route/resolve` | 明示的なRoute名 | Aura RouterのRouteからPage Resourceへの解決結果 |
 | `bear_sql_lookup` | `bear/sql/resolve` | staticなquery ID | Ray.MediaQuery / Ray.QueryModuleのSQLファイル |
 | `bear_template_lookup` | `bear/template/resolve` | engine、template名 | 明示的なTwig/Qiq template名からworkspace内ファイルへの解決結果 |
-| `bear_template_for_resource` | `bear/template/forResource` | Resource URI、engine | 規約template。Resourceだけ解決できたnot_foundではResourceと探索pathを保持 |
+| `bear_template_for_resource` | `bear/template/forResource` | Resource URI、engine | 規約template。Resourceだけ解決できた`not_found`では成功`data`を持たず、`partial`にResourceと探索pathを保持 |
 | `bear_alps_descriptor_lookup` | `bear/alps/describeDescriptor` | descriptor ID | ALPS descriptor factsと明示されたlocal relationship |
 | `bear_resource_references` | `bear/resource/references` | Resource URI、limit | 同じcanonical Resourceへ解決されたstatic URI/Route参照とsource range |
 | `bear_resource_incoming_relations` | `bear/resource/incomingRelations` | Resource URI | 対象Resourceを指すLink/Embed relation |
@@ -59,11 +59,18 @@ BEAR Semantic APIの結果は、coreの共通envelopeを保ちます。
 ```
 
 - `status`は成功、欠落、曖昧、不正入力、parse error、engine unavailableなどを区別します。
+- `data`が存在して非nullになるのは`status: ok`の場合だけです。Phpactorのstdio serializerはnullの
+  object memberを省略します。失敗結果に任意の`partial`がある場合も、
+  成功ではなく、失敗までに確定できた狭い範囲の事実として扱います。
 - `candidates`は曖昧な候補を、推測で1件に絞らず返します。
 - `provenance`は根拠となった保存済みfileとrangeを示します。
 - `total`と`truncated`がある結果では、返された配列だけを全件と判断しません。
 - pathはworkspace相対です。workspace外のtargetは公開しません。
 - 空配列だけで「存在しない」と判断せず、`status`とcapabilityを併せて確認します。
+
+`bear_template_for_resource`では、Resourceが解決済みでtemplateだけが無い場合に
+`status: not_found`で成功`data`を持たず、`partial`へResourceと実際に確認した規約pathを格納します。
+Resource自体が無い場合は`partial`もありません。
 
 `lsp_workspace_symbols`は`data.coverage`に対象record種別、method非対応、index freshness、空結果が
 決定的でないことを返します。既知fileのmemberは`lsp_document_symbols`、method名やindex未反映の

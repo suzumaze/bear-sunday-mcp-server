@@ -238,7 +238,7 @@ The complete Japanese reference is available in [MCPツール一覧](docs/tools.
 | `bear_route_lookup` | `bear/route/resolve` | Explicit Aura Router route name to Page Resource |
 | `bear_sql_lookup` | `bear/sql/resolve` | Static SQL query ID to workspace-relative SQL file |
 | `bear_template_lookup` | `bear/template/resolve` | Explicit Twig or Qiq template name to file |
-| `bear_template_for_resource` | `bear/template/forResource` | Convention-based Twig or Qiq template; missing templates retain resolved Resource and searched paths |
+| `bear_template_for_resource` | `bear/template/forResource` | Convention-based Twig or Qiq template; missing templates have no success `data` and retain resolved Resource and searched paths in `partial` |
 | `bear_alps_descriptor_lookup` | `bear/alps/describeDescriptor` | ALPS descriptor facts and explicit local relationships |
 | `bear_resource_references` | `bear/resource/references` | Static Resource URI and Route references with bounded source ranges |
 | `bear_resource_incoming_relations` | `bear/resource/incomingRelations` | Link/Embed relations targeting a Resource URI |
@@ -265,6 +265,14 @@ Every result keeps the core envelope unchanged:
 Failures are tool results with stable semantic statuses rather than PHP exception traces.
 An unsupported Semantic API major version returns `unsupported`. Missing Phpactor or a
 missing custom LSP method returns `engine_unavailable`.
+
+`data` is present and non-null only when `status` is `ok`; Phpactor's stdio serializer
+omits null object members. A failed semantic query may include an optional `partial`
+object containing narrower facts established before the failure. For example,
+`bear_template_for_resource` returns `not_found` without success `data` and preserves the
+resolved Resource and searched convention paths in `partial` when only the template is
+missing. Clients must continue to use `status`, not the presence of `partial`, for success
+or failure.
 
 `lsp_workspace_symbols.data.coverage` records the exact boundary: Phpactor class,
 function, and constant index records are included; methods are not. Its provenance uses
