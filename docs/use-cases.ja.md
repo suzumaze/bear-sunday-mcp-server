@@ -100,6 +100,8 @@ workspaceのbounded viewには`bear_resource_attribute_index`、単一Resource�
 `bear_resource_attributes`を使います。indexには`total`/`truncated`とResourceごとの独立した
 `status`があるため、1つの壊れたfileで他のfactsを失いません。文書化されたFQNだけを認識し、
 application PHPは実行しません。
+両toolは引数policyを`explicit_only`として返します。属性で省略された引数はconstructorにdefaultが
+無いことを意味せず、install済みpackageのdefault値を展開・推測しません。
 
 ## 5. Contract名のpresenceを比較する
 
@@ -130,6 +132,11 @@ ALPS operation descriptor間のrequest名presenceを比較してください。
 
 lineとcharacterは0-basedで、characterはLSPのUTF-16規約です。Resource URIなどのBEAR識別子は
 分かるが信頼できるcursor位置がない場合は、identifier-basedのBEAR toolを優先します。
+
+`lsp_workspace_symbols`はdocument symbolより対象が狭く、Phpactor indexのclass、function、constant
+recordだけを返し、methodは対象外です。index freshnessは`unknown`なので、空結果だけでは不存在を
+証明できず、新規保存fileがまだindexに無い可能性もあります。既知fileには
+`lsp_document_symbols`、method探索や結論不能な空結果にはsource検索を使います。
 
 ## 7. AIが生成した変更を検証する
 
@@ -162,6 +169,10 @@ lineとcharacterは0-basedで、characterはLSPのUTF-16規約です。Resource 
 ```
 
 - `status`は成功、欠落、曖昧、不正入力、parse error、engine unavailableを区別します。
+- `data`が存在して非nullになるのは`status: ok`だけで、null memberはstdio wire上で省略されます。
+  失敗時の任意の`partial`は、失敗までに確定した
+  狭い範囲の事実であり、成功として扱いません。Resource templateだけが無い場合は、解決済み
+  Resourceと探索pathをこの形で保持できます。
 - `candidates`は推測で1件を選ばず、件数制限された候補を保持します。
 - `provenance`は結果の根拠となった保存済みworkspace fileとrangeを示します。
 - pathはworkspace相対です。固定されたrootの外にあるファイルは公開しません。

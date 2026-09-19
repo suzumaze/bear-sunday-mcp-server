@@ -19,12 +19,16 @@ normal agent workflow.
    identifier is known, and an `lsp_*` tool when a saved file and cursor position are known.
 4. Read `status`, capability or `available`, ambiguity candidates, `total`, and `truncated`
    before interpreting the data.
-5. Read only the minimal source named by `provenance` or returned workspace-relative paths.
-6. Search source text only for unsupported, dynamic, or otherwise unresolved parts of the
+5. When `status` is not `ok`, expect no successful `data` (null members are omitted on the
+   stdio wire) and inspect an optional `partial` member only as narrower facts proven before
+   the failure. In particular, a missing Resource template may preserve the resolved Resource
+   and searched convention paths in `partial`.
+6. Read only the minimal source named by `provenance` or returned workspace-relative paths.
+7. Search source text only for unsupported, dynamic, or otherwise unresolved parts of the
    question. Do not use an empty result alone as proof of absence.
-7. Apply project-specific judgment outside MCP. The semantic tools report facts, not whether a
+8. Apply project-specific judgment outside MCP. The semantic tools report facts, not whether a
    design is good or whether a change should be made.
-8. After an authorized edit is saved, repeat the relevant semantic query, then run appropriate
+9. After an authorized edit is saved, repeat the relevant semantic query, then run appropriate
    tests or static analysis through the normal command workflow.
 
 ## Route questions to tools
@@ -45,6 +49,15 @@ normal agent workflow.
 Treat contract comparison as presence-only unless the result explicitly proves more. Matching
 names do not prove matching types or meaning. Preserve ambiguity instead of selecting a candidate
 without evidence.
+
+Treat Resource attribute arguments as explicit source syntax only unless `argumentPolicy` says
+otherwise. An omitted argument does not prove that its constructor has no default. Do not invent
+or hardcode installed-package defaults.
+
+Treat `lsp_workspace_symbols` as a Phpactor index query for class, function, and constant records.
+It does not search methods, its index freshness is unknown, and an empty result is inconclusive.
+Use `lsp_document_symbols` for a known file and fall back to source search for methods or saved
+files that may not yet be indexed.
 
 ## Respect the boundary
 

@@ -91,6 +91,9 @@ Use `bear_resource_attribute_index` for the bounded workspace view, then
 `bear_resource_attributes` for one Resource. The index has `total`/`truncated` and an
 independent `status` per Resource, so one malformed file does not erase facts from the
 others. Only the documented FQNs are recognized; application PHP is never evaluated.
+Both tools return an explicit-only argument policy. An omitted attribute argument does
+not mean that the constructor has no default, and installed-package defaults are not
+expanded or guessed.
 
 ## 5. Compare contract name presence
 
@@ -124,6 +127,12 @@ Line and character are zero-based. Character positions use the LSP UTF-16 conven
 Identifier-based BEAR tools are preferable when the client has a Resource URI or another
 BEAR identifier but no reliable cursor position.
 
+`lsp_workspace_symbols` is narrower than document symbols. Phpactor's workspace provider
+returns indexed class, function, and constant records, not methods. Its index freshness is
+reported as unknown, so an empty result is not proof of absence and a newly saved file may
+not be indexed yet. For a known file, use `lsp_document_symbols`; for method discovery or
+an inconclusive empty result, fall back to source search.
+
 ## 7. Validate an AI-generated change
 
 The server never edits files, but it can verify that a saved change is visible through the
@@ -156,6 +165,10 @@ Every BEAR Semantic API result preserves the same envelope:
 
 - `status` distinguishes success, absence, ambiguity, invalid input, parse errors, and an
   unavailable engine.
+- `data` is present and non-null only for `status: ok`; null members are omitted on the
+  stdio wire. An optional `partial` on a failure contains
+  narrower facts proven before that failure and must not be treated as success. A missing
+  Resource template can preserve the resolved Resource and searched paths this way.
 - `candidates` preserves bounded alternatives instead of selecting one by guesswork.
 - `provenance` identifies saved workspace files and ranges that support the result.
 - Paths are workspace-relative. The adapter does not expose files outside its fixed root.

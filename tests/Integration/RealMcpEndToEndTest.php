@@ -88,6 +88,8 @@ final class RealMcpEndToEndTest extends TestCase
             self::assertIsArray($attributes);
             self::assertSame('ok', $attributes['status']);
             self::assertSame(['Embed', 'Link'], array_column($attributes['data']['attributes'], 'name'));
+            self::assertSame('explicit_only', $attributes['data']['argumentPolicy']['source']);
+            self::assertFalse($attributes['data']['argumentPolicy']['constructorDefaultsExpanded']);
 
             $attributeIndex = $client->callTool('bear_resource_attribute_index', [
                 'scheme' => 'app',
@@ -145,6 +147,23 @@ final class RealMcpEndToEndTest extends TestCase
             self::assertIsArray($resourceTemplate);
             self::assertSame('ok', $resourceTemplate['status']);
             self::assertSame('var/qiq/template/App/User.php', $resourceTemplate['data']['path']);
+
+            $missingResourceTemplate = $client->callTool('bear_template_for_resource', [
+                'resourceUri' => 'app://self/dashboard',
+                'engine' => 'twig',
+            ])->structuredContent;
+            self::assertIsArray($missingResourceTemplate);
+            self::assertSame('not_found', $missingResourceTemplate['status']);
+            self::assertArrayNotHasKey('data', $missingResourceTemplate);
+            self::assertSame(
+                'src/Resource/App/Dashboard.php',
+                $missingResourceTemplate['partial']['resource']['path'],
+            );
+            self::assertArrayNotHasKey('path', $missingResourceTemplate['partial']);
+            self::assertSame([
+                'src/Resource/App/Dashboard.html.twig',
+                'var/templates/App/Dashboard.html.twig',
+            ], $missingResourceTemplate['partial']['searched']);
 
             $alps = $client->callTool('bear_alps_descriptor_lookup', [
                 'descriptorId' => 'goArticle',
@@ -247,6 +266,9 @@ final class RealMcpEndToEndTest extends TestCase
                 'src/Resource/App/Dashboard.php',
                 $workspaceSymbols['data']['symbols'][0]['path'],
             );
+            self::assertFalse($workspaceSymbols['data']['coverage']['includesMethods']);
+            self::assertSame('unknown', $workspaceSymbols['data']['coverage']['indexFreshness']);
+            self::assertSame('unknown', $workspaceSymbols['provenance'][0]['freshness']);
 
             $typeDefinition = $client->callTool('lsp_type_definition', [
                 'path' => 'src/Resource/App/User.php',

@@ -122,6 +122,27 @@ final class McpStdioServerTest extends TestCase
             self::assertFalse($tool['annotations']['destructiveHint'] ?? true);
             self::assertFalse($tool['annotations']['openWorldHint'] ?? true);
         }
+        $toolsByName = array_column($tools, null, 'name');
+        self::assertStringContainsString(
+            'Methods are excluded',
+            $toolsByName['lsp_workspace_symbols']['description'],
+        );
+        self::assertStringContainsString(
+            'omitted constructor defaults are not expanded',
+            $toolsByName['bear_resource_attribute_index']['description'],
+        );
+        self::assertStringContainsString(
+            'not_found has no success data',
+            $toolsByName['bear_template_for_resource']['description'],
+        );
+        self::assertNotContains(
+            'data',
+            $toolsByName['bear_template_for_resource']['outputSchema']['required'],
+        );
+        self::assertArrayHasKey(
+            'partial',
+            $toolsByName['bear_template_for_resource']['outputSchema']['properties'],
+        );
 
         $called = $this->request('tools/call', [
             'name' => 'bear_resource_list',

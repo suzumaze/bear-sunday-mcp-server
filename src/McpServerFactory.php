@@ -83,7 +83,8 @@ final class McpServerFactory
             name: 'bear_resource_attributes',
             title: 'Describe BEAR Resource attributes',
             description: 'Return allowlisted class and Resource-method attributes with bounded static arguments; '
-                . 'dynamic expressions are marked rather than evaluated.',
+                . 'dynamic expressions are marked rather than evaluated. Only arguments written in source are '
+                . 'returned; omitted constructor defaults are not expanded.',
             annotations: $annotations,
             inputSchema: self::objectSchema([
                 'resourceUri' => self::uriSchema(),
@@ -95,7 +96,8 @@ final class McpServerFactory
             [$tools, 'resourceAttributeIndex'],
             name: 'bear_resource_attribute_index',
             title: 'Index BEAR Resource attributes',
-            description: 'List bounded Resource attribute facts with an independent semantic status per Resource.',
+            description: 'List bounded Resource attribute facts with an independent semantic status per Resource. '
+                . 'Only arguments written in source are returned; omitted constructor defaults are not expanded.',
             annotations: $annotations,
             inputSchema: self::objectSchema([
                 'scheme' => [
@@ -192,7 +194,9 @@ final class McpServerFactory
             [$tools, 'templateForResource'],
             name: 'bear_template_for_resource',
             title: 'Resolve a Resource template',
-            description: 'Resolve an existing convention-based Twig or Qiq template for a BEAR Resource URI.',
+            description: 'Resolve a convention-based Twig or Qiq template for a BEAR Resource URI. When the '
+                . 'Resource exists but no template does, not_found has no success data and includes the Resource '
+                . 'and searched paths in partial.',
             annotations: $annotations,
             inputSchema: self::objectSchema([
                 'resourceUri' => self::uriSchema(),
@@ -341,7 +345,9 @@ final class McpServerFactory
             [$lspTools, 'workspaceSymbols'],
             name: 'lsp_workspace_symbols',
             title: 'Search workspace symbols with Phpactor',
-            description: 'Run standard workspace/symbol and return only symbols in the configured workspace.',
+            description: 'Search Phpactor\'s workspace index for class, function, and constant records in the '
+                . 'configured workspace. Methods are excluded, index freshness is unknown, and an empty result '
+                . 'is not proof that a saved symbol does not exist.',
             annotations: $annotations,
             inputSchema: self::objectSchema([
                 'query' => [
@@ -465,7 +471,7 @@ final class McpServerFactory
     {
         return [
             'type' => 'object',
-            'required' => ['status', 'data', 'candidates', 'provenance'],
+            'required' => ['status', 'candidates', 'provenance'],
             'properties' => [
                 'status' => [
                     'type' => 'string',
@@ -482,6 +488,10 @@ final class McpServerFactory
                     ],
                 ],
                 'data' => ['type' => ['object', 'null']],
+                'partial' => [
+                    'type' => ['object', 'null'],
+                    'description' => 'Optional facts proven by a failed semantic query; status remains authoritative.',
+                ],
                 'candidates' => ['type' => 'array'],
                 'provenance' => ['type' => 'array'],
                 'error' => ['type' => 'object'],

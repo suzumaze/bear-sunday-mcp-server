@@ -209,29 +209,43 @@ final class StandardLspTools
         try {
             $raw = $this->requestWithRetry('workspace/symbol', ['query' => $query]);
         } catch (\Throwable $exception) {
-            return $this->exceptionResult($exception);
+            $failure = $this->exceptionResult($exception);
+            $failure['data'] = $this->workspaceSymbolData([], 0, false);
+
+            return $failure;
         }
 
-        $provenance = [['source' => 'workspace/symbol', 'freshness' => 'saved']];
+        $provenance = [['source' => 'workspace/symbol', 'freshness' => 'unknown']];
         if ($raw === null || $raw === []) {
-            return $this->envelope('not_found', null, $provenance);
+            return $this->envelope('not_found', $this->workspaceSymbolData([], 0, false), $provenance);
         }
         $normalized = $this->normalizeWorkspaceSymbols($raw);
         if ($normalized === null) {
-            return self::failure('parse_error', 'invalid_lsp_response', 'Phpactor returned invalid Workspace Symbols.');
+            $failure = self::failure(
+                'parse_error',
+                'invalid_lsp_response',
+                'Phpactor returned invalid Workspace Symbols.',
+            );
+            $failure['data'] = $this->workspaceSymbolData([], 0, false);
+
+            return $failure;
         }
         $symbols = $normalized['symbols'];
         if ($symbols === []) {
-            return $this->envelope('not_found', null, $provenance);
+            return $this->envelope('not_found', $this->workspaceSymbolData([], 0, false), $provenance);
         }
 
         $total = count($symbols);
 
-        return $this->envelope('ok', [
-            'symbols' => array_slice($symbols, 0, $limit),
-            'total' => $total,
-            'truncated' => $normalized['truncated'] || $total > $limit,
-        ], $provenance);
+        return $this->envelope(
+            'ok',
+            $this->workspaceSymbolData(
+                array_slice($symbols, 0, $limit),
+                $total,
+                $normalized['truncated'] || $total > $limit,
+            ),
+            $provenance,
+        );
     }
 
     /** @return array<string, mixed> */
@@ -959,6 +973,26 @@ final class StandardLspTools
             'path' => $document->relativePath,
             'freshness' => 'saved',
         ]];
+    }
+
+    /**
+     * @param list<array<string, mixed>> $symbols
+     * @return array<string, mixed>
+     */
+    private function workspaceSymbolData(array $symbols, int $total, bool $truncated): array
+    {
+        return [
+            'symbols' => $symbols,
+            'total' => $total,
+            'truncated' => $truncated,
+            'coverage' => [
+                'source' => 'phpactor_workspace_index',
+                'recordTypes' => ['class', 'function', 'constant'],
+                'includesMethods' => false,
+                'indexFreshness' => 'unknown',
+                'emptyResultIsDefinitive' => false,
+            ],
+        ];
     }
 
     /** @return array<string, mixed> */

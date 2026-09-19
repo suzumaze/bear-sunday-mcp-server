@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Changed
+
+- `lsp_workspace_symbols` now reports its Phpactor index coverage, excludes methods
+  explicitly, marks index freshness as unknown, and states that an empty result is not
+  definitive. Coverage is retained on empty and engine-failure responses.
+- Resource attribute tool descriptions and Semantic API data identify arguments as
+  explicit-only; omitted constructor defaults are not expanded or guessed.
+- `bear_template_for_resource` documents the optional `partial` member that preserves a
+  resolved Resource and searched convention paths while `not_found` has no successful
+  `data`; null members remain omitted by Phpactor's stdio serializer.
+
 ## [0.7.0] - 2026-09-18
 
 ### Added
