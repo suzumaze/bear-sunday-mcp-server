@@ -4,7 +4,7 @@ BEAR.Sunday MCP Serverは、保存済みの1つのworkspaceについて、AIク�
 事実を提供します。テキスト検索を完全に置き換えるものではありません。対応済みのBEAR概念は
 最初にSemantic toolで調べ、返されたファイルを読み、Semantic Model外のコードだけを検索します。
 
-利用できる22 toolの入力と結果は[MCPツール一覧](tools.ja.md)、実装・検証状況は
+利用できる23 toolの入力と結果は[MCPツール一覧](tools.ja.md)、実装・検証状況は
 [プロジェクト現在地点](project-status.ja.md)にまとめています。
 
 ## AIクライアント用Skill
@@ -21,6 +21,7 @@ SkillはMCP serverをinstall・起動・設定しません。また、BEAR appli
 
 | 質問 | テキスト検索 | Semantic MCPの結果 |
 |---|---|---|
+| project全体で静的に不整合な箇所はどこか | 独立した検索を繰り返し、未走査部分は分からない | 走査件数・打ち切り・skip情報を伴うbounded diagnostics |
 | Resource URIの実装は何か | 一致した文字列やクラス名の断片 | 正規化URI、FQN、workspace相対path |
 | Resourceの公開APIは何か | `on*` methodを個別検索 | public `on*` methodと宣言されたparameter type |
 | Resourceはどこで使われるか | 同じ文字列をすべて表示 | 同じcanonical Resourceへ解決された静的参照 |
@@ -33,7 +34,21 @@ SkillはMCP serverをinstall・起動・設定しません。また、BEAR appli
 すべての検索問題をsemanticに扱うとは主張しません。コメント、任意の設定、未対応のframework拡張、
 動的に組み立てられた値は、引き続きsource確認やテキスト検索が必要です。
 
-## 1. 未知のプロジェクトを把握する
+## 1. Project全体の静的不整合を監査する
+
+質問例:
+
+```text
+このprojectを静的に証明できる不整合について監査し、findingと、skipまたは打ち切られた検査を
+分けて報告してください。
+```
+
+`bear_project_diagnostics`を使い、itemを解釈する前に`total`、`truncated`、`scannedFiles`、
+`scannedResources`、`resourceScanTruncated`、`skippedChecks`を確認します。個別の保存済みfileや
+明示的参照が壊れていても外側のqueryは`ok`のままで、その失敗がdiagnostic itemになります。
+findingは静的な根拠であり、runtime behaviorやarchitectureの良し悪しを判定するものではありません。
+
+## 2. 未知のプロジェクトを把握する
 
 質問例:
 
@@ -52,7 +67,7 @@ SkillはMCP serverをinstall・起動・設定しません。また、BEAR appli
 アプリケーションを実行せずに、Semantic API version、project capability、Resource一覧、method、
 relation、template、schemaを把握できます。
 
-## 2. Resource変更の影響範囲を調べる
+## 3. Resource変更の影響範囲を調べる
 
 質問例:
 
@@ -70,7 +85,7 @@ app://self/userを変更する前に、public method、外向きLink/Embed、inc
 返されたpathとrangeから、関係するファイルだけを開けます。件数制限された結果には`total`と
 `truncated`があります。`truncated`がtrueなら、返されたpageを全件と判断してはいけません。
 
-## 3. Request surfaceを追跡する
+## 4. Request surfaceを追跡する
 
 一度に1つの具体的な質問をします。
 
@@ -87,7 +102,7 @@ ALPS descriptor goArticleを説明してください。
 
 解決は意図的に保守的です。動的な式、custom loader、外部ALPS link、曖昧な規約は推測しません。
 
-## 4. Resource属性を監査する
+## 5. Resource属性を監査する
 
 質問例:
 
@@ -103,7 +118,7 @@ application PHPは実行しません。
 両toolは引数policyを`explicit_only`として返します。属性で省略された引数はconstructorにdefaultが
 無いことを意味せず、install済みpackageのdefault値を展開・推測しません。
 
-## 5. Contract名のpresenceを比較する
+## 6. Contract名のpresenceを比較する
 
 質問例:
 
@@ -117,7 +132,7 @@ ALPS operation descriptor間のrequest名presenceを比較してください。
 型、制約、意味、runtime互換性の一致を証明しません。response比較ではResource body面は現在
 `unsupported`ですが、SchemaとALPSの`rt`先representationは比較できます。
 
-## 6. 正確なsource位置から移動する
+## 7. 正確なsource位置から移動する
 
 保存済みファイルとcursor位置が分かる場合は、標準LSP toolを使います。
 
@@ -138,7 +153,7 @@ recordだけを返し、methodは対象外です。index freshnessは`unknown`�
 証明できず、新規保存fileがまだindexに無い可能性もあります。既知fileには
 `lsp_document_symbols`、method探索や結論不能な空結果にはsource検索を使います。
 
-## 7. AIが生成した変更を検証する
+## 8. AIが生成した変更を検証する
 
 サーバー自身はファイルを編集しませんが、保存した変更がIDEと同じsemantic layerから認識されるかを
 確認できます。
@@ -155,7 +170,7 @@ recordだけを返し、methodは対象外です。index freshnessは`unknown`�
 
 これは規約や解決の誤りを検出します。runtime behaviorを証明するものではありません。
 
-## 8. 結果を安全に解釈する
+## 9. 結果を安全に解釈する
 
 すべてのBEAR Semantic API resultは同じenvelopeを保ちます。
 

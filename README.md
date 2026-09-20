@@ -20,7 +20,7 @@ and AI clients.
 
 ## Status
 
-Version 0.7.0 provides twenty-two read-only tools against BEAR Semantic API version 1 and
+Version 0.8.0 provides twenty-three read-only tools against BEAR Semantic API version 1 and
 Phpactor's standard LSP. In addition to project, Resource, and schema facts, it resolves
 explicit Route names, SQL query IDs, Twig/Qiq template names, Resource templates, and ALPS
 descriptors. It also exposes allowlisted Resource attribute facts, a bounded attribute
@@ -33,14 +33,14 @@ constant records, not methods, and does not claim that its index is current.
 
 See [Project status](docs/project-status.md) ([日本語](docs/project-status.ja.md)) for the
 implemented boundary, real-workspace verification evidence, and deferred experiments.
-See the [tool table below](#tools) ([日本語の全22ツール一覧](docs/tools.ja.md)) for the
+See the [tool table below](#tools) ([日本語の全23ツール一覧](docs/tools.ja.md)) for the
 complete inventory, and [Use cases](docs/use-cases.md) ([日本語](docs/use-cases.ja.md))
 for task-oriented workflows.
 
 ## Requirements
 
 - PHP 8.2 or newer
-- Phpactor with `suzumaze/bear-phpactor-extension` 0.1.6 or newer installed in Phpactor's
+- Phpactor with `suzumaze/bear-phpactor-extension` 0.1.7 or newer installed in Phpactor's
   Composer environment
 - An MCP host that supports stdio servers
 
@@ -54,7 +54,7 @@ Install the released server into a dedicated directory:
 composer create-project --no-dev --prefer-dist \
   suzumaze/bear-sunday-mcp-server \
   /absolute/path/to/bear-sunday-mcp-server \
-  '^0.6'
+  '^0.8'
 ```
 
 For development from the repository instead:
@@ -190,6 +190,7 @@ see [Use cases](docs/use-cases.md) ([日本語](docs/use-cases.ja.md)).
 
 ```text
 List the Resources in this BEAR.Sunday project.
+Audit this project for statically provable inconsistencies and report any skipped checks.
 Describe app://self/user, including methods, Link/Embed relations, templates, and schemas.
 Show the request schema for app://self/user.
 Resolve the /thing/detail route to its Page Resource.
@@ -229,6 +230,7 @@ The complete Japanese reference is available in [MCPツール一覧](docs/tools.
 | MCP tool | BEAR Semantic API v1 request | Purpose |
 |---|---|---|
 | `bear_project_info` | `bear/project/info` | API version, capabilities, package versions, PSR-4 roots, and Resource count |
+| `bear_project_diagnostics` | `bear/project/diagnostics` | Bounded project-wide static inconsistencies, scan coverage, truncation, and skipped checks |
 | `bear_resource_list` | `bear/resource/list` | Deterministic Resource URI inventory with scheme, prefix, and limit filters |
 | `bear_resource_describe` | `bear/resource/describe` | Resource methods, Link/Embed relations, templates, and schemas |
 | `bear_resource_attributes` | `bear/resource/attributes` | Allowlisted class/method attributes with explicit source arguments and dynamic markers; constructor defaults are not expanded |

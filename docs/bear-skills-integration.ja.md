@@ -15,6 +15,7 @@ MCP serverには、汎用の[`bear-semantic` Skill](../skills/bear-semantic/SKIL
 これは個別の設計Skillを置き換えず、次の共通処理だけを担当します。
 
 - `bear_project_info`によるcapability確認
+- `bear_project_diagnostics`によるproject全体の静的不整合と走査範囲の確認
 - BEAR identifierにはsemantic tool、source位置にはLSP toolを選ぶrouting
 - status、ambiguity、truncation、provenanceの解釈
 - 対象外だけをsource検索するfallback
@@ -79,8 +80,8 @@ Skillへ残すもの:
 
 ## Semantic API実装状況
 
-2026-09-16時点で、以下のResource attribute factsとcontract comparisonはcoreとMCP adapterに
-実装済みです。Project diagnosticsは引き続き設計候補です。
+2026-09-20時点で、以下のResource attribute facts、contract comparison、project diagnosticsは
+coreとMCP adapterに実装済みです。
 
 ### 1. Resource attribute facts
 
@@ -147,41 +148,51 @@ bear/contract/compare
 }
 ```
 
-### 3. Project diagnostics（未実装）
+### 3. Project diagnostics
 
 ```text
 bear/project/diagnostics
 ```
 
-診断は断定とheuristic candidateを区別します。
+保存済みsourceから静的に証明できる不整合だけを、件数制限付きで返します。
 
 ```json
 {
-  "ruleId": "resource.read_without_cache_attribute",
-  "classification": "heuristic_candidate",
-  "subject": "app://self/user",
-  "path": "src/Resource/App/User.php",
-  "range": {"start": 120, "end": 125},
-  "facts": {
-    "readMethods": ["onGet"],
-    "cacheAttributes": []
+  "status": "ok",
+  "data": {
+    "items": [{
+      "code": "relation_method_not_found",
+      "status": "not_found",
+      "subject": "app://self/user#onPatch",
+      "path": "src/Resource/App/Dashboard.php",
+      "byteRange": {"start": 282, "end": 341},
+      "details": {"kind": "link", "rel": "edit"}
+    }],
+    "total": 1,
+    "truncated": false,
+    "scannedFiles": 7,
+    "scannedResources": 3,
+    "resourceScanTruncated": false,
+    "skippedChecks": []
   }
 }
 ```
 
-この例は「cacheすべき」とは主張しません。Skillがデータの性質、更新頻度、runtime evidenceを
-読んで判断します。
+外側のqueryは個別fileや参照が壊れていても`ok`を保ち、その不整合をitemとして返します。
+`truncated`、`resourceScanTruncated`、`skippedChecks`を確認せずに「問題なし」と判断してはいけません。
+cacheすべきか、設計が良いかといったheuristicやproject opinionは診断に含めず、Skillが別途判断します。
 
 ## Skillが使う基本workflow
 
 1. `bear_project_info`でcapabilityとversionを確認する。
-2. BEAR identifierが分かる場合はGrepより先にsemantic toolを呼ぶ。
-3. `status`、`available`、`truncated`を確認する。
-4. provenanceにある最小限のファイルだけを読む。
-5. semantic toolが対象外と明示した部分だけを検索する。
-6. Skillの判断基準を適用する。
-7. 編集後、同じqueryを再実行してsemantic resolutionを確認する。
-8. test/static analysisは別のcommandとして実行する。
+2. project全体のreviewでは`bear_project_diagnostics`を呼び、走査範囲とskipを確認する。
+3. BEAR identifierが分かる場合はGrepより先にsemantic toolを呼ぶ。
+4. `status`、`available`、`truncated`を確認する。
+5. provenanceにある最小限のファイルだけを読む。
+6. semantic toolが対象外と明示した部分だけを検索する。
+7. Skillの判断基準を適用する。
+8. 編集後、同じqueryを再実行してsemantic resolutionを確認する。
+9. test/static analysisは別のcommandとして実行する。
 
 ## 非目標
 
@@ -194,8 +205,8 @@ bear/project/diagnostics
 ## Acceptance criteria
 
 - 同じ保存済みworkspaceへの同じqueryは決定的な順序で同じ結果を返す。
-- すべてのfindingにrule ID、classification、subject、provenanceがある。
-- `fact`と`heuristic_candidate`をresponse schemaで区別する。
+- すべてのdiagnostic itemに安定したcode、semantic status、subject、workspace相対pathがある。
+- responseは走査件数、診断itemの打ち切り、Resource走査の打ち切り、skipされた検査を区別する。
 - path traversal、workspace外symlink、oversized inputを拒否する。
 - MCP toolはread-onlyのままにする。
 - Skillなしでもresponseの意味がtool descriptionと文書から分かる。

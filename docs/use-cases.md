@@ -9,6 +9,7 @@ semantic model.
 
 | Question | Text search | Semantic MCP result |
 |---|---|---|
+| What is statically inconsistent across the project? | Many independent searches with no coverage signal | Bounded diagnostics with scan counts, truncation, and skipped checks |
 | What implements a Resource URI? | Matching string or class fragments | Normalized URI, FQN, and workspace-relative path |
 | What is the Resource interface? | Separate searches for `on*` methods | Public `on*` methods and declared parameter types |
 | Where is the Resource used? | Every matching string | Static references that resolve to the same canonical Resource |
@@ -22,7 +23,22 @@ The server does not claim that every search problem is semantic. Comments, arbit
 configuration, unsupported framework extensions, and dynamically constructed values still
 require source inspection or text search.
 
-## 1. Learn an unfamiliar project
+## 1. Audit project-wide static inconsistencies
+
+Ask:
+
+```text
+Audit this project for statically provable inconsistencies. Separate findings from checks
+that were skipped or truncated.
+```
+
+Use `bear_project_diagnostics`, then inspect `total`, `truncated`, `scannedFiles`,
+`scannedResources`, `resourceScanTruncated`, and `skippedChecks` before interpreting the
+items. The outer query remains `ok` when an individual saved file or explicit reference is
+broken; those failures are diagnostic items. Findings are static evidence, not runtime or
+architectural judgments.
+
+## 2. Learn an unfamiliar project
 
 Ask:
 
@@ -41,7 +57,7 @@ Typical tool sequence:
 This establishes the Semantic API version, project capabilities, Resource inventory,
 methods, relations, templates, and schemas without executing the application.
 
-## 2. Estimate the impact of changing a Resource
+## 3. Estimate the impact of changing a Resource
 
 Ask:
 
@@ -60,7 +76,7 @@ Use the returned paths and ranges to open only the relevant files. A bounded res
 `total` and `truncated`; do not treat the returned page as the complete set when
 `truncated` is true.
 
-## 3. Trace a request surface
+## 4. Trace a request surface
 
 Ask one concrete question at a time:
 
@@ -78,7 +94,7 @@ The corresponding tools are `bear_route_lookup`, `bear_template_for_resource`,
 Resolution is deliberately conservative. Dynamic expressions, custom loaders, external
 ALPS links, and ambiguous conventions are not guessed.
 
-## 4. Audit Resource attributes
+## 5. Audit Resource attributes
 
 Ask:
 
@@ -95,7 +111,7 @@ Both tools return an explicit-only argument policy. An omitted attribute argumen
 not mean that the constructor has no default, and installed-package defaults are not
 expanded or guessed.
 
-## 5. Compare contract name presence
+## 6. Compare contract name presence
 
 Ask:
 
@@ -110,7 +126,7 @@ available. Equal names are evidence of spelling presence only—not type, constr
 meaning, or runtime compatibility. For response comparison the Resource body surface is
 currently `unsupported`; Schema and an ALPS `rt` representation can still be compared.
 
-## 6. Navigate from an exact source position
+## 7. Navigate from an exact source position
 
 When the client already knows a saved file and cursor position, use the standard LSP tools:
 
@@ -133,7 +149,7 @@ reported as unknown, so an empty result is not proof of absence and a newly save
 not be indexed yet. For a known file, use `lsp_document_symbols`; for method discovery or
 an inconclusive empty result, fall back to source search.
 
-## 7. Validate an AI-generated change
+## 8. Validate an AI-generated change
 
 The server never edits files, but it can verify that a saved change is visible through the
 same semantic layer used by the IDE:
@@ -150,7 +166,7 @@ same semantic layer used by the IDE:
 
 This catches convention and resolution mistakes. It does not prove runtime behavior.
 
-## 8. Interpret results safely
+## 9. Interpret results safely
 
 Every BEAR Semantic API result preserves the same envelope:
 

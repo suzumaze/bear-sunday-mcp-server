@@ -1,7 +1,7 @@
 # Project status
 
 This is the combined implementation, verification, and release status of the Phpactor extension
-and MCP server as of 2026-09-18.
+and MCP server as of 2026-09-20.
 
 See the [complete tool inventory](../README.md#tools) ([Japanese](tools.ja.md)) and the
 [task-oriented use cases](use-cases.md) ([Japanese](use-cases.ja.md)).
@@ -13,20 +13,21 @@ flowchart TB
         C2["Standard LSP navigation and discovery<br/>complete"]
         C3["Allowlisted Resource attribute facts<br/>complete"]
         C4["Resource, Schema, and ALPS<br/>name-presence comparison<br/>complete"]
+        C5["Project-wide static diagnostics<br/>complete"]
         C1 --> C2
-        C1 --> C3 --> C4
+        C1 --> C3 --> C4 --> C5
     end
 
     subgraph MCP["bear-sunday-mcp-server"]
-        M1["22 read-only tools<br/>complete"]
+        M1["23 read-only tools<br/>complete"]
         M2["Grep comparison and task-oriented use cases<br/>complete"]
         M3["BEAR.Skills responsibility map<br/>complete"]
-        M4["Real Phpactor fixture E2E<br/>22 tools, 86 assertions<br/>complete"]
+        M4["Real Phpactor fixture E2E<br/>23 tools<br/>complete"]
         M5["276-Resource workspace<br/>read-only connection verified"]
         M1 --> M2 --> M3 --> M4 --> M5
     end
 
-    C4 --> M1
+    C5 --> M1
 
     subgraph Deferred["Deferred experiment"]
         D1["QueryRepository semantic log<br/>design record only"]
@@ -34,18 +35,18 @@ flowchart TB
         D1 -.-> D2
     end
 
-    M5 --> R1["core v0.1.6 / MCP v0.6.0<br/>released and locally verified"]
-    R1 --> S1["MCP v0.7.0<br/>bear-semantic skill bundled and released"]
+    M5 --> R1["core v0.1.7 / MCP v0.8.0<br/>released and locally verified"]
+    R1 --> S1["bear-semantic skill bundled<br/>project diagnostics workflow included"]
 ```
 
 ## Release status
 
 | Component | Version | Status |
 |---|---|---|
-| `suzumaze/bear-phpactor-extension` | [`v0.1.6`](https://github.com/suzumaze/bear-phpactor-extension/releases/tag/v0.1.6) | GitHub Release and Packagist published |
-| `suzumaze/bear-sunday-mcp-server` | [`v0.7.0`](https://github.com/suzumaze/bear-sunday-mcp-server/releases/tag/v0.7.0) | GitHub Release and Packagist published |
-| MCP tool inventory | 22 tools | English and Japanese manuals complete |
-| `bear-semantic` agent skill | bundled in `v0.7.0` | Available to Codex and Claude Code users |
+| `suzumaze/bear-phpactor-extension` | [`v0.1.7`](https://github.com/suzumaze/bear-phpactor-extension/releases/tag/v0.1.7) | GitHub Release and Packagist published |
+| `suzumaze/bear-sunday-mcp-server` | `v0.8.0` | Release with project diagnostics |
+| MCP tool inventory | 23 tools | English and Japanese manuals complete |
+| `bear-semantic` agent skill | bundled in `v0.8.0` | Project diagnostics workflow included |
 
 ## What improved beyond grep
 
@@ -74,6 +75,17 @@ clean.
 | References / incoming relations | `ok` |
 | Attribute index | `ok`, total 276, bounded result `truncated: true` |
 | Schema lookup | `not_found` for the selected Resource, a semantic absence rather than engine failure |
+
+The 0.8.0 release candidate was also verified against BEAR.Kata without executing the
+application, Resources, or SQL:
+
+| Check | Result |
+|---|---|
+| MCP inventory | 23 tools, including `bear_project_diagnostics` |
+| Release handshake | MCP `0.8.0`, core `v0.1.7`, Semantic API v1 |
+| Project diagnostics | `ok`, 65 items, no result truncation |
+| Scan coverage | 245 PHP files, 41 Resources, no Resource scan truncation |
+| Skipped checks | none |
 
 ## Current boundary
 

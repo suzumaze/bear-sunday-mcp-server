@@ -41,6 +41,7 @@ final class RealMcpEndToEndTest extends TestCase
             self::assertSame([
                 'bear_alps_descriptor_lookup',
                 'bear_contract_compare',
+                'bear_project_diagnostics',
                 'bear_project_info',
                 'bear_resource_attribute_index',
                 'bear_resource_attributes',
@@ -66,6 +67,17 @@ final class RealMcpEndToEndTest extends TestCase
             $project = $client->callTool('bear_project_info')->structuredContent;
             self::assertIsArray($project);
             self::assertSame(1, $project['data']['semanticApiVersion']);
+            self::assertContains('projectDiagnostics', $project['data']['capabilities']);
+
+            $diagnostics = $client->callTool('bear_project_diagnostics', ['limit' => 10])->structuredContent;
+            self::assertIsArray($diagnostics);
+            self::assertSame('ok', $diagnostics['status']);
+            self::assertSame(2, $diagnostics['data']['total']);
+            self::assertFalse($diagnostics['data']['truncated']);
+            self::assertSame(7, $diagnostics['data']['scannedFiles']);
+            self::assertSame(3, $diagnostics['data']['scannedResources']);
+            self::assertFalse($diagnostics['data']['resourceScanTruncated']);
+            self::assertSame([], $diagnostics['data']['skippedChecks']);
 
             $resources = $client->callTool('bear_resource_list', ['scheme' => 'app'])->structuredContent;
             $resourcesAgain = $client->callTool('bear_resource_list', ['scheme' => 'app'])->structuredContent;
