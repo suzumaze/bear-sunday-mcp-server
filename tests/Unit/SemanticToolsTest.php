@@ -14,6 +14,30 @@ use Suzumaze\BearSundayMcp\Tests\Support\InMemoryLspClient;
 #[CoversClass(SemanticTools::class)]
 final class SemanticToolsTest extends TestCase
 {
+    public function testMapsProjectDiagnosticsWithoutChangingSemanticResults(): void
+    {
+        $client = new InMemoryLspClient(static function (string $method, array $params): array {
+            if ($method === 'bear/project/info') {
+                return self::projectInfoResult();
+            }
+
+            return self::ok(['method' => $method, 'params' => $params]);
+        });
+        $tools = new SemanticTools($client);
+
+        self::assertSame(
+            self::ok([
+                'method' => 'bear/project/diagnostics',
+                'params' => ['limit' => 25],
+            ]),
+            $tools->projectDiagnostics(25),
+        );
+        self::assertSame(
+            ['bear/project/info', 'bear/project/diagnostics'],
+            array_column($client->requests, 'method'),
+        );
+    }
+
     public function testMapsTheFourM1ToolsToSemanticApiV1WithoutChangingResults(): void
     {
         $client = new InMemoryLspClient(static function (string $method, array $params): array {

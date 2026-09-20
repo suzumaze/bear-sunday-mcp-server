@@ -15,20 +15,23 @@ normal agent workflow.
    server prefix.
 2. If it exists, call it first and inspect the Semantic API version, capabilities, package
    versions, PSR-4 roots, and Resource count.
-3. Choose the smallest tool that answers the question. Prefer a `bear_*` tool when a BEAR
+3. For a project-wide review, call `bear_project_diagnostics` when the capability is available.
+   Inspect `total`, `truncated`, `resourceScanTruncated`, and `skippedChecks`; zero returned items
+   do not prove that a skipped or truncated check is clean.
+4. Choose the smallest tool that answers the question. Prefer a `bear_*` tool when a BEAR
    identifier is known, and an `lsp_*` tool when a saved file and cursor position are known.
-4. Read `status`, capability or `available`, ambiguity candidates, `total`, and `truncated`
+5. Read `status`, capability or `available`, ambiguity candidates, `total`, and `truncated`
    before interpreting the data.
-5. When `status` is not `ok`, expect no successful `data` (null members are omitted on the
+6. When `status` is not `ok`, expect no successful `data` (null members are omitted on the
    stdio wire) and inspect an optional `partial` member only as narrower facts proven before
    the failure. In particular, a missing Resource template may preserve the resolved Resource
    and searched convention paths in `partial`.
-6. Read only the minimal source named by `provenance` or returned workspace-relative paths.
-7. Search source text only for unsupported, dynamic, or otherwise unresolved parts of the
+7. Read only the minimal source named by `provenance` or returned workspace-relative paths.
+8. Search source text only for unsupported, dynamic, or otherwise unresolved parts of the
    question. Do not use an empty result alone as proof of absence.
-8. Apply project-specific judgment outside MCP. The semantic tools report facts, not whether a
+9. Apply project-specific judgment outside MCP. The semantic tools report facts, not whether a
    design is good or whether a change should be made.
-9. After an authorized edit is saved, repeat the relevant semantic query, then run appropriate
+10. After an authorized edit is saved, repeat the relevant semantic query, then run appropriate
    tests or static analysis through the normal command workflow.
 
 ## Route questions to tools
@@ -36,6 +39,7 @@ normal agent workflow.
 | Intent | Prefer |
 |---|---|
 | Discover capabilities or inventory | `bear_project_info`, then `bear_resource_list` |
+| Audit project-wide static inconsistencies | `bear_project_diagnostics` |
 | Inspect a Resource contract | `bear_resource_describe`, `bear_resource_attributes` |
 | Review attributes across Resources | `bear_resource_attribute_index` |
 | Compare Resource, schema, and ALPS names | `bear_contract_compare` |

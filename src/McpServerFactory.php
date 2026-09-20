@@ -35,6 +35,19 @@ final class McpServerFactory
             outputSchema: self::envelopeSchema(),
         );
         $builder->addTool(
+            [$tools, 'projectDiagnostics'],
+            name: 'bear_project_diagnostics',
+            title: 'Diagnose a BEAR project',
+            description: 'Collect bounded, statically provable inconsistencies across saved project files. '
+                . 'The outer result remains successful when individual inputs are broken; inspect total, '
+                . 'truncated, resourceScanTruncated, and skippedChecks before interpreting the items.',
+            annotations: $annotations,
+            inputSchema: self::objectSchema([
+                'limit' => self::limitSchema('Maximum number of diagnostic items to return.'),
+            ]),
+            outputSchema: self::envelopeSchema(),
+        );
+        $builder->addTool(
             [$tools, 'resourceList'],
             name: 'bear_resource_list',
             title: 'List BEAR Resources',

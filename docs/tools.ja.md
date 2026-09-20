@@ -1,7 +1,7 @@
 # MCPツール一覧
 
-BEAR.Sunday MCP Server 0.7.0は、BEAR Semantic API v1とPhpactorの標準LSPを
-用途別の22個のread-only toolとして公開します。
+BEAR.Sunday MCP Server 0.8.0は、BEAR Semantic API v1とPhpactorの標準LSPを
+用途別の23個のread-only toolとして公開します。
 
 - Resource URIなど、調べたいBEAR識別子が分かる場合は`bear_*` toolを使います。
 - 保存済みファイルのcursor位置が分かる場合は`lsp_*` toolを使います。
@@ -15,6 +15,7 @@ BEAR.Sunday MCP Server 0.7.0は、BEAR Semantic API v1とPhpactorの標準LSPを
 | MCP tool | Semantic API request | 主な入力 | 得られる事実 |
 |---|---|---|---|
 | `bear_project_info` | `bear/project/info` | optionalなcontext path | Semantic API version、capability、package version、PSR-4 root、Resource数 |
+| `bear_project_diagnostics` | `bear/project/diagnostics` | limit | project全体の静的に証明できる不整合、走査件数、打ち切り、skipされた検査 |
 | `bear_resource_list` | `bear/resource/list` | scheme、prefix、limit | 正規化されたResource URI、FQN、workspace相対pathの決定的な一覧 |
 | `bear_resource_describe` | `bear/resource/describe` | Resource URI | public `on*` method、parameter、Link/Embed、template、schema |
 | `bear_resource_attributes` | `bear/resource/attributes` | Resource URI | allowlist済みclass/method属性と明示引数。省略されたconstructor defaultは展開しない |
@@ -78,7 +79,7 @@ Resource自体が無い場合は`partial`もありません。
 
 ## 安全境界
 
-全22 toolはread-onlyです。MCP serverは次の操作を行いません。
+全23 toolはread-onlyです。MCP serverは次の操作を行いません。
 
 - BEAR applicationや任意PHPの実行
 - templateのrender

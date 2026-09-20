@@ -96,6 +96,7 @@ final class McpStdioServerTest extends TestCase
         self::assertSame([
             'bear_alps_descriptor_lookup',
             'bear_contract_compare',
+            'bear_project_diagnostics',
             'bear_project_info',
             'bear_resource_attribute_index',
             'bear_resource_attributes',
@@ -142,6 +143,24 @@ final class McpStdioServerTest extends TestCase
         self::assertArrayHasKey(
             'partial',
             $toolsByName['bear_template_for_resource']['outputSchema']['properties'],
+        );
+        self::assertStringContainsString(
+            'skippedChecks',
+            $toolsByName['bear_project_diagnostics']['description'],
+        );
+
+        $diagnostics = $this->request('tools/call', [
+            'name' => 'bear_project_diagnostics',
+            'arguments' => ['limit' => 25],
+        ]);
+        self::assertFalse($diagnostics['result']['isError'] ?? true);
+        self::assertSame(
+            'bear/project/diagnostics',
+            $diagnostics['result']['structuredContent']['data']['method'],
+        );
+        self::assertSame(
+            ['limit' => 25],
+            $diagnostics['result']['structuredContent']['data']['params'],
         );
 
         $called = $this->request('tools/call', [
@@ -330,6 +349,12 @@ final class McpStdioServerTest extends TestCase
             'arguments' => ['resourceUri' => 'app://self/user', 'limit' => 0],
         ]);
         self::assertSame(-32602, $invalidReferenceLimit['error']['code']);
+
+        $invalidDiagnosticsLimit = $this->request('tools/call', [
+            'name' => 'bear_project_diagnostics',
+            'arguments' => ['limit' => 201],
+        ]);
+        self::assertSame(-32602, $invalidDiagnosticsLimit['error']['code']);
 
         $invalidContractKind = $this->request('tools/call', [
             'name' => 'bear_contract_compare',

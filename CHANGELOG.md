@@ -4,8 +4,16 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-09-20
+
+### Added
+
+- `bear_project_diagnostics` for bounded, project-wide static inconsistency checks through
+  `bear/project/diagnostics`, including scan coverage, truncation, and skipped-check metadata.
+
 ### Changed
 
+- Require `suzumaze/bear-phpactor-extension` 0.1.7 or newer for the documented installation.
 - `lsp_workspace_symbols` now reports its Phpactor index coverage, excludes methods
   explicitly, marks index freshness as unknown, and states that an empty result is not
   definitive. Coverage is retained on empty and engine-failure responses.
@@ -114,7 +122,8 @@ All notable changes to this project will be documented in this file.
 - Bounded LSP framing, fixed workspace/process configuration, structured failure results, and
   fake and real stdio integration coverage.
 
-[Unreleased]: https://github.com/suzumaze/bear-sunday-mcp-server/compare/v0.7.0...HEAD
+[Unreleased]: https://github.com/suzumaze/bear-sunday-mcp-server/compare/v0.8.0...HEAD
+[0.8.0]: https://github.com/suzumaze/bear-sunday-mcp-server/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/suzumaze/bear-sunday-mcp-server/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/suzumaze/bear-sunday-mcp-server/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/suzumaze/bear-sunday-mcp-server/compare/v0.4.0...v0.5.0

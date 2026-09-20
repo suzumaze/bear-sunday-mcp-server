@@ -47,6 +47,12 @@ final class SemanticTools
     }
 
     /** @return array<string, mixed> */
+    public function projectDiagnostics(int $limit = 100): array
+    {
+        return $this->query('bear/project/diagnostics', ['limit' => $limit]);
+    }
+
+    /** @return array<string, mixed> */
     public function resourceList(?string $scheme = null, string $prefix = '', int $limit = 50): array
     {
         return $this->query('bear/resource/list', [
