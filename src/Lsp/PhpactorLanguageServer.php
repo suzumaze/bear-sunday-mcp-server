@@ -47,11 +47,15 @@ final class PhpactorLanguageServer implements SemanticLspClient
             throw new \InvalidArgumentException('LSP timeout must be between 0 and 60 seconds');
         }
 
+        $extraConfig = [
+            'language_server_configuration.auto_config' => false,
+            ...BundledPhpactorConfiguration::forCommand($commandPrefix),
+        ];
         $command = [
             ...$commandPrefix,
             'language-server',
             '--working-dir=' . $workspace->root,
-            '--config-extra={"language_server_configuration.auto_config":false}',
+            '--config-extra=' . json_encode($extraConfig, JSON_THROW_ON_ERROR),
         ];
         $descriptors = [
             0 => ['pipe', 'r'],

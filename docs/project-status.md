@@ -37,7 +37,7 @@ flowchart TB
         D1 -.-> D2
     end
 
-    M5 --> R1["core v0.1.8 / MCP v0.9.1<br/>contract coverage release"]
+    M5 --> R1["core v0.1.8 / MCP v0.10.0<br/>bundled installation"]
     R1 --> S1["bear-semantic skill bundled<br/>contract adoption workflow included"]
 ```
 
@@ -46,10 +46,10 @@ flowchart TB
 | Component | Version | Status |
 |---|---|---|
 | `suzumaze/bear-phpactor-extension` | `v0.1.8` | Contract coverage Semantic API |
-| `suzumaze/bear-sunday-mcp-server` | `v0.9.1` | Contract coverage tool, optional view, and compact text fallback |
-| MCP tool inventory | 24 in `v0.9.1` | English and Japanese manuals complete |
+| `suzumaze/bear-sunday-mcp-server` | `v0.10.0` | Bundled Phpactor/BEAR extension, contract coverage, optional view, compact text fallback |
+| MCP tool inventory | 24 in `v0.10.0` | English and Japanese manuals complete |
 | Contract coverage UI | optional MCP Apps view | Read-only; structured/text fallback retained |
-| `bear-semantic` agent skill | bundled with `v0.9.1` | Project diagnostics and contract-adoption workflows included |
+| `bear-semantic` agent skill | bundled with `v0.10.0` | Project diagnostics and contract-adoption workflows included |
 
 ## What improved beyond grep
 

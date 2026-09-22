@@ -19,6 +19,11 @@ final class PhpactorCommandResolver
             return [self::validate($configured)];
         }
 
+        $bundledBinary = dirname(__DIR__) . '/vendor/bin/phpactor';
+        if (is_file($bundledBinary) && is_executable($bundledBinary)) {
+            return [$bundledBinary];
+        }
+
         $workspaceBinary = $workspace->root . '/vendor/bin/phpactor';
         if (is_file($workspaceBinary) && is_executable($workspaceBinary)) {
             return [$workspaceBinary];

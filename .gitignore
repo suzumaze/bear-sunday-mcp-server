@@ -1,4 +1,5 @@
 /vendor/
+/.phpactor.json
 /.phpunit.cache/
 /.phpunit.result.cache
 /.idea/
