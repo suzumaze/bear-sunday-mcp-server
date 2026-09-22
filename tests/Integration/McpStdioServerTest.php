@@ -245,6 +245,10 @@ final class McpStdioServerTest extends TestCase
             ['limit' => 25, 'offset' => 10],
             $diagnostics['result']['structuredContent']['data']['params'],
         );
+        self::assertSame(
+            $diagnostics['result']['structuredContent'],
+            json_decode($diagnostics['result']['content'][0]['text'], true, 64, JSON_THROW_ON_ERROR),
+        );
 
         $coverage = $this->request('tools/call', [
             'name' => 'bear_contract_coverage',
@@ -258,6 +262,10 @@ final class McpStdioServerTest extends TestCase
         self::assertSame(
             ['limit' => 25, 'offset' => 10, 'gapsOnly' => true, 'scheme' => 'page'],
             $coverage['result']['structuredContent']['data']['params'],
+        );
+        self::assertSame(
+            $coverage['result']['structuredContent'],
+            json_decode($coverage['result']['content'][0]['text'], true, 64, JSON_THROW_ON_ERROR),
         );
 
         $called = $this->request('tools/call', [
@@ -441,6 +449,10 @@ final class McpStdioServerTest extends TestCase
         self::assertSame(
             'bear/project/contractCoverage',
             $coverageWithoutApps['result']['structuredContent']['data']['method'],
+        );
+        self::assertSame(
+            $coverageWithoutApps['result']['structuredContent'],
+            json_decode($coverageWithoutApps['result']['content'][0]['text'], true, 64, JSON_THROW_ON_ERROR),
         );
 
         $invalid = $this->request('tools/call', [

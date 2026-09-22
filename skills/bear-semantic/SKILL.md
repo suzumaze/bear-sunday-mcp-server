@@ -17,12 +17,16 @@ normal agent workflow.
    versions, PSR-4 roots, and Resource count.
 3. For a project-wide review, call `bear_project_diagnostics` when the capability is available.
    Inspect `total`, `truncated`, `resourceScanTruncated`, and `skippedChecks`; zero returned items
-   do not prove that a skipped or truncated check is clean. While `truncated` is true, advance
-   `offset` by the number of returned items and inspect the next page.
+   do not prove that a skipped or truncated check is clean. For a complete audit, advance
+   `offset` by the number of returned items until `truncated` is false; for an overview,
+   a small first page can preserve scan metadata without fetching all findings.
 4. For JSON Schema or ALPS adoption planning, call `bear_contract_coverage` when the capability
    is available with `gapsOnly: true`. Treat `absent` as an optional adoption candidate, not an
    error; separate it from `dynamic`, `unresolved`, and `not_applicable`, inspect all scan bounds,
-   and advance `offset` until `truncated` is false.
+   and advance `offset` until `truncated` is false when the user needs the complete list.
+   When only an overview is needed, use a small first page (for example `limit: 20`):
+   `summary`, `total`, and scan metadata still cover the whole analyzed project. Fetch
+   additional pages only for requested detail; never describe a partial page as a complete list.
 5. Choose the smallest tool that answers the question. Prefer a `bear_*` tool when a BEAR
    identifier is known, and an `lsp_*` tool when a saved file and cursor position are known.
 6. Read `status`, capability or `available`, ambiguity candidates, `total`, and `truncated`

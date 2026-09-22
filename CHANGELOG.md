@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Changed
+
+- Project diagnostics and contract coverage retain complete structured and text results,
+  but serialize the text fallback as compact JSON instead of pretty-printed JSON.
+- The bundled skill and English/Japanese use cases recommend small first pages for
+  overviews while requiring all pages for a complete audit.
+
 ## [0.9.0] - 2026-09-22
 
 ### Added

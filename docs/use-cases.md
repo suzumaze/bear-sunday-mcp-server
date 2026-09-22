@@ -37,7 +37,9 @@ Use `bear_project_diagnostics`, then inspect `total`, `offset`, `truncated`, `sc
 `scannedResources`, `resourceScanTruncated`, and `skippedChecks` before interpreting the
 items. The outer query remains `ok` when an individual saved file or explicit reference is
 broken; those failures are diagnostic items. Findings are static evidence, not runtime or
-architectural judgments. Continue with the next `offset` while `truncated` is true.
+architectural judgments. A small initial `limit` (for example 20) is useful for an overview;
+the scan count and `total` still cover the whole project. For a complete audit, continue
+with the next `offset` until `truncated` is false, advancing by the returned item count.
 
 ## 2. Plan JSON Schema and ALPS adoption
 
@@ -48,13 +50,17 @@ Show the project's contract coverage. Separate absent adoption opportunities fro
 unresolved declarations, and suggest a small first batch without treating gaps as errors.
 ```
 
-Use `bear_contract_coverage` with `gapsOnly: true`, then inspect `total`, `matchingTotal`,
+Use `bear_contract_coverage` with `gapsOnly: true` and a small initial `limit` (for example 20),
+then inspect `total`, `matchingTotal`,
 `offset`, `truncated`, `scannedResources`, `analyzedResources`, and `resourceScanTruncated`.
 Optionally select `scheme: "page"` or `"app"` before pagination; `summary.schemes`
 still counts the complete project. These are URI families, not proven HTML/JSON
 representations or public/private exposure. An `absent` surface is not a requirement
 violation; choose which boundaries merit a contract using project context.
-Continue with the next `offset` while `truncated` is true. Each Resource method reports request Schema,
+The `summary` is computed across all analyzed methods regardless of page size or `gapsOnly`.
+Fetch more pages when the question needs more individual methods; for a complete list,
+continue with the next `offset` while `truncated` is true, advancing by the returned item count.
+Each Resource method reports request Schema,
 response Schema, and ALPS states as `available`, `absent`, `dynamic`, `unresolved`, or
 `not_applicable`. In the UI, request-Schema `not_applicable` is labelled “No request fields”.
 `covered` only means every applicable surface is statically available; it is

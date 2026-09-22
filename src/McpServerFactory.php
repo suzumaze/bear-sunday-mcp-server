@@ -19,6 +19,7 @@ final class McpServerFactory
 
     public static function create(SemanticTools $tools, StandardLspTools $lspTools): Server
     {
+        $reports = new ProjectReportTools($tools);
         $annotations = new ToolAnnotations(
             readOnlyHint: true,
             destructiveHint: false,
@@ -62,7 +63,7 @@ final class McpServerFactory
             outputSchema: self::envelopeSchema(),
         );
         $builder->addTool(
-            [$tools, 'projectDiagnostics'],
+            [$reports, 'projectDiagnostics'],
             name: 'bear_project_diagnostics',
             title: 'Diagnose a BEAR project',
             description: 'Collect bounded, statically provable inconsistencies across saved project files. '
@@ -79,7 +80,7 @@ final class McpServerFactory
             outputSchema: self::envelopeSchema(),
         );
         $builder->addTool(
-            [$tools, 'contractCoverage'],
+            [$reports, 'contractCoverage'],
             name: 'bear_contract_coverage',
             title: 'Inspect BEAR contract coverage',
             description: 'Report bounded JSON Schema and ALPS adoption facts for saved Resource methods. '
