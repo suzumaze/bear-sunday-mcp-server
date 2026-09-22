@@ -83,8 +83,15 @@ Install the released server into a dedicated directory:
 composer create-project --no-dev --prefer-dist \
   suzumaze/bear-sunday-mcp-server \
   /absolute/path/to/bear-sunday-mcp-server \
-  '^0.8'
+  '^0.9'
 ```
+
+This installs the MCP adapter and its SDK, **not** Phpactor or
+`suzumaze/bear-phpactor-extension`. Install the extension in the same Composer
+environment as Phpactor before connecting the server. An existing installation
+managed by [`phpactor-setup-for-bear-sunday`](https://github.com/suzumaze/phpactor-setup-for-bear-sunday)
+can be reused; point `--phpactor` at its binary. The BEAR.Sunday workspace itself
+does not need either package in its `composer.json`.
 
 For development from the repository instead:
 
@@ -94,11 +101,6 @@ git clone https://github.com/suzumaze/bear-sunday-mcp-server.git \
 cd /absolute/path/to/bear-sunday-mcp-server
 composer install
 ```
-
-Use the Phpactor binary configured by
-[`phpactor-setup-for-bear-sunday`](https://github.com/suzumaze/phpactor-setup-for-bear-sunday)
-or another Phpactor installation that actually loads the BEAR extension. You do not need a
-second Phpactor installation when the setup package already provides one.
 
 ## Run directly
 
