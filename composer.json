@@ -17,7 +17,10 @@
     },
     "require": {
         "php": "^8.2",
-        "mcp/sdk": "^0.8.1"
+        "mcp/sdk": "^0.8.1",
+        "phpactor/language-server-protocol": "3.17.4",
+        "phpactor/phpactor": "2026.07.22.0",
+        "suzumaze/bear-phpactor-extension": "^0.1.8"
     },
     "require-dev": {
         "phpstan/phpstan": "^2.1",
@@ -45,8 +48,17 @@
             "@phpcs",
             "@phpstan",
             "@phpunit"
+        ],
+        "phpactor:init": "@php vendor/bin/bear-phpactor-init",
+        "post-install-cmd": [
+            "@phpactor:init"
+        ],
+        "post-update-cmd": [
+            "@phpactor:init"
         ]
     },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
     "config": {
         "platform": {
             "php": "8.2.0"

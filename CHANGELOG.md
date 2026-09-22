@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.10.0] - 2026-09-22
+
+### Changed
+
+- A standard `composer create-project` installation now includes a compatible Phpactor and
+  BEAR Phpactor extension. Composer generates the extension registration, and the MCP server
+  selects its bundled Phpactor by default while preserving explicit external overrides.
+- Installation documentation distinguishes the bundled MCP runtime from direct editor/LSP
+  use, which still needs its own Phpactor extension configuration.
+
 ## [0.9.1] - 2026-09-22
 
 ### Changed
@@ -154,7 +164,8 @@ All notable changes to this project will be documented in this file.
 - Bounded LSP framing, fixed workspace/process configuration, structured failure results, and
   fake and real stdio integration coverage.
 
-[Unreleased]: https://github.com/suzumaze/bear-sunday-mcp-server/compare/v0.9.1...HEAD
+[Unreleased]: https://github.com/suzumaze/bear-sunday-mcp-server/compare/v0.10.0...HEAD
+[0.10.0]: https://github.com/suzumaze/bear-sunday-mcp-server/compare/v0.9.1...v0.10.0
 [0.9.1]: https://github.com/suzumaze/bear-sunday-mcp-server/compare/v0.9.0...v0.9.1
 [0.9.0]: https://github.com/suzumaze/bear-sunday-mcp-server/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/suzumaze/bear-sunday-mcp-server/compare/v0.7.0...v0.8.0

@@ -65,13 +65,13 @@ for task-oriented workflows.
 ## Requirements
 
 - PHP 8.2 or newer
-- Phpactor with `suzumaze/bear-phpactor-extension` 0.1.8 or newer installed in Phpactor's
-  Composer environment
+- PHP extensions required by Phpactor: `mbstring`, `posix`, and `tokenizer`
 - An MCP host that supports stdio servers
 
-`bear_contract_coverage` additionally requires a Phpactor extension build that advertises the
-`contractCoverage` capability; older compatible extensions return `engine_unavailable` for that
-single tool while the remaining tools continue to work.
+The standard installation bundles Phpactor 2026.07.22.0 and
+`suzumaze/bear-phpactor-extension` 0.1.8 or newer. If you override `--phpactor`
+with an older compatible installation, `bear_contract_coverage` needs its
+`contractCoverage` capability; otherwise that tool returns `engine_unavailable`.
 
 The MCP SDK is fixed to the compatible `0.8.x` line because its public API is not yet 1.0.
 
@@ -83,15 +83,19 @@ Install the released server into a dedicated directory:
 composer create-project --no-dev --prefer-dist \
   suzumaze/bear-sunday-mcp-server \
   /absolute/path/to/bear-sunday-mcp-server \
-  '^0.9'
+  '^0.10'
 ```
 
-This installs the MCP adapter and its SDK, **not** Phpactor or
-`suzumaze/bear-phpactor-extension`. Install the extension in the same Composer
-environment as Phpactor before connecting the server. An existing installation
-managed by [`phpactor-setup-for-bear-sunday`](https://github.com/suzumaze/phpactor-setup-for-bear-sunday)
-can be reused; point `--phpactor` at its binary. The BEAR.Sunday workspace itself
-does not need either package in its `composer.json`.
+This installs the MCP adapter, Phpactor, and the BEAR extension into one dedicated
+Composer environment. Composer's install script generates `.phpactor.json` there;
+the adapter applies its extension list when launching the bundled Phpactor. No
+packages or configuration files are added to the BEAR.Sunday workspace. If
+Composer scripts were disabled, run `composer run phpactor:init` in the server
+directory before starting it.
+
+The MCP host still needs its own one-time server registration below. To reuse an
+existing Phpactor installation instead of the bundled binary, pass `--phpactor`
+or set `PHPACTOR_BIN`; that installation must load the BEAR extension itself.
 
 For development from the repository instead:
 
@@ -106,14 +110,15 @@ composer install
 
 ```console
 /absolute/path/to/bear-sunday-mcp-server/bin/bear-sunday-mcp \
-  --workspace=/absolute/path/to/bear-project \
-  --phpactor=/absolute/path/to/phpactor
+  --workspace=/absolute/path/to/bear-project
 ```
 
 `--workspace` is required and canonicalized once at startup. `--phpactor` may be omitted.
-The adapter then checks `PHPACTOR_BIN`, `WORKSPACE/vendor/bin/phpactor`, and finally the
-`phpactor` command on `PATH`. A configured command is passed directly to `proc_open` as an
-argument array; shell command strings and appended arguments are rejected.
+The adapter checks `PHPACTOR_BIN`, the bundled `vendor/bin/phpactor`,
+`WORKSPACE/vendor/bin/phpactor`, and finally `phpactor` on `PATH`, in that order.
+An explicit `--phpactor` takes precedence over all of them. A configured command
+is passed directly to `proc_open` as an argument array; shell command strings
+and appended arguments are rejected.
 
 The process normally appears to wait silently because MCP messages use stdin and stdout.
 
@@ -124,8 +129,7 @@ Register one BEAR.Sunday workspace with Codex CLI:
 ```console
 codex mcp add bear-sunday -- \
   /absolute/path/to/bear-sunday-mcp-server/bin/bear-sunday-mcp \
-  --workspace=/absolute/path/to/bear-project \
-  --phpactor=/absolute/path/to/phpactor
+  --workspace=/absolute/path/to/bear-project
 codex mcp list
 ```
 
@@ -141,7 +145,6 @@ The equivalent `~/.codex/config.toml` entry is:
 command = "/absolute/path/to/bear-sunday-mcp-server/bin/bear-sunday-mcp"
 args = [
     "--workspace=/absolute/path/to/bear-project",
-    "--phpactor=/absolute/path/to/phpactor",
 ]
 startup_timeout_sec = 20
 tool_timeout_sec = 60
@@ -156,8 +159,7 @@ Register the server for one local project without committing machine-specific pa
 cd /absolute/path/to/bear-project
 claude mcp add --scope local --transport stdio bear-sunday -- \
   /absolute/path/to/bear-sunday-mcp-server/bin/bear-sunday-mcp \
-  --workspace=/absolute/path/to/bear-project \
-  --phpactor=/absolute/path/to/phpactor
+  --workspace=/absolute/path/to/bear-project
 claude mcp list
 claude mcp get bear-sunday
 ```
@@ -180,8 +182,7 @@ For MCP hosts that use an `mcpServers` JSON object:
       "type": "stdio",
       "command": "/absolute/path/to/bear-sunday-mcp-server/bin/bear-sunday-mcp",
       "args": [
-        "--workspace=/absolute/path/to/bear-project",
-        "--phpactor=/absolute/path/to/phpactor"
+        "--workspace=/absolute/path/to/bear-project"
       ]
     }
   }
@@ -198,7 +199,9 @@ Each configured server is fixed to one workspace. Give entries distinct names, s
 ## Connect a generic LSP client
 
 An editor, CLI, or AI client with native LSP support can skip MCP and start Phpactor
-directly:
+directly. Unlike the bundled MCP launch, this requires the editor's Phpactor
+environment to register the BEAR extension (see
+[`bear-phpactor-extension`](https://github.com/suzumaze/bear-phpactor-extension)):
 
 ```text
 command: /absolute/path/to/phpactor

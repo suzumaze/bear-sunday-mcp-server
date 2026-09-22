@@ -12,6 +12,13 @@ use Suzumaze\BearSundayMcp\Workspace;
 #[CoversClass(PhpactorCommandResolver::class)]
 final class PhpactorCommandResolverTest extends TestCase
 {
+    public function testUsesBundledPhpactorByDefault(): void
+    {
+        $binary = dirname(__DIR__, 2) . '/vendor/bin/phpactor';
+        self::assertFileExists($binary);
+        self::assertSame([$binary], PhpactorCommandResolver::resolve(Workspace::fromPath(__DIR__)));
+    }
+
     public function testAcceptsASimplePathCommandNameWithoutUsingAShell(): void
     {
         self::assertSame(
