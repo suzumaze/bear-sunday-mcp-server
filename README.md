@@ -34,6 +34,15 @@ the actual returned item count while `truncated` is true. Diagnostics accepts `l
 (default 100); contract coverage accepts 1–100 (default 100). A single oversized item may
 exceed the budget. `gapsOnly` selects adoption gaps without returning covered rows.
 Use `scheme: "page"` or `"app"` to select a source URI family before pagination.
+For a first overview, request a small page (for example `limit: 10` or `20`).
+`total`, scan metadata, and contract-coverage `summary` still describe the whole scan;
+fetch further pages only when the question requires their rows. This reduces returned
+content, not scanning work or the host's tool-definition overhead. A complete audit
+must follow `truncated` to the end, advancing by the actual returned item count.
+Project-report text fallbacks retain the same full result as `structuredContent`, encoded
+as compact JSON to avoid the additional whitespace of SDK pretty printing. Hosts may
+surface one or both representations, so this reduces wire bytes but does not promise a
+specific model-token saving.
 The scheme alone does not establish whether a Resource is publicly exposed or rendered
 as JSON; `absent` does not mean a Schema is required.
 On hosts that support the open MCP Apps UI extension, `bear_contract_coverage` also renders a

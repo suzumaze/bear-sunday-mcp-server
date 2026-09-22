@@ -47,7 +47,9 @@ SkillはMCP serverをinstall・起動・設定しません。また、BEAR appli
 `bear_project_diagnostics`を使い、itemを解釈する前に`total`、`offset`、`truncated`、`scannedFiles`、
 `scannedResources`、`resourceScanTruncated`、`skippedChecks`を確認します。個別の保存済みfileや
 明示的参照が壊れていても外側のqueryは`ok`のままで、その失敗がdiagnostic itemになります。
-`truncated`がtrueの間は次の`offset`を取得します。findingは静的な根拠であり、runtime behaviorや
+概要を掴む最初の問い合わせは`limit: 20`程度の小さなpageにすると、全件の`total`と走査範囲を
+保ったまま返却明細を減らせます。全件監査が必要なら`truncated`がfalseになるまで、実際の返却件数だけ
+`offset`を進めて取得します。findingは静的な根拠であり、runtime behaviorや
 architectureの良し悪しを判定するものではありません。
 
 ## 2. JSON Schema・ALPS導入を計画する
@@ -59,12 +61,14 @@ architectureの良し悪しを判定するものではありません。
 分け、gapをerror扱いせずに小さな最初の導入batchを提案してください。
 ```
 
-`bear_contract_coverage`を`gapsOnly: true`で使い、`total`、`matchingTotal`、`offset`、
+`bear_contract_coverage`を`gapsOnly: true`と小さな初回`limit`（例: 20）で使い、
+`total`、`matchingTotal`、`offset`、
 `truncated`、`scannedResources`、`analyzedResources`、`resourceScanTruncated`を確認します。
 `scheme: "page"`または`"app"`でpagination前にURI schemeを選べます。`summary.schemes`は
 全projectの内訳のままです。URI schemeだけではHTML/JSON表現や公開範囲を証明できず、
 `absent`もSchemaが必須という意味ではありません。導入対象はprojectの境界で判断します。
-`truncated`がtrueの間は次の`offset`を取得します。各Resource methodについてrequest
+`summary`は明細のpage sizeや`gapsOnly`とは独立した全体集計です。必要な明細だけを追加取得し、
+全件一覧が必要なら`truncated`がfalseになるまで返却件数だけ`offset`を進めます。各Resource methodについてrequest
 Schema、response Schema、ALPSを`available`、`absent`、`dynamic`、`unresolved`、
 `not_applicable`に分けます。UIではrequest Schemaの`not_applicable`を「No request fields」と表示します。
 `covered`は適用対象surfaceが静的に利用可能という意味だけで、
