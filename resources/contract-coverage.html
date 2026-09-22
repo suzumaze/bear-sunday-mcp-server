@@ -1,0 +1,774 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>BEAR Contract Coverage</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: var(--color-background-primary, #fbfaf7);
+      --panel: var(--color-background-secondary, #ffffff);
+      --text: var(--color-text-primary, #24211c);
+      --muted: var(--color-text-secondary, #6f675d);
+      --border: var(--color-border-primary, #ded8cf);
+      --accent: #6d4bd2;
+      --available: #1f8a5b;
+      --absent: #3f78a8;
+      --dynamic: #b36b16;
+      --unresolved: #bd3e45;
+      --na: #8b8580;
+      --warning-bg: #fff3cd;
+      --warning-text: #684f00;
+      --radius: 14px;
+      font-family: var(--font-sans, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    main {
+      width: min(100%, 1100px);
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 20px;
+      margin-bottom: 18px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(22px, 4vw, 32px);
+      letter-spacing: -0.035em;
+    }
+
+    .subtitle {
+      margin: 5px 0 0;
+      color: var(--muted);
+    }
+
+    .interpretation {
+      margin: 0 0 16px;
+      padding: 11px 14px;
+      border-left: 3px solid var(--accent);
+      border-radius: 7px;
+      background: var(--panel);
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .scope {
+      min-width: max-content;
+      padding: 7px 10px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      color: var(--muted);
+      background: var(--panel);
+      font-size: 12px;
+    }
+
+    .notice {
+      display: none;
+      margin-bottom: 16px;
+      padding: 12px 14px;
+      border: 1px solid #d9b843;
+      border-radius: 10px;
+      background: var(--warning-bg);
+      color: var(--warning-text);
+    }
+
+    .notice.visible { display: block; }
+
+    .overview {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .card,
+    .table-panel,
+    .empty {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--panel);
+    }
+
+    .card { padding: 15px; }
+
+    .card h2 {
+      margin: 0 0 4px;
+      font-size: 14px;
+    }
+
+    .card-total {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .bar {
+      display: flex;
+      overflow: hidden;
+      height: 10px;
+      margin: 12px 0;
+      border-radius: 999px;
+      background: color-mix(in srgb, var(--border) 70%, transparent);
+    }
+
+    .segment { min-width: 0; }
+    .available { background: var(--available); }
+    .absent { background: var(--absent); }
+    .dynamic { background: var(--dynamic); }
+    .unresolved { background: var(--unresolved); }
+    .not_applicable { background: var(--na); }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px 10px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    .summary-line {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 18px;
+      margin: 0 0 14px;
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--panel);
+      color: var(--muted);
+    }
+
+    .summary-line strong { color: var(--text); }
+
+    .toolbar {
+      display: grid;
+      grid-template-columns: minmax(220px, 1fr) repeat(2, minmax(150px, 210px));
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    input,
+    select {
+      width: 100%;
+      min-height: 40px;
+      padding: 8px 10px;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      background: var(--panel);
+      color: var(--text);
+      font: inherit;
+    }
+
+    input:focus,
+    select:focus {
+      outline: 2px solid color-mix(in srgb, var(--accent) 50%, transparent);
+      outline-offset: 1px;
+    }
+
+    .table-panel { overflow: hidden; }
+
+    .table-scroll { overflow-x: auto; }
+
+    table {
+      width: 100%;
+      min-width: 760px;
+      border-collapse: collapse;
+    }
+
+    th,
+    td {
+      padding: 11px 12px;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+      vertical-align: middle;
+    }
+
+    th {
+      color: var(--muted);
+      background: color-mix(in srgb, var(--panel) 88%, var(--border));
+      font-size: 11px;
+      font-weight: 650;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+
+    tbody tr:last-child td { border-bottom: 0; }
+    tbody tr:hover { background: color-mix(in srgb, var(--accent) 5%, var(--panel)); }
+
+    .resource-link {
+      display: block;
+      width: 100%;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      color: inherit;
+      cursor: pointer;
+      font: inherit;
+      text-align: left;
+    }
+
+    .resource-link code { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
+    .resource-link:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: 4px; }
+    .resource-link:hover code { text-decoration-thickness: 2px; }
+
+    .detail-row td { padding: 0 12px 14px; background: color-mix(in srgb, var(--accent) 4%, var(--panel)); }
+    .detail-panel { padding: 14px; border: 1px solid var(--border); border-radius: 10px; background: var(--panel); }
+    .detail-panel h3 { margin: 0 0 10px; font-size: 13px; }
+    .detail-surfaces { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+    .detail-surface { min-width: 0; padding: 10px; border: 1px solid var(--border); border-radius: 8px; }
+    .detail-surface h4 { margin: 0 0 7px; font-size: 12px; }
+    .detail-surface dl { margin: 0; font-size: 11px; }
+    .detail-surface dt { margin-top: 5px; color: var(--muted); }
+    .detail-surface dd { margin: 0; overflow-wrap: anywhere; }
+    .detail-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-top: 12px; }
+    .detail-actions button { padding: 6px 10px; border: 1px solid var(--border); border-radius: 7px; background: var(--panel); color: var(--text); cursor: pointer; font: inherit; font-size: 12px; }
+    .detail-actions button:hover { border-color: var(--accent); }
+    .detail-actions span { color: var(--muted); font-size: 11px; }
+
+    .resource {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    code {
+      font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace);
+      font-size: 12px;
+    }
+
+    .method { font-weight: 700; }
+
+    .path {
+      max-width: 340px;
+      overflow: hidden;
+      color: var(--muted);
+      font-size: 11px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 8px;
+      border: 1px solid currentColor;
+      border-radius: 999px;
+      background: transparent;
+      font-size: 11px;
+      font-weight: 650;
+      white-space: nowrap;
+    }
+
+    .badge.available { color: var(--available); }
+    .badge.absent { color: var(--absent); }
+    .badge.dynamic { color: var(--dynamic); }
+    .badge.unresolved { color: var(--unresolved); }
+    .badge.not_applicable { color: var(--na); }
+
+    .empty {
+      padding: 34px 20px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .loading-mark {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      margin-right: 7px;
+      border-radius: 50%;
+      background: var(--accent);
+      animation: pulse 1.2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      50% { opacity: .28; transform: scale(.72); }
+    }
+
+    .footer-note {
+      margin: 12px 2px 0;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    @media (max-width: 760px) {
+      main { padding: 14px; }
+      header { flex-direction: column; gap: 10px; }
+      .overview { grid-template-columns: 1fr; }
+      .toolbar { grid-template-columns: 1fr; }
+      .detail-surfaces { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <div>
+      <h1>BEAR Contract Coverage</h1>
+      <p class="subtitle">Static JSON Schema and ALPS adoption facts. This is not a quality score.</p>
+    </div>
+    <div class="scope" id="scope">Waiting for data</div>
+  </header>
+
+  <p class="interpretation">
+    Absent means no contract artifact was observed, not that one is required.
+    App and Page are source URI schemes; they do not prove public exposure or HTML/JSON rendering.
+  </p>
+  <div class="notice" id="notice" role="status"></div>
+  <section class="overview" id="overview" aria-label="Contract surface summaries"></section>
+  <div class="summary-line" id="summary" hidden></div>
+
+  <section id="content">
+    <div class="empty" id="empty">
+      <span class="loading-mark" aria-hidden="true"></span>
+      Waiting for contract coverage data…
+    </div>
+  </section>
+
+  <p class="footer-note">
+    Choose whether a contract is useful at the actual application boundary. Dynamic requires source inspection.
+    Unresolved means an explicit declaration could not be resolved. No request fields means the
+    Resource method has no parameters and no statically observable request Schema.
+  </p>
+</main>
+
+<script>
+(() => {
+  'use strict';
+
+  const stateOrder = ['available', 'absent', 'dynamic', 'unresolved', 'not_applicable'];
+  const stateLabels = {
+    available: 'Available',
+    absent: 'Absent',
+    dynamic: 'Dynamic',
+    unresolved: 'Unresolved',
+    not_applicable: 'No request fields'
+  };
+  const surfaceLabels = {
+    requestSchema: 'Request Schema',
+    responseSchema: 'Response Schema',
+    alps: 'ALPS'
+  };
+  const pending = new Map();
+  let nextId = 1;
+  let initialized = false;
+  let coverage = null;
+  let resizeFrame = 0;
+  let expandedKey = null;
+
+  const byId = (id) => document.getElementById(id);
+
+  function post(message) {
+    if (window.parent !== window) {
+      window.parent.postMessage(message, '*');
+    }
+  }
+
+  function request(method, params) {
+    const id = nextId++;
+    post({ jsonrpc: '2.0', id, method, params });
+    return new Promise((resolve, reject) => pending.set(id, { resolve, reject }));
+  }
+
+  function notify(method, params = {}) {
+    post({ jsonrpc: '2.0', method, params });
+  }
+
+  function reportSize() {
+    if (!initialized || resizeFrame !== 0) return;
+    resizeFrame = requestAnimationFrame(() => {
+      resizeFrame = 0;
+      const root = document.documentElement;
+      notify('ui/notifications/size-changed', {
+        width: Math.ceil(root.getBoundingClientRect().width),
+        height: Math.ceil(root.scrollHeight)
+      });
+    });
+  }
+
+  function element(tag, className, text) {
+    const node = document.createElement(tag);
+    if (className) node.className = className;
+    if (text !== undefined) node.textContent = text;
+    return node;
+  }
+
+  function renderError(message) {
+    byId('overview').replaceChildren();
+    byId('summary').hidden = true;
+    const empty = element('div', 'empty', message);
+    byId('content').replaceChildren(empty);
+    byId('scope').textContent = 'Coverage unavailable';
+    reportSize();
+  }
+
+  function renderCard(surface, counts, methods) {
+    const card = element('article', 'card');
+    card.append(element('h2', '', surfaceLabels[surface]));
+    card.append(element('div', 'card-total', `${methods} methods observed`));
+
+    const bar = element('div', 'bar');
+    bar.setAttribute('aria-label', `${surfaceLabels[surface]} state distribution`);
+    for (const state of stateOrder) {
+      const count = Number(counts[state] || 0);
+      if (count === 0 || methods === 0) continue;
+      const segment = element('span', `segment ${state}`);
+      segment.style.flexGrow = String(count);
+      segment.title = `${stateLabels[state]}: ${count}`;
+      bar.append(segment);
+    }
+    card.append(bar);
+
+    const legend = element('div', 'legend');
+    for (const state of stateOrder) {
+      const count = Number(counts[state] || 0);
+      if (count === 0) continue;
+      const item = element('span', 'legend-item');
+      item.append(element('span', `dot ${state}`));
+      item.append(document.createTextNode(`${stateLabels[state]} ${count}`));
+      legend.append(item);
+    }
+    card.append(legend);
+    return card;
+  }
+
+  function surfaceBadge(surface) {
+    const state = stateOrder.includes(surface?.state) ? surface.state : 'unresolved';
+    const badge = element('span', `badge ${state}`, stateLabels[state]);
+    const details = [surface?.status, surface?.subject].filter(Boolean).join(' · ');
+    if (details) badge.title = details;
+    return badge;
+  }
+
+  function matches(item, query, surfaceName, state) {
+    const haystack = `${item.uri || ''} ${item.method || ''} ${item.path || ''}`.toLowerCase();
+    if (query && !haystack.includes(query)) return false;
+
+    const surfaces = item.surfaces || {};
+    const selected = surfaceName === 'all'
+      ? Object.values(surfaces)
+      : [surfaces[surfaceName]];
+
+    if (state === 'all') return true;
+    if (state === 'gaps') {
+      return selected.some((surface) => surface && !['available', 'not_applicable'].includes(surface.state));
+    }
+    return selected.some((surface) => surface?.state === state);
+  }
+
+  function detailPanel(item) {
+    const panel = element('div', 'detail-panel');
+    panel.append(element('h3', '', `${item.uri || 'Unknown Resource'} · ${item.method || 'Unknown method'}`));
+    const surfaces = element('div', 'detail-surfaces');
+    for (const name of ['requestSchema', 'responseSchema', 'alps']) {
+      const surface = item.surfaces?.[name] || {};
+      const box = element('section', 'detail-surface');
+      box.append(element('h4', '', surfaceLabels[name]));
+      const facts = element('dl', '');
+      for (const [label, value] of [
+        ['State', stateLabels[surface.state] || 'Unknown'],
+        ['Semantic status', surface.status || 'Unknown'],
+        ['Subject', surface.subject || 'Not specified']
+      ]) {
+        facts.append(element('dt', '', label), element('dd', '', value));
+      }
+      box.append(facts);
+      surfaces.append(box);
+    }
+    panel.append(surfaces);
+
+    const actions = element('div', 'detail-actions');
+    const open = element('button', '', 'Ask assistant to open source');
+    open.type = 'button';
+    const copy = element('button', '', 'Copy source path');
+    copy.type = 'button';
+    const feedback = element('span', '');
+    feedback.setAttribute('role', 'status');
+    open.addEventListener('click', async () => {
+      open.disabled = true;
+      feedback.textContent = 'Sending source location to the assistant…';
+      try {
+        const path = item.path || 'Unknown path';
+        const uri = item.uri || 'Unknown Resource';
+        const method = item.method || 'Unknown method';
+        await request('ui/message', {
+          role: 'user',
+          content: {
+            type: 'text',
+            text: `Please open and inspect the saved BEAR Resource source for ${uri} ${method} at ${path}. The path is relative to the connected BEAR workspace. If this host cannot open an editor, show me the source location and relevant contract evidence instead.`
+          }
+        });
+        feedback.textContent = 'Source request sent to the assistant.';
+      } catch (error) {
+        feedback.textContent = `This host could not accept the request: ${error.message}. You can copy the source path instead.`;
+      } finally {
+        open.disabled = false;
+      }
+    });
+    copy.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(item.path || '');
+        feedback.textContent = 'Workspace-relative path copied. Paste it into your editor or chat.';
+      } catch {
+        feedback.textContent = `Copy this workspace-relative path: ${item.path || 'Unknown path'}`;
+      }
+    });
+    actions.append(open, copy, feedback);
+    panel.append(actions);
+    return panel;
+  }
+
+  function renderRows() {
+    if (!coverage) return;
+    const query = byId('search').value.trim().toLowerCase();
+    const surfaceName = byId('surface-filter').value;
+    const state = byId('state-filter').value;
+    const items = Array.isArray(coverage.items) ? coverage.items : [];
+    const visible = items.filter((item) => matches(item, query, surfaceName, state));
+    const tbody = byId('coverage-rows');
+    tbody.replaceChildren();
+
+    for (const [index, item] of visible.entries()) {
+      const key = `${item.uri || ''}\0${item.method || ''}\0${item.path || ''}\0${index}`;
+      const row = document.createElement('tr');
+      const identity = document.createElement('td');
+      const resource = element('div', 'resource');
+      const uri = element('code', '', item.uri || 'Unknown Resource');
+      const method = element('span', 'method', item.method || 'Unknown method');
+      const path = element('span', 'path', item.path || 'Unknown path');
+      path.title = item.path || '';
+      resource.append(uri, method, path);
+      const link = element('button', 'resource-link');
+      link.type = 'button';
+      link.setAttribute('aria-expanded', key === expandedKey ? 'true' : 'false');
+      link.setAttribute('aria-label', `Show contract details for ${item.uri || 'Unknown Resource'} ${item.method || ''}`);
+      link.append(resource);
+      link.addEventListener('click', () => {
+        expandedKey = expandedKey === key ? null : key;
+        renderRows();
+      });
+      identity.append(link);
+      row.append(identity);
+
+      for (const surface of ['requestSchema', 'responseSchema', 'alps']) {
+        const cell = document.createElement('td');
+        cell.append(surfaceBadge(item.surfaces?.[surface]));
+        row.append(cell);
+      }
+      tbody.append(row);
+      if (expandedKey === key) {
+        const detail = element('tr', 'detail-row');
+        const cell = document.createElement('td');
+        cell.colSpan = 4;
+        cell.append(detailPanel(item));
+        detail.append(cell);
+        tbody.append(detail);
+      }
+    }
+
+    const offset = Number(coverage.offset || 0);
+    const matchingTotal = Number(coverage.matchingTotal ?? coverage.total ?? items.length);
+    const first = items.length === 0 ? 0 : offset + 1;
+    const last = offset + items.length;
+    const selection = coverage.gapsOnly ? 'adoption candidates' : 'matching methods';
+    byId('result-count').textContent =
+      `${visible.length} of ${items.length} returned methods · page ${first}–${last} of ${matchingTotal} ${selection}`;
+    byId('no-results').hidden = visible.length !== 0;
+    reportSize();
+  }
+
+  function renderTable() {
+    const wrapper = document.createElement('div');
+    const toolbar = element('div', 'toolbar');
+
+    const search = document.createElement('input');
+    search.id = 'search';
+    search.type = 'search';
+    search.placeholder = 'Filter by Resource, method, or path';
+    search.setAttribute('aria-label', 'Filter Resource methods');
+
+    const surface = document.createElement('select');
+    surface.id = 'surface-filter';
+    surface.setAttribute('aria-label', 'Filter by contract surface');
+    for (const [value, label] of [['all', 'All surfaces'], ...Object.entries(surfaceLabels)]) {
+      const option = document.createElement('option');
+      option.value = value;
+      option.textContent = label;
+      surface.append(option);
+    }
+
+    const state = document.createElement('select');
+    state.id = 'state-filter';
+    state.setAttribute('aria-label', 'Filter by state');
+    for (const [value, label] of [['all', 'All states'], ['gaps', 'Adoption gaps'], ...stateOrder.map((key) => [key, stateLabels[key]])]) {
+      const option = document.createElement('option');
+      option.value = value;
+      option.textContent = label;
+      state.append(option);
+    }
+    toolbar.append(search, surface, state);
+    wrapper.append(toolbar);
+
+    const panel = element('div', 'table-panel');
+    const scroll = element('div', 'table-scroll');
+    const table = document.createElement('table');
+    const head = document.createElement('thead');
+    const headerRow = document.createElement('tr');
+    for (const label of ['Resource method', 'Request Schema', 'Response Schema', 'ALPS']) {
+      headerRow.append(element('th', '', label));
+    }
+    head.append(headerRow);
+    const body = document.createElement('tbody');
+    body.id = 'coverage-rows';
+    table.append(head, body);
+    scroll.append(table);
+    panel.append(scroll);
+    const noResults = element('div', 'empty', 'No Resource methods match these filters.');
+    noResults.id = 'no-results';
+    noResults.hidden = true;
+    panel.append(noResults);
+    wrapper.append(panel);
+
+    const count = element('p', 'footer-note');
+    count.id = 'result-count';
+    wrapper.append(count);
+    byId('content').replaceChildren(wrapper);
+
+    search.addEventListener('input', renderRows);
+    surface.addEventListener('change', renderRows);
+    state.addEventListener('change', renderRows);
+    renderRows();
+  }
+
+  function renderEnvelope(envelope) {
+    if (!envelope || envelope.status !== 'ok' || !envelope.data) {
+      renderError(`Coverage query did not return usable data${envelope?.status ? ` (${envelope.status})` : ''}.`);
+      return;
+    }
+
+    coverage = envelope.data;
+    expandedKey = null;
+    const summary = coverage.summary || {};
+    const methods = Number(summary.methods || 0);
+    const overview = byId('overview');
+    overview.replaceChildren();
+    for (const surface of ['requestSchema', 'responseSchema', 'alps']) {
+      overview.append(renderCard(surface, summary.surfaces?.[surface] || {}, methods));
+    }
+
+    const summaryLine = byId('summary');
+    summaryLine.hidden = false;
+    summaryLine.replaceChildren();
+    const facts = [
+      ['Methods observed', methods],
+      ['All assessed surfaces available', Number(summary.coveredMethods || 0)],
+      ['Resources scanned', Number(coverage.scannedResources || 0)],
+      ['Resources analyzed', Number(coverage.analyzedResources || 0)]
+    ];
+    if (summary.schemes) {
+      facts.push(
+        ['App URI methods', Number(summary.schemes.app?.methods || 0)],
+        ['Page URI methods', Number(summary.schemes.page?.methods || 0)]
+      );
+    }
+    for (const [label, value] of facts) {
+      const item = document.createElement('span');
+      item.append(element('strong', '', String(value)), document.createTextNode(` ${label.toLowerCase()}`));
+      summaryLine.append(item);
+    }
+
+    const notices = [];
+    if (coverage.resourceScanTruncated) {
+      notices.push(`The Resource scan stopped after ${coverage.scannedResources || 0} Resources; project totals are partial.`);
+    }
+    const returned = Array.isArray(coverage.items) ? coverage.items.length : 0;
+    const offset = Number(coverage.offset || 0);
+    const matchingTotal = Number(coverage.matchingTotal ?? coverage.total ?? returned);
+    if (coverage.truncated || offset > 0) {
+      const first = returned === 0 ? 0 : offset + 1;
+      const last = offset + returned;
+      const next = coverage.truncated ? ` Use offset ${last} for the next page.` : '';
+      notices.push(`The method table shows ${first}–${last} of ${matchingTotal} matching methods.${next}`);
+    }
+    if (coverage.gapsOnly) {
+      notices.push('Only methods with optional adoption candidates were requested; the summary still covers every analyzed method.');
+    }
+    if (coverage.scheme) {
+      notices.push(`Only ${coverage.scheme}:// methods were requested; the summary still covers both URI schemes.`);
+    }
+    if (Number(coverage.analyzedResources || 0) < Number(coverage.scannedResources || 0)) {
+      notices.push('Some scanned Resources could not be analyzed and are not represented in the summary.');
+    }
+    const notice = byId('notice');
+    notice.textContent = notices.join(' ');
+    notice.classList.toggle('visible', notices.length > 0);
+    byId('scope').textContent = `${coverage.scannedResources || 0} Resources · ${methods} methods`;
+    renderTable();
+    reportSize();
+  }
+
+  window.addEventListener('message', (event) => {
+    if (event.source !== window.parent) return;
+    const message = event.data;
+    if (!message || message.jsonrpc !== '2.0') return;
+
+    if (Object.prototype.hasOwnProperty.call(message, 'id') && pending.has(message.id)) {
+      const waiter = pending.get(message.id);
+      pending.delete(message.id);
+      if (message.error) waiter.reject(new Error(message.error.message || 'MCP Apps request failed'));
+      else waiter.resolve(message.result);
+      return;
+    }
+
+    if (message.method === 'ui/notifications/tool-result') {
+      renderEnvelope(message.params?.structuredContent);
+    } else if (message.method === 'ui/resource-teardown' && Object.prototype.hasOwnProperty.call(message, 'id')) {
+      post({ jsonrpc: '2.0', id: message.id, result: {} });
+    }
+  });
+
+  if (window.parent !== window) {
+    request('ui/initialize', {
+      protocolVersion: '2026-01-26',
+      appInfo: { name: 'bear-contract-coverage', version: '1.0.0' },
+      appCapabilities: { availableDisplayModes: ['inline'] }
+    }).then(() => {
+      initialized = true;
+      notify('ui/notifications/initialized');
+      new ResizeObserver(reportSize).observe(document.documentElement);
+      reportSize();
+    }).catch((error) => renderError(`The host did not initialize the coverage view: ${error.message}`));
+  }
+})();
+</script>
+</body>
+</html>

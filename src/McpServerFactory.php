@@ -4,11 +4,19 @@ declare(strict_types=1);
 
 namespace Suzumaze\BearSundayMcp;
 
+use Mcp\Schema\Content\TextResourceContents;
+use Mcp\Schema\Extension\Apps\McpApps;
+use Mcp\Schema\Extension\Apps\ToolVisibility;
+use Mcp\Schema\Extension\Apps\UiResourceContentMeta;
+use Mcp\Schema\Extension\Apps\UiToolMeta;
 use Mcp\Schema\ToolAnnotations;
 use Mcp\Server;
 
 final class McpServerFactory
 {
+    /** Measured project-report page size that stays near or below the existing 64 KiB semantic payload budget. */
+    private const PROJECT_REPORT_MAX_ITEMS = 100;
+
     public static function create(SemanticTools $tools, StandardLspTools $lspTools): Server
     {
         $annotations = new ToolAnnotations(
@@ -21,6 +29,25 @@ final class McpServerFactory
             'bear-sunday-mcp-server',
             Version::CURRENT,
             'Read-only bridge to BEAR.Sunday Semantic API v1 over Phpactor LSP.',
+        );
+        $builder->enableExtension(new McpApps());
+        $builder->addResource(
+            static fn (): TextResourceContents => new TextResourceContents(
+                uri: ContractCoverageUi::URI,
+                mimeType: McpApps::MIME_TYPE,
+                text: ContractCoverageUi::html(),
+                meta: [
+                    'ui' => new UiResourceContentMeta(prefersBorder: true),
+                ],
+            ),
+            uri: ContractCoverageUi::URI,
+            name: 'bear-contract-coverage',
+            title: 'BEAR Contract Coverage',
+            description: 'Read-only visualization of JSON Schema and ALPS adoption facts.',
+            mimeType: McpApps::MIME_TYPE,
+            meta: [
+                'ui' => McpApps::resourceMarker(),
+            ],
         );
 
         $builder->addTool(
@@ -40,18 +67,58 @@ final class McpServerFactory
             title: 'Diagnose a BEAR project',
             description: 'Collect bounded, statically provable inconsistencies across saved project files. '
                 . 'The outer result remains successful when individual inputs are broken; inspect total, '
-                . 'truncated, resourceScanTruncated, and skippedChecks before interpreting the items.',
+                . 'offset, truncated, resourceScanTruncated, and skippedChecks before interpreting the items.',
             annotations: $annotations,
             inputSchema: self::objectSchema([
-                'limit' => self::limitSchema('Maximum number of diagnostic items to return.'),
+                'limit' => self::limitSchema(
+                    'Maximum number of diagnostic items to return per page.',
+                    self::PROJECT_REPORT_MAX_ITEMS,
+                ),
+                'offset' => self::offsetSchema(),
             ]),
+            outputSchema: self::envelopeSchema(),
+        );
+        $builder->addTool(
+            [$tools, 'contractCoverage'],
+            name: 'bear_contract_coverage',
+            title: 'Inspect BEAR contract coverage',
+            description: 'Report bounded JSON Schema and ALPS adoption facts for saved Resource methods. '
+                . 'This is not an error report or quality score: inspect available, absent, dynamic, unresolved, '
+                . 'and not_applicable surface states together with scan truncation before suggesting adoption work. '
+                . 'Absent means not adopted, not required. An app or page URI scheme alone does not prove '
+                . 'external exposure or JSON rendering. Use scheme to compare URI families, gapsOnly '
+                . 'to retrieve adoption candidates, and offset to continue a bounded page.',
+            annotations: $annotations,
+            inputSchema: self::objectSchema([
+                'limit' => self::limitSchema(
+                    'Maximum number of Resource method coverage items to return per page.',
+                    self::PROJECT_REPORT_MAX_ITEMS,
+                ),
+                'offset' => self::offsetSchema(),
+                'gapsOnly' => [
+                    'type' => 'boolean',
+                    'description' => 'Return only methods with at least one adoption gap.',
+                ],
+                'scheme' => [
+                    'type' => 'string',
+                    'enum' => ['app', 'page'],
+                    'description' => 'Optional source URI scheme filter; '
+                        . 'this does not imply public exposure or a media type.',
+                ],
+            ]),
+            meta: [
+                'ui' => new UiToolMeta(
+                    resourceUri: ContractCoverageUi::URI,
+                    visibility: [ToolVisibility::Model],
+                ),
+            ],
             outputSchema: self::envelopeSchema(),
         );
         $builder->addTool(
             [$tools, 'resourceList'],
             name: 'bear_resource_list',
             title: 'List BEAR Resources',
-            description: 'List deterministic Resource URI candidates known to the workspace.',
+            description: 'List deterministic Resource URI candidates in stable bounded pages.',
             annotations: $annotations,
             inputSchema: self::objectSchema([
                 'scheme' => [
@@ -68,8 +135,9 @@ final class McpServerFactory
                     'type' => 'integer',
                     'minimum' => 1,
                     'maximum' => 200,
-                    'description' => 'Maximum number of items to return.',
+                    'description' => 'Maximum number of items to return in this page.',
                 ],
+                'offset' => self::offsetSchema(),
             ]),
             outputSchema: self::envelopeSchema(),
         );
@@ -109,7 +177,7 @@ final class McpServerFactory
             [$tools, 'resourceAttributeIndex'],
             name: 'bear_resource_attribute_index',
             title: 'Index BEAR Resource attributes',
-            description: 'List bounded Resource attribute facts with an independent semantic status per Resource. '
+            description: 'List paginated Resource attribute facts with an independent semantic status per Resource. '
                 . 'Only arguments written in source are returned; omitted constructor defaults are not expanded.',
             annotations: $annotations,
             inputSchema: self::objectSchema([
@@ -124,6 +192,7 @@ final class McpServerFactory
                     'description' => 'Optional URI path prefix without the scheme.',
                 ],
                 'limit' => self::limitSchema('Maximum number of Resources to inspect.'),
+                'offset' => self::offsetSchema(),
             ]),
             outputSchema: self::envelopeSchema(),
         );
@@ -469,13 +538,23 @@ final class McpServerFactory
     }
 
     /** @return array<string, mixed> */
-    private static function limitSchema(string $description): array
+    private static function limitSchema(string $description, int $maximum = 200): array
     {
         return [
             'type' => 'integer',
             'minimum' => 1,
-            'maximum' => 200,
+            'maximum' => $maximum,
             'description' => $description,
+        ];
+    }
+
+    /** @return array<string, mixed> */
+    private static function offsetSchema(): array
+    {
+        return [
+            'type' => 'integer',
+            'minimum' => 0,
+            'description' => 'Zero-based offset in the stable result ordering.',
         ];
     }
 

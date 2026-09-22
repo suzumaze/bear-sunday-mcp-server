@@ -4,7 +4,7 @@ BEAR.Sunday MCP Serverは、保存済みの1つのworkspaceについて、AIク�
 事実を提供します。テキスト検索を完全に置き換えるものではありません。対応済みのBEAR概念は
 最初にSemantic toolで調べ、返されたファイルを読み、Semantic Model外のコードだけを検索します。
 
-利用できる23 toolの入力と結果は[MCPツール一覧](tools.ja.md)、実装・検証状況は
+利用できる24 toolの入力と結果は[MCPツール一覧](tools.ja.md)、実装・検証状況は
 [プロジェクト現在地点](project-status.ja.md)にまとめています。
 
 ## AIクライアント用Skill
@@ -22,6 +22,7 @@ SkillはMCP serverをinstall・起動・設定しません。また、BEAR appli
 | 質問 | テキスト検索 | Semantic MCPの結果 |
 |---|---|---|
 | project全体で静的に不整合な箇所はどこか | 独立した検索を繰り返し、未走査部分は分からない | 走査件数・打ち切り・skip情報を伴うbounded diagnostics |
+| JSON SchemaやALPSをまだ導入していない箇所はどこか | 属性と規約fileを個別検索し、適用可能性や網羅性は人が判断 | methodごとのsurface状態とboundedなproject集計 |
 | Resource URIの実装は何か | 一致した文字列やクラス名の断片 | 正規化URI、FQN、workspace相対path |
 | Resourceの公開APIは何か | `on*` methodを個別検索 | public `on*` methodと宣言されたparameter type |
 | Resourceはどこで使われるか | 同じ文字列をすべて表示 | 同じcanonical Resourceへ解決された静的参照 |
@@ -43,12 +44,44 @@ SkillはMCP serverをinstall・起動・設定しません。また、BEAR appli
 分けて報告してください。
 ```
 
-`bear_project_diagnostics`を使い、itemを解釈する前に`total`、`truncated`、`scannedFiles`、
+`bear_project_diagnostics`を使い、itemを解釈する前に`total`、`offset`、`truncated`、`scannedFiles`、
 `scannedResources`、`resourceScanTruncated`、`skippedChecks`を確認します。個別の保存済みfileや
 明示的参照が壊れていても外側のqueryは`ok`のままで、その失敗がdiagnostic itemになります。
-findingは静的な根拠であり、runtime behaviorやarchitectureの良し悪しを判定するものではありません。
+`truncated`がtrueの間は次の`offset`を取得します。findingは静的な根拠であり、runtime behaviorや
+architectureの良し悪しを判定するものではありません。
 
-## 2. 未知のプロジェクトを把握する
+## 2. JSON Schema・ALPS導入を計画する
+
+質問例:
+
+```text
+このprojectのcontract coverageを示してください。未導入候補と、dynamicまたはunresolvedな宣言を
+分け、gapをerror扱いせずに小さな最初の導入batchを提案してください。
+```
+
+`bear_contract_coverage`を`gapsOnly: true`で使い、`total`、`matchingTotal`、`offset`、
+`truncated`、`scannedResources`、`analyzedResources`、`resourceScanTruncated`を確認します。
+`scheme: "page"`または`"app"`でpagination前にURI schemeを選べます。`summary.schemes`は
+全projectの内訳のままです。URI schemeだけではHTML/JSON表現や公開範囲を証明できず、
+`absent`もSchemaが必須という意味ではありません。導入対象はprojectの境界で判断します。
+`truncated`がtrueの間は次の`offset`を取得します。各Resource methodについてrequest
+Schema、response Schema、ALPSを`available`、`absent`、`dynamic`、`unresolved`、
+`not_applicable`に分けます。UIではrequest Schemaの`not_applicable`を「No request fields」と表示します。
+`covered`は適用対象surfaceが静的に利用可能という意味だけで、
+code品質scoreではありません。`absent`を導入候補にし、`dynamic`はsourceを確認し、明示参照が
+壊れた`unresolved`は新しいartifactを生成する前に解決します。`coveredMethods`を増やすための
+placeholder一括生成は行わず、1つの一貫したResource workflowを選び、既存のSchema・ALPS規約に
+合わせます。
+
+MCP Apps対応hostでは、同じ結果をinteractiveなread-only viewでも表示できます。summary barと
+table filterは既存`structuredContent`の表示であり、別のcoverage計算ではありません。`absent`は
+errorではなく任意の導入候補のまま扱い、`resourceScanTruncated`とresult打ち切りは未走査範囲が
+あるwarningとして明示します。UI非対応hostには従来と同じsemantic resultを返します。
+Resource methodを選ぶと3つのsurfaceの明細を確認できます。source操作はworkspace相対pathを
+`ui/message`でhost assistantに渡します。editorを開けるかどうかはhost次第で、対応しない場合も
+pathをコピーできます。
+
+## 3. 未知のプロジェクトを把握する
 
 質問例:
 
@@ -56,6 +89,9 @@ findingは静的な根拠であり、runtime behaviorやarchitectureの良し悪
 このBEAR.Sundayプロジェクトを要約してください。Resource数とPage/App Resourceの先頭を一覧し、
 入口に見えるResourceを詳しく説明してください。
 ```
+
+Resource一覧で`truncated: true`なら、返却item数だけ`offset`を進めて次ページを取得します。
+最大200件は1ページのサイズ上限であり、inventory全体の打ち切りではありません。
 
 代表的なtool sequence:
 
@@ -67,7 +103,7 @@ findingは静的な根拠であり、runtime behaviorやarchitectureの良し悪
 アプリケーションを実行せずに、Semantic API version、project capability、Resource一覧、method、
 relation、template、schemaを把握できます。
 
-## 3. Resource変更の影響範囲を調べる
+## 4. Resource変更の影響範囲を調べる
 
 質問例:
 
@@ -85,7 +121,7 @@ app://self/userを変更する前に、public method、外向きLink/Embed、inc
 返されたpathとrangeから、関係するファイルだけを開けます。件数制限された結果には`total`と
 `truncated`があります。`truncated`がtrueなら、返されたpageを全件と判断してはいけません。
 
-## 4. Request surfaceを追跡する
+## 5. Request surfaceを追跡する
 
 一度に1つの具体的な質問をします。
 
@@ -102,7 +138,7 @@ ALPS descriptor goArticleを説明してください。
 
 解決は意図的に保守的です。動的な式、custom loader、外部ALPS link、曖昧な規約は推測しません。
 
-## 5. Resource属性を監査する
+## 6. Resource属性を監査する
 
 質問例:
 
@@ -118,7 +154,7 @@ application PHPは実行しません。
 両toolは引数policyを`explicit_only`として返します。属性で省略された引数はconstructorにdefaultが
 無いことを意味せず、install済みpackageのdefault値を展開・推測しません。
 
-## 6. Contract名のpresenceを比較する
+## 7. Contract名のpresenceを比較する
 
 質問例:
 
@@ -132,7 +168,7 @@ ALPS operation descriptor間のrequest名presenceを比較してください。
 型、制約、意味、runtime互換性の一致を証明しません。response比較ではResource body面は現在
 `unsupported`ですが、SchemaとALPSの`rt`先representationは比較できます。
 
-## 7. 正確なsource位置から移動する
+## 8. 正確なsource位置から移動する
 
 保存済みファイルとcursor位置が分かる場合は、標準LSP toolを使います。
 
@@ -153,7 +189,7 @@ recordだけを返し、methodは対象外です。index freshnessは`unknown`�
 証明できず、新規保存fileがまだindexに無い可能性もあります。既知fileには
 `lsp_document_symbols`、method探索や結論不能な空結果にはsource検索を使います。
 
-## 8. AIが生成した変更を検証する
+## 9. AIが生成した変更を検証する
 
 サーバー自身はファイルを編集しませんが、保存した変更がIDEと同じsemantic layerから認識されるかを
 確認できます。
@@ -170,7 +206,7 @@ recordだけを返し、methodは対象外です。index freshnessは`unknown`�
 
 これは規約や解決の誤りを検出します。runtime behaviorを証明するものではありません。
 
-## 9. 結果を安全に解釈する
+## 10. 結果を安全に解釈する
 
 すべてのBEAR Semantic API resultは同じenvelopeを保ちます。
 

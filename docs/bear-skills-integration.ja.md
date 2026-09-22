@@ -16,6 +16,7 @@ MCP serverには、汎用の[`bear-semantic` Skill](../skills/bear-semantic/SKIL
 
 - `bear_project_info`によるcapability確認
 - `bear_project_diagnostics`によるproject全体の静的不整合と走査範囲の確認
+- `bear_contract_coverage`によるJSON Schema・ALPS導入候補と解析不能箇所の分離
 - BEAR identifierにはsemantic tool、source位置にはLSP toolを選ぶrouting
 - status、ambiguity、truncation、provenanceの解釈
 - 対象外だけをsource検索するfallback
@@ -80,7 +81,8 @@ Skillへ残すもの:
 
 ## Semantic API実装状況
 
-2026-09-20時点で、以下のResource attribute facts、contract comparison、project diagnosticsは
+2026-09-21時点で、以下のResource attribute facts、contract comparison、project diagnostics、
+contract coverageは
 coreとMCP adapterに実装済みです。
 
 ### 1. Resource attribute facts
@@ -169,6 +171,7 @@ bear/project/diagnostics
       "details": {"kind": "link", "rel": "edit"}
     }],
     "total": 1,
+    "offset": 0,
     "truncated": false,
     "scannedFiles": 7,
     "scannedResources": 3,
@@ -180,19 +183,35 @@ bear/project/diagnostics
 
 外側のqueryは個別fileや参照が壊れていても`ok`を保ち、その不整合をitemとして返します。
 `truncated`、`resourceScanTruncated`、`skippedChecks`を確認せずに「問題なし」と判断してはいけません。
+`truncated`がtrueなら、返却件数を現在の`offset`に加えて次pageを取得します。
 cacheすべきか、設計が良いかといったheuristicやproject opinionは診断に含めず、Skillが別途判断します。
+
+### 4. Contract adoption coverage
+
+```text
+bear/project/contractCoverage
+```
+
+保存済みResource methodごとにrequest Schema、response Schema、ALPS descriptorを調べ、
+`available`、`absent`、`dynamic`、`unresolved`、`not_applicable`へ分類します。
+`absent`は任意artifactの未導入候補でありerrorではありません。`dynamic`はsource確認が必要で、
+`unresolved`は明示宣言が解決できない状態です。`covered`も品質scoreではなく、適用対象surfaceが
+静的に利用可能という意味だけです。Skillは走査打ち切りを確認し、project方針に基づいて小さな
+導入batchを提案しますが、Semantic API自身はartifactを生成しません。gap調査では`gapsOnly: true`を
+使い、`truncated`がtrueの間は`offset`で全pageを取得します。
 
 ## Skillが使う基本workflow
 
 1. `bear_project_info`でcapabilityとversionを確認する。
 2. project全体のreviewでは`bear_project_diagnostics`を呼び、走査範囲とskipを確認する。
-3. BEAR identifierが分かる場合はGrepより先にsemantic toolを呼ぶ。
-4. `status`、`available`、`truncated`を確認する。
-5. provenanceにある最小限のファイルだけを読む。
-6. semantic toolが対象外と明示した部分だけを検索する。
-7. Skillの判断基準を適用する。
-8. 編集後、同じqueryを再実行してsemantic resolutionを確認する。
-9. test/static analysisは別のcommandとして実行する。
+3. contract導入支援では`bear_contract_coverage`を呼び、未導入と解析不能を分ける。
+4. BEAR identifierが分かる場合はGrepより先にsemantic toolを呼ぶ。
+5. `status`、`available`、`truncated`を確認する。
+6. provenanceにある最小限のファイルだけを読む。
+7. semantic toolが対象外と明示した部分だけを検索する。
+8. Skillの判断基準を適用する。
+9. 編集後、同じqueryを再実行してsemantic resolutionを確認する。
+10. test/static analysisは別のcommandとして実行する。
 
 ## 非目標
 

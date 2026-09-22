@@ -4,6 +4,24 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+
+- `bear_contract_coverage` for bounded project-wide JSON Schema and ALPS adoption facts,
+  preserving absent, dynamic, unresolved, available, and non-applicable states without
+  treating optional contract gaps as errors or a quality score.
+- An optional, read-only MCP Apps view for `bear_contract_coverage`, with surface summaries,
+  local filtering, explicit scan-truncation warnings, and a structured/text fallback for hosts
+  that do not render MCP Apps.
+
+### Changed
+
+- Project diagnostics and contract coverage now use stable offset pagination and a measured
+  100-item page budget; contract coverage can select only adoption gaps with `gapsOnly`.
+- Project diagnostics and contract coverage now analyze the complete Resource inventory;
+  `bear_resource_list` and `bear_resource_attribute_index` expose stable `offset` pagination.
+- The contract coverage view labels request-Schema `not_applicable` as “No request fields” and
+  displays the current page range.
+
 ## [0.8.0] - 2026-09-20
 
 ### Added

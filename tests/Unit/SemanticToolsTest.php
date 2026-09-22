@@ -28,13 +28,44 @@ final class SemanticToolsTest extends TestCase
         self::assertSame(
             self::ok([
                 'method' => 'bear/project/diagnostics',
-                'params' => ['limit' => 25],
+                'params' => ['limit' => 25, 'offset' => 10],
             ]),
-            $tools->projectDiagnostics(25),
+            $tools->projectDiagnostics(25, 10),
         );
         self::assertSame(
             ['bear/project/info', 'bear/project/diagnostics'],
             array_column($client->requests, 'method'),
+        );
+    }
+
+    public function testMapsContractCoverageWithoutChangingSemanticResults(): void
+    {
+        $client = new InMemoryLspClient(static function (string $method, array $params): array {
+            if ($method === 'bear/project/info') {
+                return self::projectInfoResult();
+            }
+
+            return self::ok(['method' => $method, 'params' => $params]);
+        });
+        $tools = new SemanticTools($client);
+
+        self::assertSame(
+            self::ok([
+                'method' => 'bear/project/contractCoverage',
+                'params' => ['limit' => 25, 'offset' => 10, 'gapsOnly' => true],
+            ]),
+            $tools->contractCoverage(25, 10, true),
+        );
+        self::assertSame(
+            ['bear/project/info', 'bear/project/contractCoverage'],
+            array_column($client->requests, 'method'),
+        );
+        self::assertSame(
+            self::ok([
+                'method' => 'bear/project/contractCoverage',
+                'params' => ['limit' => 5, 'offset' => 0, 'gapsOnly' => true, 'scheme' => 'page'],
+            ]),
+            $tools->contractCoverage(5, 0, true, 'page'),
         );
     }
 
@@ -53,9 +84,9 @@ final class SemanticToolsTest extends TestCase
         self::assertSame(
             self::ok([
                 'method' => 'bear/resource/list',
-                'params' => ['scheme' => 'app', 'prefix' => 'user', 'limit' => 25],
+                'params' => ['scheme' => 'app', 'prefix' => 'user', 'limit' => 25, 'offset' => 10],
             ]),
-            $tools->resourceList('app', 'user', 25),
+            $tools->resourceList('app', 'user', 25, 10),
         );
         self::assertSame(
             self::ok([
@@ -203,9 +234,9 @@ final class SemanticToolsTest extends TestCase
         self::assertSame(
             self::ok([
                 'method' => 'bear/resource/attributeIndex',
-                'params' => ['scheme' => 'app', 'prefix' => 'dash', 'limit' => 25],
+                'params' => ['scheme' => 'app', 'prefix' => 'dash', 'limit' => 25, 'offset' => 10],
             ]),
-            $tools->resourceAttributeIndex('app', 'dash', 25),
+            $tools->resourceAttributeIndex('app', 'dash', 25, 10),
         );
         self::assertSame(
             self::ok([
