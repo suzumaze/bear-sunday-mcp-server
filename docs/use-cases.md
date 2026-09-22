@@ -10,6 +10,7 @@ semantic model.
 | Question | Text search | Semantic MCP result |
 |---|---|---|
 | What is statically inconsistent across the project? | Many independent searches with no coverage signal | Bounded diagnostics with scan counts, truncation, and skipped checks |
+| Where are JSON Schema or ALPS contracts not adopted yet? | Attribute and convention searches with no applicability or completeness signal | Per-method surface states and a bounded project summary |
 | What implements a Resource URI? | Matching string or class fragments | Normalized URI, FQN, and workspace-relative path |
 | What is the Resource interface? | Separate searches for `on*` methods | Public `on*` methods and declared parameter types |
 | Where is the Resource used? | Every matching string | Static references that resolve to the same canonical Resource |
@@ -32,13 +33,46 @@ Audit this project for statically provable inconsistencies. Separate findings fr
 that were skipped or truncated.
 ```
 
-Use `bear_project_diagnostics`, then inspect `total`, `truncated`, `scannedFiles`,
+Use `bear_project_diagnostics`, then inspect `total`, `offset`, `truncated`, `scannedFiles`,
 `scannedResources`, `resourceScanTruncated`, and `skippedChecks` before interpreting the
 items. The outer query remains `ok` when an individual saved file or explicit reference is
 broken; those failures are diagnostic items. Findings are static evidence, not runtime or
-architectural judgments.
+architectural judgments. Continue with the next `offset` while `truncated` is true.
 
-## 2. Learn an unfamiliar project
+## 2. Plan JSON Schema and ALPS adoption
+
+Ask:
+
+```text
+Show the project's contract coverage. Separate absent adoption opportunities from dynamic or
+unresolved declarations, and suggest a small first batch without treating gaps as errors.
+```
+
+Use `bear_contract_coverage` with `gapsOnly: true`, then inspect `total`, `matchingTotal`,
+`offset`, `truncated`, `scannedResources`, `analyzedResources`, and `resourceScanTruncated`.
+Optionally select `scheme: "page"` or `"app"` before pagination; `summary.schemes`
+still counts the complete project. These are URI families, not proven HTML/JSON
+representations or public/private exposure. An `absent` surface is not a requirement
+violation; choose which boundaries merit a contract using project context.
+Continue with the next `offset` while `truncated` is true. Each Resource method reports request Schema,
+response Schema, and ALPS states as `available`, `absent`, `dynamic`, `unresolved`, or
+`not_applicable`. In the UI, request-Schema `not_applicable` is labelled “No request fields”.
+`covered` only means every applicable surface is statically available; it is
+not a code-quality score. Prefer `absent` surfaces as adoption candidates, inspect source for
+`dynamic`, and resolve explicit broken references reported as `unresolved` before generating
+new artifacts. Do not bulk-generate placeholders to raise `coveredMethods`; select one coherent
+Resource workflow and follow the project's existing Schema and ALPS conventions.
+
+An MCP Apps-compatible host can render the same result as an interactive, read-only view. Its
+summary bars and table filters are presentation of the existing `structuredContent`, not a second
+coverage calculation. `absent` remains an optional adoption opportunity rather than an error,
+while `resourceScanTruncated` and result truncation are shown as incomplete-coverage warnings.
+Select a Resource method to inspect its three surface facts. The source action sends the
+workspace-relative path to the host assistant via `ui/message`; whether that opens an editor is
+host-dependent. Copying the path remains available when the host cannot handle that request.
+Text-only hosts continue to receive the same semantic result.
+
+## 3. Learn an unfamiliar project
 
 Ask:
 
@@ -56,8 +90,10 @@ Typical tool sequence:
 
 This establishes the Semantic API version, project capabilities, Resource inventory,
 methods, relations, templates, and schemas without executing the application.
+Advance `offset` by the returned item count while a Resource list page reports
+`truncated: true`; the 200-item maximum is a page-size bound, not an inventory cutoff.
 
-## 3. Estimate the impact of changing a Resource
+## 4. Estimate the impact of changing a Resource
 
 Ask:
 
@@ -76,7 +112,7 @@ Use the returned paths and ranges to open only the relevant files. A bounded res
 `total` and `truncated`; do not treat the returned page as the complete set when
 `truncated` is true.
 
-## 4. Trace a request surface
+## 5. Trace a request surface
 
 Ask one concrete question at a time:
 
@@ -94,7 +130,7 @@ The corresponding tools are `bear_route_lookup`, `bear_template_for_resource`,
 Resolution is deliberately conservative. Dynamic expressions, custom loaders, external
 ALPS links, and ambiguous conventions are not guessed.
 
-## 5. Audit Resource attributes
+## 6. Audit Resource attributes
 
 Ask:
 
@@ -111,7 +147,7 @@ Both tools return an explicit-only argument policy. An omitted attribute argumen
 not mean that the constructor has no default, and installed-package defaults are not
 expanded or guessed.
 
-## 6. Compare contract name presence
+## 7. Compare contract name presence
 
 Ask:
 
@@ -126,7 +162,7 @@ available. Equal names are evidence of spelling presence only—not type, constr
 meaning, or runtime compatibility. For response comparison the Resource body surface is
 currently `unsupported`; Schema and an ALPS `rt` representation can still be compared.
 
-## 7. Navigate from an exact source position
+## 8. Navigate from an exact source position
 
 When the client already knows a saved file and cursor position, use the standard LSP tools:
 
@@ -149,7 +185,7 @@ reported as unknown, so an empty result is not proof of absence and a newly save
 not be indexed yet. For a known file, use `lsp_document_symbols`; for method discovery or
 an inconclusive empty result, fall back to source search.
 
-## 8. Validate an AI-generated change
+## 9. Validate an AI-generated change
 
 The server never edits files, but it can verify that a saved change is visible through the
 same semantic layer used by the IDE:
@@ -166,7 +202,7 @@ same semantic layer used by the IDE:
 
 This catches convention and resolution mistakes. It does not prove runtime behavior.
 
-## 9. Interpret results safely
+## 10. Interpret results safely
 
 Every BEAR Semantic API result preserves the same envelope:
 

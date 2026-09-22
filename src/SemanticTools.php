@@ -47,18 +47,45 @@ final class SemanticTools
     }
 
     /** @return array<string, mixed> */
-    public function projectDiagnostics(int $limit = 100): array
+    public function projectDiagnostics(int $limit = 100, int $offset = 0): array
     {
-        return $this->query('bear/project/diagnostics', ['limit' => $limit]);
+        return $this->query('bear/project/diagnostics', [
+            'limit' => $limit,
+            'offset' => $offset,
+        ]);
     }
 
     /** @return array<string, mixed> */
-    public function resourceList(?string $scheme = null, string $prefix = '', int $limit = 50): array
-    {
+    public function contractCoverage(
+        int $limit = 100,
+        int $offset = 0,
+        bool $gapsOnly = false,
+        ?string $scheme = null,
+    ): array {
+        $params = [
+            'limit' => $limit,
+            'offset' => $offset,
+            'gapsOnly' => $gapsOnly,
+        ];
+        if ($scheme !== null) {
+            $params['scheme'] = $scheme;
+        }
+
+        return $this->query('bear/project/contractCoverage', $params);
+    }
+
+    /** @return array<string, mixed> */
+    public function resourceList(
+        ?string $scheme = null,
+        string $prefix = '',
+        int $limit = 50,
+        int $offset = 0,
+    ): array {
         return $this->query('bear/resource/list', [
             'scheme' => $scheme,
             'prefix' => $prefix,
             'limit' => $limit,
+            'offset' => $offset,
         ]);
     }
 
@@ -89,11 +116,13 @@ final class SemanticTools
         ?string $scheme = null,
         string $prefix = '',
         int $limit = 50,
+        int $offset = 0,
     ): array {
         return $this->query('bear/resource/attributeIndex', [
             'scheme' => $scheme,
             'prefix' => $prefix,
             'limit' => $limit,
+            'offset' => $offset,
         ]);
     }
 

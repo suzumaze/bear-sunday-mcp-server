@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Suzumaze\BearSundayMcp\Tests\Integration;
 
+use Mcp\Schema\Extension\Apps\McpApps;
 use PHPUnit\Framework\TestCase;
+use Suzumaze\BearSundayMcp\ContractCoverageUi;
 use Suzumaze\BearSundayMcp\Version;
 
 final class McpStdioServerTest extends TestCase
@@ -81,12 +83,53 @@ final class McpStdioServerTest extends TestCase
     {
         $initialize = $this->request('initialize', [
             'protocolVersion' => '2025-11-25',
-            'capabilities' => (object) [],
+            'capabilities' => [
+                'extensions' => [
+                    McpApps::EXTENSION_ID => [
+                        'mimeTypes' => [McpApps::MIME_TYPE],
+                    ],
+                ],
+            ],
             'clientInfo' => ['name' => 'phpunit', 'version' => '1.0.0'],
         ]);
         self::assertSame('2025-11-25', $initialize['result']['protocolVersion']);
         self::assertSame(Version::CURRENT, $initialize['result']['serverInfo']['version']);
+        self::assertSame(
+            ['mimeTypes' => [McpApps::MIME_TYPE]],
+            $initialize['result']['capabilities']['extensions'][McpApps::EXTENSION_ID],
+        );
         $this->notify('notifications/initialized');
+
+        $listedResources = $this->request('resources/list', []);
+        self::assertSame([
+            'uri' => ContractCoverageUi::URI,
+            'name' => 'bear-contract-coverage',
+            'title' => 'BEAR Contract Coverage',
+            'description' => 'Read-only visualization of JSON Schema and ALPS adoption facts.',
+            'mimeType' => McpApps::MIME_TYPE,
+            '_meta' => ['ui' => []],
+        ], $listedResources['result']['resources'][0] ?? null);
+
+        $coverageUi = $this->request('resources/read', ['uri' => ContractCoverageUi::URI]);
+        $coverageUiContent = $coverageUi['result']['contents'][0] ?? [];
+        self::assertSame(ContractCoverageUi::URI, $coverageUiContent['uri'] ?? null);
+        self::assertSame(McpApps::MIME_TYPE, $coverageUiContent['mimeType'] ?? null);
+        self::assertTrue($coverageUiContent['_meta']['ui']['prefersBorder'] ?? false);
+        self::assertStringContainsString('ui/initialize', $coverageUiContent['text'] ?? '');
+        self::assertStringContainsString('ui/notifications/tool-result', $coverageUiContent['text'] ?? '');
+        self::assertStringContainsString('resourceScanTruncated', $coverageUiContent['text'] ?? '');
+        self::assertStringContainsString('This is not a quality score.', $coverageUiContent['text'] ?? '');
+        self::assertStringContainsString('No request fields', $coverageUiContent['text'] ?? '');
+        self::assertStringContainsString(
+            'Absent means no contract artifact was observed, not that one is required.',
+            $coverageUiContent['text'] ?? '',
+        );
+        self::assertStringContainsString('App URI methods', $coverageUiContent['text'] ?? '');
+        self::assertStringContainsString('Page URI methods', $coverageUiContent['text'] ?? '');
+        self::assertStringContainsString('Use offset', $coverageUiContent['text'] ?? '');
+        self::assertStringContainsString('Show contract details for', $coverageUiContent['text'] ?? '');
+        self::assertStringContainsString("request('ui/message'", $coverageUiContent['text'] ?? '');
+        self::assertStringContainsString('Copy source path', $coverageUiContent['text'] ?? '');
 
         $listed = $this->request('tools/list', []);
         $tools = $listed['result']['tools'] ?? [];
@@ -96,6 +139,7 @@ final class McpStdioServerTest extends TestCase
         self::assertSame([
             'bear_alps_descriptor_lookup',
             'bear_contract_compare',
+            'bear_contract_coverage',
             'bear_project_diagnostics',
             'bear_project_info',
             'bear_resource_attribute_index',
@@ -148,10 +192,49 @@ final class McpStdioServerTest extends TestCase
             'skippedChecks',
             $toolsByName['bear_project_diagnostics']['description'],
         );
+        self::assertStringContainsString(
+            'not an error report or quality score',
+            $toolsByName['bear_contract_coverage']['description'],
+        );
+        self::assertSame(
+            100,
+            $toolsByName['bear_contract_coverage']['inputSchema']['properties']['limit']['maximum'] ?? null,
+        );
+        self::assertArrayHasKey(
+            'offset',
+            $toolsByName['bear_contract_coverage']['inputSchema']['properties'],
+        );
+        self::assertArrayHasKey(
+            'gapsOnly',
+            $toolsByName['bear_contract_coverage']['inputSchema']['properties'],
+        );
+        self::assertSame(
+            ['app', 'page'],
+            $toolsByName['bear_contract_coverage']['inputSchema']['properties']['scheme']['enum'] ?? null,
+        );
+        self::assertArrayHasKey(
+            'offset',
+            $toolsByName['bear_resource_list']['inputSchema']['properties'],
+        );
+        self::assertArrayHasKey(
+            'offset',
+            $toolsByName['bear_resource_attribute_index']['inputSchema']['properties'],
+        );
+        self::assertSame(
+            100,
+            $toolsByName['bear_project_diagnostics']['inputSchema']['properties']['limit']['maximum'] ?? null,
+        );
+        self::assertSame(
+            [
+                'resourceUri' => ContractCoverageUi::URI,
+                'visibility' => ['model'],
+            ],
+            $toolsByName['bear_contract_coverage']['_meta']['ui'] ?? null,
+        );
 
         $diagnostics = $this->request('tools/call', [
             'name' => 'bear_project_diagnostics',
-            'arguments' => ['limit' => 25],
+            'arguments' => ['limit' => 25, 'offset' => 10],
         ]);
         self::assertFalse($diagnostics['result']['isError'] ?? true);
         self::assertSame(
@@ -159,13 +242,27 @@ final class McpStdioServerTest extends TestCase
             $diagnostics['result']['structuredContent']['data']['method'],
         );
         self::assertSame(
-            ['limit' => 25],
+            ['limit' => 25, 'offset' => 10],
             $diagnostics['result']['structuredContent']['data']['params'],
+        );
+
+        $coverage = $this->request('tools/call', [
+            'name' => 'bear_contract_coverage',
+            'arguments' => ['limit' => 25, 'offset' => 10, 'gapsOnly' => true, 'scheme' => 'page'],
+        ]);
+        self::assertFalse($coverage['result']['isError'] ?? true);
+        self::assertSame(
+            'bear/project/contractCoverage',
+            $coverage['result']['structuredContent']['data']['method'],
+        );
+        self::assertSame(
+            ['limit' => 25, 'offset' => 10, 'gapsOnly' => true, 'scheme' => 'page'],
+            $coverage['result']['structuredContent']['data']['params'],
         );
 
         $called = $this->request('tools/call', [
             'name' => 'bear_resource_list',
-            'arguments' => ['scheme' => 'app', 'prefix' => 'user', 'limit' => 10],
+            'arguments' => ['scheme' => 'app', 'prefix' => 'user', 'limit' => 10, 'offset' => 20],
         ]);
         self::assertFalse($called['result']['isError'] ?? true);
         self::assertSame('ok', $called['result']['structuredContent']['status']);
@@ -174,7 +271,7 @@ final class McpStdioServerTest extends TestCase
             $called['result']['structuredContent']['data']['method'],
         );
         self::assertSame(
-            ['scheme' => 'app', 'prefix' => 'user', 'limit' => 10],
+            ['scheme' => 'app', 'prefix' => 'user', 'limit' => 10, 'offset' => 20],
             $called['result']['structuredContent']['data']['params'],
         );
 
@@ -193,11 +290,15 @@ final class McpStdioServerTest extends TestCase
 
         $attributeIndex = $this->request('tools/call', [
             'name' => 'bear_resource_attribute_index',
-            'arguments' => ['scheme' => 'app', 'prefix' => 'dash', 'limit' => 10],
+            'arguments' => ['scheme' => 'app', 'prefix' => 'dash', 'limit' => 10, 'offset' => 20],
         ]);
         self::assertSame(
             'bear/resource/attributeIndex',
             $attributeIndex['result']['structuredContent']['data']['method'],
+        );
+        self::assertSame(
+            ['scheme' => 'app', 'prefix' => 'dash', 'limit' => 10, 'offset' => 20],
+            $attributeIndex['result']['structuredContent']['data']['params'],
         );
 
         $contract = $this->request('tools/call', [
@@ -332,6 +433,16 @@ final class McpStdioServerTest extends TestCase
         ]);
         $this->notify('notifications/initialized');
 
+        $coverageWithoutApps = $this->request('tools/call', [
+            'name' => 'bear_contract_coverage',
+            'arguments' => ['limit' => 10],
+        ]);
+        self::assertFalse($coverageWithoutApps['result']['isError'] ?? true);
+        self::assertSame(
+            'bear/project/contractCoverage',
+            $coverageWithoutApps['result']['structuredContent']['data']['method'],
+        );
+
         $invalid = $this->request('tools/call', [
             'name' => 'bear_resource_list',
             'arguments' => ['limit' => 999],
@@ -352,9 +463,21 @@ final class McpStdioServerTest extends TestCase
 
         $invalidDiagnosticsLimit = $this->request('tools/call', [
             'name' => 'bear_project_diagnostics',
-            'arguments' => ['limit' => 201],
+            'arguments' => ['limit' => 101],
         ]);
         self::assertSame(-32602, $invalidDiagnosticsLimit['error']['code']);
+
+        $invalidCoverageLimit = $this->request('tools/call', [
+            'name' => 'bear_contract_coverage',
+            'arguments' => ['limit' => 101],
+        ]);
+        self::assertSame(-32602, $invalidCoverageLimit['error']['code']);
+
+        $invalidCoverageOffset = $this->request('tools/call', [
+            'name' => 'bear_contract_coverage',
+            'arguments' => ['offset' => -1],
+        ]);
+        self::assertSame(-32602, $invalidCoverageOffset['error']['code']);
 
         $invalidContractKind = $this->request('tools/call', [
             'name' => 'bear_contract_compare',

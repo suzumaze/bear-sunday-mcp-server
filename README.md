@@ -20,12 +20,27 @@ and AI clients.
 
 ## Status
 
-Version 0.8.0 provides twenty-three read-only tools against BEAR Semantic API version 1 and
+The server provides twenty-four read-only tools against BEAR Semantic API version 1 and
 Phpactor's standard LSP. In addition to project, Resource, and schema facts, it resolves
 explicit Route names, SQL query IDs, Twig/Qiq template names, Resource templates, and ALPS
 descriptors. It also exposes allowlisted Resource attribute facts, a bounded attribute
 inventory, presence-only contract comparison, static Resource references, and incoming
-Link/Embed relations.
+Link/Embed relations. Project-level contract coverage distinguishes absent, dynamic,
+unresolved, available, and non-applicable JSON Schema and ALPS surfaces without treating
+optional adoption gaps as errors.
+Project diagnostics and contract coverage use stable offset pagination with a measured
+100-item maximum page: on BeMart this keeps their JSON responses near or below the same
+64 KiB payload budget used for bounded Hover text,
+while `gapsOnly` lets contract coverage return every adoption gap without returning covered rows.
+Use `scheme: "page"` or `"app"` to select a source URI family before pagination.
+The scheme alone does not establish whether a Resource is publicly exposed or rendered
+as JSON; `absent` does not mean a Schema is required.
+On hosts that support the open MCP Apps UI extension, `bear_contract_coverage` also renders a
+coverage view with surface distributions, App/Page URI subtotals, Resource-method filtering, inline contract details,
+and prominent scan-truncation warnings. Selecting a method can ask the host assistant to inspect
+its workspace-relative source path; editor navigation depends on the host. The path can also be
+copied. The view loads no external resources and does not replace the tool's text and
+`structuredContent` response on other hosts.
 Definition, Type Definition, References, and Hover can be queried at a position in a saved
 workspace file; Completion, Document Links, document symbols, and workspace symbol search
 are also available. Workspace symbol search covers Phpactor's indexed class, function, and
@@ -33,7 +48,7 @@ constant records, not methods, and does not claim that its index is current.
 
 See [Project status](docs/project-status.md) ([日本語](docs/project-status.ja.md)) for the
 implemented boundary, real-workspace verification evidence, and deferred experiments.
-See the [tool table below](#tools) ([日本語の全23ツール一覧](docs/tools.ja.md)) for the
+See the [tool table below](#tools) ([日本語の全24ツール一覧](docs/tools.ja.md)) for the
 complete inventory, and [Use cases](docs/use-cases.md) ([日本語](docs/use-cases.ja.md))
 for task-oriented workflows.
 
@@ -43,6 +58,10 @@ for task-oriented workflows.
 - Phpactor with `suzumaze/bear-phpactor-extension` 0.1.7 or newer installed in Phpactor's
   Composer environment
 - An MCP host that supports stdio servers
+
+`bear_contract_coverage` additionally requires a Phpactor extension build that advertises the
+`contractCoverage` capability; older compatible extensions return `engine_unavailable` for that
+single tool while the remaining tools continue to work.
 
 The MCP SDK is fixed to the compatible `0.8.x` line because its public API is not yet 1.0.
 
@@ -230,11 +249,12 @@ The complete Japanese reference is available in [MCPツール一覧](docs/tools.
 | MCP tool | BEAR Semantic API v1 request | Purpose |
 |---|---|---|
 | `bear_project_info` | `bear/project/info` | API version, capabilities, package versions, PSR-4 roots, and Resource count |
-| `bear_project_diagnostics` | `bear/project/diagnostics` | Bounded project-wide static inconsistencies, scan coverage, truncation, and skipped checks |
-| `bear_resource_list` | `bear/resource/list` | Deterministic Resource URI inventory with scheme, prefix, and limit filters |
+| `bear_project_diagnostics` | `bear/project/diagnostics` | Paginated project-wide static inconsistencies, scan coverage, and skipped checks |
+| `bear_contract_coverage` | `bear/project/contractCoverage` | Paginated Resource-method contract adoption, gap selection, complete summary, and scan bounds |
+| `bear_resource_list` | `bear/resource/list` | Deterministic paginated Resource URI inventory with scheme and prefix filters |
 | `bear_resource_describe` | `bear/resource/describe` | Resource methods, Link/Embed relations, templates, and schemas |
 | `bear_resource_attributes` | `bear/resource/attributes` | Allowlisted class/method attributes with explicit source arguments and dynamic markers; constructor defaults are not expanded |
-| `bear_resource_attribute_index` | `bear/resource/attributeIndex` | Bounded workspace attribute facts with per-Resource status and explicit-only argument policy |
+| `bear_resource_attribute_index` | `bear/resource/attributeIndex` | Paginated workspace attribute facts with per-Resource status and explicit-only argument policy |
 | `bear_contract_compare` | `bear/contract/compare` | Exact name presence across Resource request parameters, JSON Schema, and ALPS; no type/meaning claim |
 | `bear_schema_lookup` | `bear/schema/describeForResource` | Bounded request/response Schema facts without raw JSON |
 | `bear_route_lookup` | `bear/route/resolve` | Explicit Aura Router route name to Page Resource |
