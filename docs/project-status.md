@@ -1,7 +1,7 @@
 # Project status
 
 This is the combined implementation, verification, and release status of the Phpactor extension
-and MCP server as of 2026-09-21.
+and MCP server as of 2026-09-22.
 
 See the [complete tool inventory](../README.md#tools) ([Japanese](tools.ja.md)) and the
 [task-oriented use cases](use-cases.md) ([Japanese](use-cases.ja.md)).
@@ -14,14 +14,14 @@ flowchart TB
         C3["Allowlisted Resource attribute facts<br/>complete"]
         C4["Resource, Schema, and ALPS<br/>name-presence comparison<br/>complete"]
         C5["Project-wide static diagnostics<br/>complete"]
-        C6["Project-wide contract adoption coverage<br/>complete on current branch"]
+        C6["Project-wide contract adoption coverage<br/>complete"]
         C1 --> C2
         C1 --> C3 --> C4 --> C5 --> C6
     end
 
     subgraph MCP["bear-sunday-mcp-server"]
-        M1["24 read-only tools<br/>complete on current branch"]
-        M0["Optional MCP Apps contract coverage view<br/>complete on current branch"]
+        M1["24 read-only tools<br/>complete"]
+        M0["Optional MCP Apps contract coverage view<br/>complete"]
         M2["Grep comparison and task-oriented use cases<br/>complete"]
         M3["BEAR.Skills responsibility map<br/>complete"]
         M4["Real Phpactor fixture E2E<br/>24 tools<br/>complete"]
@@ -37,19 +37,19 @@ flowchart TB
         D1 -.-> D2
     end
 
-    M5 --> R1["core v0.1.7 / MCP v0.8.0<br/>released and locally verified"]
-    R1 --> S1["bear-semantic skill bundled<br/>project diagnostics workflow included"]
+    M5 --> R1["core v0.1.8 / MCP v0.9.0<br/>contract coverage release"]
+    R1 --> S1["bear-semantic skill bundled<br/>contract adoption workflow included"]
 ```
 
 ## Release status
 
 | Component | Version | Status |
 |---|---|---|
-| `suzumaze/bear-phpactor-extension` | [`v0.1.7`](https://github.com/suzumaze/bear-phpactor-extension/releases/tag/v0.1.7) | GitHub Release and Packagist published |
-| `suzumaze/bear-sunday-mcp-server` | `v0.8.0` | Release with project diagnostics |
-| MCP tool inventory | 24 on the current branch; 23 in `v0.8.0` | English and Japanese manuals complete |
-| Contract coverage UI | optional MCP Apps view on the current branch | Read-only; structured/text fallback retained |
-| `bear-semantic` agent skill | current branch extends the `v0.8.0` skill | Project diagnostics and contract-adoption workflows included |
+| `suzumaze/bear-phpactor-extension` | `v0.1.8` | Contract coverage Semantic API |
+| `suzumaze/bear-sunday-mcp-server` | `v0.9.0` | Contract coverage tool and optional view |
+| MCP tool inventory | 24 in `v0.9.0` | English and Japanese manuals complete |
+| Contract coverage UI | optional MCP Apps view | Read-only; structured/text fallback retained |
+| `bear-semantic` agent skill | bundled with `v0.9.0` | Project diagnostics and contract-adoption workflows included |
 
 ## What improved beyond grep
 
@@ -90,14 +90,16 @@ application, Resources, or SQL:
 | Scan coverage | 245 PHP files, 41 Resources, no Resource scan truncation |
 | Skipped checks | none |
 
-The 100-item project-report page budget is based on saved-source measurements against BeMart
-(154 Resources, 249 methods), not on an MCP protocol limit. Contract coverage was 64,480 bytes
-at 100 items and 128,379 bytes at 200; project diagnostics was 46,397 bytes at 100 and 92,981
-bytes at 200. The implementation therefore targets an approximately 64 KiB response page,
-matching the existing bounded Hover-text payload budget, and uses stable `offset` pagination.
-BeMart contract coverage returned pages of 100, 100, and 49;
-diagnostics returned 100, 100, and 69. `gapsOnly` returned all 22 adoption gaps in one page,
-including all four unresolved ALPS declarations.
+The initial 100-item default was informed by saved-source measurements against BeMart
+(154 Resources, 249 methods): contract coverage was 64,480 bytes at 100 items and
+128,379 bytes at 200; project diagnostics was 46,397 bytes at 100 and 92,981 bytes at 200.
+Other item shapes can be much larger, so both reports also apply an approximate 56 KiB
+serialized-item-and-provenance budget, reserving room for the envelope and summary.
+This is not a hard wire-size guarantee for a single oversized item. Diagnostics preserves
+its published 1–200 input range, while contract coverage accepts 1–100. Advance `offset`
+by the returned item count, which may be smaller than the requested `limit`.
+In the earlier BeMart measurement, `gapsOnly` returned 22 adoption gaps, including all
+four unresolved ALPS declarations.
 
 ## Current boundary
 

@@ -1,6 +1,6 @@
 # プロジェクト現在地点
 
-2026-09-21時点の、Phpactor extensionとMCP serverを合わせた実装・検証・公開状況です。
+2026-09-22時点の、Phpactor extensionとMCP serverを合わせた実装・検証・公開状況です。
 
 全24 toolの入力と結果は[MCPツール一覧](tools.ja.md)、具体的な調査手順は
 [ユースケース](use-cases.ja.md)を参照してください。
@@ -13,14 +13,14 @@ flowchart TB
         C3["Resource属性facts<br/>完了"]
         C4["Resource・Schema・ALPS<br/>名前presence比較<br/>完了"]
         C5["Project全体の静的diagnostics<br/>完了"]
-        C6["Project全体のcontract導入coverage<br/>現branchで完了"]
+        C6["Project全体のcontract導入coverage<br/>完了"]
         C1 --> C2
         C1 --> C3 --> C4 --> C5 --> C6
     end
 
     subgraph MCP["bear-sunday-mcp-server"]
-        M1["24 read-only tools<br/>現branchで完了"]
-        M0["任意のMCP Apps contract coverage view<br/>現branchで完了"]
+        M1["24 read-only tools<br/>完了"]
+        M0["任意のMCP Apps contract coverage view<br/>完了"]
         M2["Grepとの差とtask-oriented use cases<br/>完了"]
         M3["BEAR.Skills責務対応表<br/>完了"]
         M4["実Phpactor fixture E2E<br/>24 tools<br/>完了"]
@@ -36,19 +36,19 @@ flowchart TB
         D1 -.-> D2
     end
 
-    M5 --> R1["core v0.1.7 / MCP v0.8.0<br/>公開・手元更新完了"]
-    R1 --> S1["bear-semantic Skill同梱<br/>project diagnostics workflow追加"]
+    M5 --> R1["core v0.1.8 / MCP v0.9.0<br/>contract coverage release"]
+    R1 --> S1["bear-semantic Skill同梱<br/>contract導入workflow追加"]
 ```
 
 ## 公開状況
 
 | component | version | 状態 |
 |---|---|---|
-| `suzumaze/bear-phpactor-extension` | [`v0.1.7`](https://github.com/suzumaze/bear-phpactor-extension/releases/tag/v0.1.7) | GitHub Release・Packagist公開済み |
-| `suzumaze/bear-sunday-mcp-server` | `v0.8.0` | project diagnosticsを含むrelease |
-| MCP tool inventory | 現branchは24 tools、`v0.8.0`は23 tools | 日本語・英語manual整備済み |
-| Contract coverage UI | 現branchで任意のMCP Apps viewを追加 | read-only、structured/text fallbackを維持 |
-| `bear-semantic` agent Skill | 現branchで`v0.8.0`同梱版を拡張 | project diagnosticsとcontract導入workflowを含む |
+| `suzumaze/bear-phpactor-extension` | `v0.1.8` | contract coverage Semantic API |
+| `suzumaze/bear-sunday-mcp-server` | `v0.9.0` | contract coverage toolと任意のview |
+| MCP tool inventory | `v0.9.0`で24 tools | 日本語・英語manual整備済み |
+| Contract coverage UI | 任意のMCP Apps view | read-only、structured/text fallbackを維持 |
+| `bear-semantic` agent Skill | `v0.9.0`に同梱 | project diagnosticsとcontract導入workflowを含む |
 
 ## Grepから進歩した点
 
@@ -94,13 +94,13 @@ source確認を引き続き使います。
 | 走査範囲 | PHP 245 files、41 Resources、Resource走査打ち切りなし |
 | skipされた検査 | なし |
 
-project reportの1ページ100件というbudgetはMCP protocolの制限ではなく、BeMart（154 Resources、
-249 methods）の保存済みsourceでの実測に基づきます。contract coverageは100件で64,480 bytes、
-200件で128,379 bytes、project diagnosticsは100件で46,397 bytes、200件で92,981 bytesでした。
-そこで既存のbounded Hover textと同じ約64 KiBを1 response pageの目標とし、安定した`offset`
-paginationを使います。BeMartでは
-contract coverageを100・100・49件、diagnosticsを100・100・69件で全件取得できました。
-`gapsOnly`は22 adoption gapsを1ページで返し、ALPS unresolved 4件すべてを含みました。
+既定100件はBeMart（154 Resources、249 methods）の保存済みsourceでの初期実測を参考にしました。
+contract coverageは100件で64,480 bytes、200件で128,379 bytes、project diagnosticsは
+100件で46,397 bytes、200件で92,981 bytesでした。ただしitemの内容次第でさらに大きくなるため、
+両reportに概算56 KiBのitem・provenance budgetを追加し、envelopeとsummaryの余地を残します。
+単一itemが非常に大きい場合のwire sizeを厳密に保証するものではありません。diagnosticsは公開済みの
+limit 1〜200を維持し、contract coverageは1〜100です。返却件数だけ`offset`を進めます。
+以前のBeMart実測では`gapsOnly`は22 adoption gaps、ALPS unresolved 4件すべてを含みました。
 
 ## 現在の境界
 
