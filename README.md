@@ -28,10 +28,11 @@ inventory, presence-only contract comparison, static Resource references, and in
 Link/Embed relations. Project-level contract coverage distinguishes absent, dynamic,
 unresolved, available, and non-applicable JSON Schema and ALPS surfaces without treating
 optional adoption gaps as errors.
-Project diagnostics and contract coverage use stable offset pagination with a measured
-100-item maximum page: on BeMart this keeps their JSON responses near or below the same
-64 KiB payload budget used for bounded Hover text,
-while `gapsOnly` lets contract coverage return every adoption gap without returning covered rows.
+Project diagnostics and contract coverage use stable offset pagination and an approximate
+serialized-byte budget: a page can be shorter than its requested count. Advance `offset` by
+the actual returned item count while `truncated` is true. Diagnostics accepts `limit` 1–200
+(default 100); contract coverage accepts 1–100 (default 100). A single oversized item may
+exceed the budget. `gapsOnly` selects adoption gaps without returning covered rows.
 Use `scheme: "page"` or `"app"` to select a source URI family before pagination.
 The scheme alone does not establish whether a Resource is publicly exposed or rendered
 as JSON; `absent` does not mean a Schema is required.
@@ -55,7 +56,7 @@ for task-oriented workflows.
 ## Requirements
 
 - PHP 8.2 or newer
-- Phpactor with `suzumaze/bear-phpactor-extension` 0.1.7 or newer installed in Phpactor's
+- Phpactor with `suzumaze/bear-phpactor-extension` 0.1.8 or newer installed in Phpactor's
   Composer environment
 - An MCP host that supports stdio servers
 

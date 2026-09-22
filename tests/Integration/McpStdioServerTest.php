@@ -221,7 +221,7 @@ final class McpStdioServerTest extends TestCase
             $toolsByName['bear_resource_attribute_index']['inputSchema']['properties'],
         );
         self::assertSame(
-            100,
+            200,
             $toolsByName['bear_project_diagnostics']['inputSchema']['properties']['limit']['maximum'] ?? null,
         );
         self::assertSame(
@@ -463,7 +463,7 @@ final class McpStdioServerTest extends TestCase
 
         $invalidDiagnosticsLimit = $this->request('tools/call', [
             'name' => 'bear_project_diagnostics',
-            'arguments' => ['limit' => 101],
+            'arguments' => ['limit' => 201],
         ]);
         self::assertSame(-32602, $invalidDiagnosticsLimit['error']['code']);
 

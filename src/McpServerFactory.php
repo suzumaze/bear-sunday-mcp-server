@@ -14,7 +14,7 @@ use Mcp\Server;
 
 final class McpServerFactory
 {
-    /** Measured project-report page size that stays near or below the existing 64 KiB semantic payload budget. */
+    /** Maximum item count for contract coverage; project diagnostics preserves its published 200-item input range. */
     private const PROJECT_REPORT_MAX_ITEMS = 100;
 
     public static function create(SemanticTools $tools, StandardLspTools $lspTools): Server
@@ -71,8 +71,8 @@ final class McpServerFactory
             annotations: $annotations,
             inputSchema: self::objectSchema([
                 'limit' => self::limitSchema(
-                    'Maximum number of diagnostic items to return per page.',
-                    self::PROJECT_REPORT_MAX_ITEMS,
+                    'Maximum number of diagnostic items per page (up to 200; byte budget may return fewer).',
+                    200,
                 ),
                 'offset' => self::offsetSchema(),
             ]),
@@ -91,7 +91,7 @@ final class McpServerFactory
             annotations: $annotations,
             inputSchema: self::objectSchema([
                 'limit' => self::limitSchema(
-                    'Maximum number of Resource method coverage items to return per page.',
+                    'Maximum number of Resource method coverage items per page (byte budget may return fewer).',
                     self::PROJECT_REPORT_MAX_ITEMS,
                 ),
                 'offset' => self::offsetSchema(),

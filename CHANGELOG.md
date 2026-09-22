@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-09-22
+
 ### Added
 
 - `bear_contract_coverage` for bounded project-wide JSON Schema and ALPS adoption facts,
@@ -15,8 +17,11 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
-- Project diagnostics and contract coverage now use stable offset pagination and a measured
-  100-item page budget; contract coverage can select only adoption gaps with `gapsOnly`.
+- Project diagnostics and contract coverage now use stable offset pagination and an approximate
+  serialized-byte page budget; diagnostics preserves its published 1–200 `limit` range,
+  and contract coverage can select only adoption gaps with `gapsOnly`.
+- Project diagnostics exposes skipped Schema and ALPS reference checks when their roots
+  are absent, and limits name-difference samples to five names per surface with full totals.
 - Project diagnostics and contract coverage now analyze the complete Resource inventory;
   `bear_resource_list` and `bear_resource_attribute_index` expose stable `offset` pagination.
 - The contract coverage view labels request-Schema `not_applicable` as “No request fields” and
@@ -140,7 +145,8 @@ All notable changes to this project will be documented in this file.
 - Bounded LSP framing, fixed workspace/process configuration, structured failure results, and
   fake and real stdio integration coverage.
 
-[Unreleased]: https://github.com/suzumaze/bear-sunday-mcp-server/compare/v0.8.0...HEAD
+[Unreleased]: https://github.com/suzumaze/bear-sunday-mcp-server/compare/v0.9.0...HEAD
+[0.9.0]: https://github.com/suzumaze/bear-sunday-mcp-server/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/suzumaze/bear-sunday-mcp-server/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/suzumaze/bear-sunday-mcp-server/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/suzumaze/bear-sunday-mcp-server/compare/v0.5.0...v0.6.0

@@ -82,7 +82,7 @@ final class RealMcpEndToEndTest extends TestCase
             self::assertSame(7, $diagnostics['data']['scannedFiles']);
             self::assertSame(3, $diagnostics['data']['scannedResources']);
             self::assertFalse($diagnostics['data']['resourceScanTruncated']);
-            self::assertSame([], $diagnostics['data']['skippedChecks']);
+            self::assertSame(['request_schema_references'], $diagnostics['data']['skippedChecks']);
 
             $coverage = $client->callTool('bear_contract_coverage', [
                 'limit' => 10,
