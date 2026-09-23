@@ -1,6 +1,6 @@
 # プロジェクト現在地点
 
-2026-09-22時点の、Phpactor extensionとMCP serverを合わせた実装・検証・公開状況です。
+2026-09-24時点の、Phpactor extensionとMCP serverを合わせた実装・検証・公開状況です。
 
 全24 toolの入力と結果は[MCPツール一覧](tools.ja.md)、具体的な調査手順は
 [ユースケース](use-cases.ja.md)を参照してください。
@@ -8,7 +8,7 @@
 ```mermaid
 flowchart TB
     subgraph Core["bear-phpactor-extension"]
-        C1["Semantic API v1<br/>Resource・Schema・Route・SQL・Template・ALPS<br/>完了"]
+        C1["BEAR Semantic API<br/>request・capability discovery<br/>完了"]
         C2["標準LSP<br/>Definition・References・Hover・Completion等<br/>完了"]
         C3["Resource属性facts<br/>完了"]
         C4["Resource・Schema・ALPS<br/>名前presence比較<br/>完了"]
@@ -36,7 +36,7 @@ flowchart TB
         D1 -.-> D2
     end
 
-    M5 --> R1["core v0.1.8 / MCP v0.10.1<br/>一括インストール"]
+    M5 --> R1["core v0.1.9 / MCP v0.10.1<br/>一括インストール"]
     R1 --> S1["bear-semantic Skill同梱<br/>contract導入workflow追加"]
 ```
 
@@ -44,7 +44,7 @@ flowchart TB
 
 | component | version | 状態 |
 |---|---|---|
-| `suzumaze/bear-phpactor-extension` | `v0.1.8` | contract coverage Semantic API |
+| `suzumaze/bear-phpactor-extension` | `v0.1.9` | 発見可能なBEAR Semantic APIと解決精度の修正 |
 | `suzumaze/bear-sunday-mcp-server` | `v0.10.1` | Phpactor・BEAR拡張を同梱。contract coverage tool、任意のview、Feynman形式の入門を追加 |
 | MCP tool inventory | `v0.10.1`で24 tools | 日本語・英語manual整備済み |
 | Contract coverage UI | 任意のMCP Apps view | read-only、structured/text fallbackを維持 |
@@ -75,7 +75,7 @@ source確認を引き続き使います。
 |---|---|
 | MCP tool inventory | 22 tools |
 | release handshake | MCP `0.6.0`、core `v0.1.6`、compatibility issueなし |
-| `bear_project_info` | `ok`, Semantic API v1 |
+| `bear_project_info` | `ok`、旧version marker `1`（request discoveryへ移行） |
 | Resource inventory | 276 Resources |
 | bounded list | 20件を返し、再実行結果はbyte-identical |
 | describe / attributes / contract | `ok` |
@@ -89,7 +89,7 @@ source確認を引き続き使います。
 | 検査 | 結果 |
 |---|---|
 | MCP tool inventory | 23 tools、`bear_project_diagnostics`を含む |
-| release handshake | MCP `0.8.0`、core `v0.1.7`、Semantic API v1 |
+| release handshake | MCP `0.8.0`、core `v0.1.7`、旧version marker `1` |
 | Project diagnostics | `ok`、65 items、result打ち切りなし |
 | 走査範囲 | PHP 245 files、41 Resources、Resource走査打ち切りなし |
 | skipされた検査 | なし |

@@ -1,7 +1,7 @@
 # Project status
 
 This is the combined implementation, verification, and release status of the Phpactor extension
-and MCP server as of 2026-09-22.
+and MCP server as of 2026-09-24.
 
 See the [complete tool inventory](../README.md#tools) ([Japanese](tools.ja.md)) and the
 [task-oriented use cases](use-cases.md) ([Japanese](use-cases.ja.md)).
@@ -9,7 +9,7 @@ See the [complete tool inventory](../README.md#tools) ([Japanese](tools.ja.md)) 
 ```mermaid
 flowchart TB
     subgraph Core["bear-phpactor-extension"]
-        C1["Semantic API v1<br/>Resource, Schema, Route, SQL, Template, ALPS<br/>complete"]
+        C1["BEAR Semantic API<br/>discoverable requests and capabilities<br/>complete"]
         C2["Standard LSP navigation and discovery<br/>complete"]
         C3["Allowlisted Resource attribute facts<br/>complete"]
         C4["Resource, Schema, and ALPS<br/>name-presence comparison<br/>complete"]
@@ -37,7 +37,7 @@ flowchart TB
         D1 -.-> D2
     end
 
-    M5 --> R1["core v0.1.8 / MCP v0.10.1<br/>bundled installation"]
+    M5 --> R1["core v0.1.9 / MCP v0.10.1<br/>bundled installation"]
     R1 --> S1["bear-semantic skill bundled<br/>contract adoption workflow included"]
 ```
 
@@ -45,7 +45,7 @@ flowchart TB
 
 | Component | Version | Status |
 |---|---|---|
-| `suzumaze/bear-phpactor-extension` | `v0.1.8` | Contract coverage Semantic API |
+| `suzumaze/bear-phpactor-extension` | `v0.1.9` | Discoverable BEAR Semantic API and resolution fixes |
 | `suzumaze/bear-sunday-mcp-server` | `v0.10.1` | Bundled Phpactor/BEAR extension, contract coverage, optional view, Feynman-style introduction |
 | MCP tool inventory | 24 in `v0.10.1` | English and Japanese manuals complete |
 | Contract coverage UI | optional MCP Apps view | Read-only; structured/text fallback retained |
@@ -71,7 +71,7 @@ clean.
 |---|---|
 | MCP inventory | 22 tools |
 | Release handshake | MCP `0.6.0`, core `v0.1.6`, no compatibility issues |
-| Project info | `ok`, Semantic API v1 |
+| Project info | `ok`, legacy version marker `1` (superseded by request discovery) |
 | Resource inventory | 276 Resources |
 | Bounded list | 20 returned; repeated result was byte-identical |
 | Describe / attributes / contract | `ok` |
@@ -85,7 +85,7 @@ application, Resources, or SQL:
 | Check | Result |
 |---|---|
 | MCP inventory | 23 tools, including `bear_project_diagnostics` |
-| Release handshake | MCP `0.8.0`, core `v0.1.7`, Semantic API v1 |
+| Release handshake | MCP `0.8.0`, core `v0.1.7`, legacy version marker `1` |
 | Project diagnostics | `ok`, 65 items, no result truncation |
 | Scan coverage | 245 PHP files, 41 Resources, no Resource scan truncation |
 | Skipped checks | none |

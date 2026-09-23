@@ -34,7 +34,7 @@ final class RealPhpactorTest extends TestCase
         }
     }
 
-    public function testQueriesSemanticApiV1ThroughARealPhpactorProcess(): void
+    public function testQueriesSemanticApiThroughARealPhpactorProcess(): void
     {
         $phpactor = getenv('BEAR_MCP_TEST_PHPACTOR');
         if (!is_string($phpactor) || $phpactor === '') {
@@ -49,7 +49,8 @@ final class RealPhpactorTest extends TestCase
         try {
             $result = $client->request('bear/project/info', []);
             self::assertSame('ok', $result['status']);
-            self::assertSame(1, $result['data']['semanticApiVersion']);
+            self::assertSame('bear-semantic', $result['data']['semanticProtocol']);
+            self::assertContains('bear/resource/describe', $result['data']['requests']);
             self::assertSame(3, $result['data']['resourceCount']);
 
             $outside = $client->request('bear/resource/describe', [

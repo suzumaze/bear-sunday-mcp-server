@@ -69,7 +69,7 @@ final class SemanticToolsTest extends TestCase
         );
     }
 
-    public function testMapsTheFourM1ToolsToSemanticApiV1WithoutChangingResults(): void
+    public function testMapsTheFourM1ToolsWithoutChangingSemanticResults(): void
     {
         $client = new InMemoryLspClient(static function (string $method, array $params): array {
             if ($method === 'bear/project/info') {
@@ -112,7 +112,7 @@ final class SemanticToolsTest extends TestCase
         );
     }
 
-    public function testMapsM2NavigationToolsToSemanticApiV1WithoutChangingResults(): void
+    public function testMapsM2NavigationToolsWithoutChangingSemanticResults(): void
     {
         $client = new InMemoryLspClient(static function (string $method, array $params): array {
             if ($method === 'bear/project/info') {
@@ -173,7 +173,7 @@ final class SemanticToolsTest extends TestCase
         );
     }
 
-    public function testMapsM2ReferenceToolsToSemanticApiV1WithoutChangingResults(): void
+    public function testMapsM2ReferenceToolsWithoutChangingSemanticResults(): void
     {
         $client = new InMemoryLspClient(static function (string $method, array $params): array {
             if ($method === 'bear/project/info') {
@@ -308,14 +308,69 @@ final class SemanticToolsTest extends TestCase
         );
     }
 
-    public function testRejectsAnUnsupportedSemanticApiMajorVersion(): void
+    public function testFailedContextSpecificProjectInfoDoesNotPoisonDefaultPreflight(): void
     {
-        $client = new InMemoryLspClient(static fn (): array => self::ok(['semanticApiVersion' => 2]));
+        $client = new InMemoryLspClient(static function (string $method, array $params): array {
+            if ($method === 'bear/project/info' && ($params['contextPath'] ?? null) === 'missing.php') {
+                return [
+                    'status' => 'not_found',
+                    'data' => null,
+                    'candidates' => [],
+                    'provenance' => [],
+                    'error' => ['code' => 'semantic_not_found', 'message' => 'Not found.'],
+                ];
+            }
+
+            return $method === 'bear/project/info' ? self::projectInfoResult() : self::ok([]);
+        });
+        $tools = new SemanticTools($client);
+
+        self::assertSame('not_found', $tools->projectInfo('missing.php')['status']);
+        self::assertSame('ok', $tools->resourceList()['status']);
+        self::assertSame(
+            ['bear/project/info', 'bear/project/info', 'bear/resource/list'],
+            array_column($client->requests, 'method'),
+        );
+    }
+
+    public function testRejectsAnUnsupportedSemanticProtocol(): void
+    {
+        $client = new InMemoryLspClient(static fn (): array => self::ok([
+            'semanticProtocol' => 'other-semantic-protocol',
+            'requests' => [],
+        ]));
 
         $result = (new SemanticTools($client))->projectInfo();
 
         self::assertSame('unsupported', $result['status']);
-        self::assertSame('unsupported_semantic_api_version', $result['error']['code']);
+        self::assertSame('unsupported_semantic_protocol', $result['error']['code']);
+    }
+
+    public function testRejectsARequestThatWasNotAdvertised(): void
+    {
+        $client = new InMemoryLspClient(static fn (): array => self::ok([
+            'semanticProtocol' => 'bear-semantic',
+            'requests' => ['bear/project/info'],
+        ]));
+
+        $result = (new SemanticTools($client))->resourceList();
+
+        self::assertSame('unsupported', $result['status']);
+        self::assertSame('semantic_request_unavailable', $result['error']['code']);
+        self::assertSame(['bear/project/info'], array_column($client->requests, 'method'));
+    }
+
+    public function testRejectsInvalidRequestDiscovery(): void
+    {
+        $client = new InMemoryLspClient(static fn (): array => self::ok([
+            'semanticProtocol' => 'bear-semantic',
+            'requests' => ['bear/project/info', 42],
+        ]));
+
+        $result = (new SemanticTools($client))->projectInfo();
+
+        self::assertSame('parse_error', $result['status']);
+        self::assertSame('invalid_semantic_discovery', $result['error']['code']);
     }
 
     public function testMapsMethodNotFoundToEngineUnavailable(): void
@@ -357,7 +412,25 @@ final class SemanticToolsTest extends TestCase
     private static function projectInfoResult(): array
     {
         return self::ok([
-            'semanticApiVersion' => 1,
+            'semanticProtocol' => 'bear-semantic',
+            'requests' => [
+                'bear/project/info',
+                'bear/project/diagnostics',
+                'bear/project/contractCoverage',
+                'bear/resource/list',
+                'bear/resource/describe',
+                'bear/resource/attributes',
+                'bear/resource/attributeIndex',
+                'bear/resource/references',
+                'bear/resource/incomingRelations',
+                'bear/contract/compare',
+                'bear/schema/describeForResource',
+                'bear/route/resolve',
+                'bear/sql/resolve',
+                'bear/template/resolve',
+                'bear/template/forResource',
+                'bear/alps/describeDescriptor',
+            ],
             'workspaceName' => 'fixture',
         ]);
     }

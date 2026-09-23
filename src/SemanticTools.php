@@ -11,7 +11,7 @@ use Suzumaze\BearSundayMcp\Lsp\SemanticLspClient;
 
 final class SemanticTools
 {
-    private const SEMANTIC_API_VERSION = 1;
+    private const SEMANTIC_PROTOCOL = 'bear-semantic';
     private const STATUSES = [
         'ok',
         'not_found',
@@ -29,6 +29,9 @@ final class SemanticTools
     /** @var array<string, mixed>|null */
     private ?array $preflightFailure = null;
 
+    /** @var array<string, true> */
+    private array $availableRequests = [];
+
     public function __construct(private readonly SemanticLspClient $client)
     {
     }
@@ -37,10 +40,9 @@ final class SemanticTools
     public function projectInfo(?string $contextPath = null): array
     {
         $result = $this->forward('bear/project/info', ['contextPath' => $contextPath]);
-        $checked = $this->checkApiVersion($result);
+        $checked = $this->checkDiscovery($result);
         if (($checked['status'] ?? null) === 'ok') {
-            $this->preflightComplete = true;
-            $this->preflightFailure = null;
+            $this->rememberDiscovery($checked);
         }
 
         return $checked;
@@ -238,7 +240,7 @@ final class SemanticTools
      */
     private function query(string $method, array $params): array
     {
-        $failure = $this->preflight();
+        $failure = $this->preflight($method);
         if ($failure !== null) {
             return $failure;
         }
@@ -247,19 +249,31 @@ final class SemanticTools
     }
 
     /** @return array<string, mixed>|null */
-    private function preflight(): ?array
+    private function preflight(string $method): ?array
     {
-        if ($this->preflightComplete) {
+        if (! $this->preflightComplete) {
+            $result = $this->checkDiscovery($this->forward('bear/project/info', ['contextPath' => null]));
+            $this->preflightComplete = true;
+            if (($result['status'] ?? null) === 'ok') {
+                $this->rememberDiscovery($result);
+            } else {
+                $this->preflightFailure = $result;
+            }
+        }
+
+        if ($this->preflightFailure !== null) {
             return $this->preflightFailure;
         }
 
-        $result = $this->checkApiVersion($this->forward('bear/project/info', ['contextPath' => null]));
-        $this->preflightComplete = true;
-        if (($result['status'] ?? null) !== 'ok') {
-            $this->preflightFailure = $result;
+        if (! isset($this->availableRequests[$method])) {
+            return self::failure(
+                'unsupported',
+                'semantic_request_unavailable',
+                'Phpactor does not advertise the required BEAR semantic request.',
+            );
         }
 
-        return $this->preflightFailure;
+        return null;
     }
 
     /**
@@ -304,21 +318,51 @@ final class SemanticTools
 
     /**
      * @param array<string, mixed> $result
+     */
+    private function rememberDiscovery(array $result): void
+    {
+        $this->preflightComplete = true;
+        $this->preflightFailure = null;
+        $this->availableRequests = [];
+
+        $data = $result['data'] ?? null;
+        $requests = is_array($data) ? ($data['requests'] ?? []) : [];
+        foreach ($requests as $request) {
+            if (is_string($request)) {
+                $this->availableRequests[$request] = true;
+            }
+        }
+    }
+
+    /**
+     * @param array<string, mixed> $result
      * @return array<string, mixed>
      */
-    private function checkApiVersion(array $result): array
+    private function checkDiscovery(array $result): array
     {
         if (($result['status'] ?? null) !== 'ok') {
             return $result;
         }
 
         $data = $result['data'] ?? null;
-        $version = is_array($data) ? ($data['semanticApiVersion'] ?? null) : null;
-        if ($version !== self::SEMANTIC_API_VERSION) {
+        if (! is_array($data) || ($data['semanticProtocol'] ?? null) !== self::SEMANTIC_PROTOCOL) {
             return self::failure(
                 'unsupported',
-                'unsupported_semantic_api_version',
-                'The BEAR Semantic API major version is not supported by this adapter.',
+                'unsupported_semantic_protocol',
+                'The BEAR semantic protocol is not supported by this adapter.',
+            );
+        }
+
+        $requests = $data['requests'] ?? null;
+        if (
+            ! is_array($requests)
+            || array_is_list($requests) === false
+            || array_filter($requests, static fn (mixed $request): bool => ! is_string($request)) !== []
+        ) {
+            return self::failure(
+                'parse_error',
+                'invalid_semantic_discovery',
+                'Phpactor returned invalid BEAR semantic request discovery.',
             );
         }
 

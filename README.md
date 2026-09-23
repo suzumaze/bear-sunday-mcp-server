@@ -23,7 +23,7 @@ and AI clients.
 
 ## Status
 
-The server provides twenty-four read-only tools against BEAR Semantic API version 1 and
+The server provides twenty-four read-only tools against the BEAR Semantic API and
 Phpactor's standard LSP. In addition to project, Resource, and schema facts, it resolves
 explicit Route names, SQL query IDs, Twig/Qiq template names, Resource templates, and ALPS
 descriptors. It also exposes allowlisted Resource attribute facts, a bounded attribute
@@ -72,7 +72,7 @@ for task-oriented workflows.
 - An MCP host that supports stdio servers
 
 The standard installation bundles Phpactor 2026.07.22.0 and
-`suzumaze/bear-phpactor-extension` 0.1.8 or newer. If you override `--phpactor`
+`suzumaze/bear-phpactor-extension` 0.1.9 or newer. If you override `--phpactor`
 with an older compatible installation, `bear_contract_coverage` needs its
 `contractCoverage` capability; otherwise that tool returns `engine_unavailable`.
 
@@ -264,9 +264,9 @@ the server, so the MCP interface is usable without the skill.
 
 The complete Japanese reference is available in [MCPツール一覧](docs/tools.ja.md).
 
-| MCP tool | BEAR Semantic API v1 request | Purpose |
+| MCP tool | BEAR Semantic API request | Purpose |
 |---|---|---|
-| `bear_project_info` | `bear/project/info` | API version, capabilities, package versions, PSR-4 roots, and Resource count |
+| `bear_project_info` | `bear/project/info` | Protocol, advertised requests, capabilities, package versions, PSR-4 roots, and Resource count |
 | `bear_project_diagnostics` | `bear/project/diagnostics` | Paginated project-wide static inconsistencies, scan coverage, and skipped checks |
 | `bear_contract_coverage` | `bear/project/contractCoverage` | Paginated Resource-method contract adoption, gap selection, complete summary, and scan bounds |
 | `bear_resource_list` | `bear/resource/list` | Deterministic paginated Resource URI inventory with scheme and prefix filters |
@@ -359,7 +359,7 @@ BEAR_MCP_TEST_PHPACTOR=/absolute/path/to/phpactor \
 ```
 
 The real tests exercise every published MCP tool through a real Phpactor process, verify
-Semantic API version 1, and confirm that an outside-workspace context path is rejected
+BEAR semantic request discovery, and confirm that an outside-workspace context path is rejected
 without exposing the outside path.
 
 ## Deferred scope

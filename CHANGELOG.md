@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Changed
+
+- Discover the stable `bear-semantic` protocol and individual request names instead of
+  requiring a whole-API version number. Each MCP tool now checks that its backing request
+  is advertised before calling it.
+
 ## [0.10.1] - 2026-09-23
 
 ### Documentation

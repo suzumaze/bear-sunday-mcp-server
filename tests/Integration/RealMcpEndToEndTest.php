@@ -67,7 +67,8 @@ final class RealMcpEndToEndTest extends TestCase
 
             $project = $client->callTool('bear_project_info')->structuredContent;
             self::assertIsArray($project);
-            self::assertSame(1, $project['data']['semanticApiVersion']);
+            self::assertSame('bear-semantic', $project['data']['semanticProtocol']);
+            self::assertContains('bear/project/diagnostics', $project['data']['requests']);
             self::assertContains('projectDiagnostics', $project['data']['capabilities']);
 
             $diagnostics = $client->callTool('bear_project_diagnostics', [

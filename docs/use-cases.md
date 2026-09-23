@@ -94,7 +94,7 @@ Typical tool sequence:
 3. `bear_resource_list` with `scheme: app`
 4. `bear_resource_describe` for selected URIs
 
-This establishes the Semantic API version, project capabilities, Resource inventory,
+This establishes the semantic protocol, advertised requests, project capabilities, Resource inventory,
 methods, relations, templates, and schemas without executing the application.
 Advance `offset` by the returned item count while a Resource list page reports
 `truncated: true`; the 200-item maximum is a page-size bound, not an inventory cutoff.

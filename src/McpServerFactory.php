@@ -29,7 +29,7 @@ final class McpServerFactory
         $builder = Server::builder()->setServerInfo(
             'bear-sunday-mcp-server',
             Version::CURRENT,
-            'Read-only bridge to BEAR.Sunday Semantic API v1 over Phpactor LSP.',
+            'Read-only bridge to the BEAR Semantic API over Phpactor LSP.',
         );
         $builder->enableExtension(new McpApps());
         $builder->addResource(
@@ -55,7 +55,8 @@ final class McpServerFactory
             [$tools, 'projectInfo'],
             name: 'bear_project_info',
             title: 'BEAR project information',
-            description: 'Report BEAR semantic capabilities, versions, workspace metadata, and Resource count.',
+            description: 'Report the BEAR semantic protocol, advertised requests, capabilities, package versions, '
+                . 'workspace metadata, and Resource count.',
             annotations: $annotations,
             inputSchema: self::objectSchema([
                 'contextPath' => self::pathSchema('Optional workspace-relative context path.'),
