@@ -1,5 +1,8 @@
 # BEAR.Sunday MCP Server
 
+New to the project? Start with the
+[Feynman README（専門用語なしの日本語解説）](README.feynman.md).
+
 Read-only MCP adapter for the BEAR.Sunday Semantic API exposed by
 [`suzumaze/bear-phpactor-extension`](https://github.com/suzumaze/bear-phpactor-extension)
 through the Phpactor Language Server.
