@@ -1,11 +1,11 @@
 # MCPツール一覧
 
-BEAR.Sunday MCP Serverは、BEAR Semantic API v1とPhpactorの標準LSPを
+BEAR.Sunday MCP Serverは、BEAR Semantic APIとPhpactorの標準LSPを
 用途別の24個のread-only toolとして公開します。
 
 - Resource URIなど、調べたいBEAR識別子が分かる場合は`bear_*` toolを使います。
 - 保存済みファイルのcursor位置が分かる場合は`lsp_*` toolを使います。
-- プロジェクトの対応機能やversionが不明な場合は、最初に`bear_project_info`を使います。
+- プロジェクトの対応requestやcapabilityが不明な場合は、最初に`bear_project_info`を使います。
 
 具体的な調査手順は[ユースケース](use-cases.ja.md)、実装・検証状況は
 [プロジェクト現在地点](project-status.ja.md)を参照してください。
@@ -14,7 +14,7 @@ BEAR.Sunday MCP Serverは、BEAR Semantic API v1とPhpactorの標準LSPを
 
 | MCP tool | Semantic API request | 主な入力 | 得られる事実 |
 |---|---|---|---|
-| `bear_project_info` | `bear/project/info` | optionalなcontext path | Semantic API version、capability、package version、PSR-4 root、Resource数 |
+| `bear_project_info` | `bear/project/info` | optionalなcontext path | protocol、request一覧、capability、package version、PSR-4 root、Resource数 |
 | `bear_project_diagnostics` | `bear/project/diagnostics` | limit、offset | project全体の静的に証明できる不整合、走査件数、pagination、skipされた検査 |
 | `bear_contract_coverage` | `bear/project/contractCoverage` | limit、offset、gapsOnly、scheme | Resource methodごとのrequest/response SchemaとALPSの導入状態、URI scheme選択、全体集計、走査範囲 |
 | `bear_resource_list` | `bear/resource/list` | scheme、prefix、limit、offset | 正規化されたResource URI、FQN、workspace相対pathの決定的なページ一覧 |

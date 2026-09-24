@@ -61,7 +61,14 @@ final class ProjectReportToolsTest extends TestCase
     private static function reports(array $result): ProjectReportTools
     {
         $client = new InMemoryLspClient(static fn (string $method): array => $method === 'bear/project/info'
-            ? self::envelope(['semanticApiVersion' => 1])
+            ? self::envelope([
+                'semanticProtocol' => 'bear-semantic',
+                'requests' => [
+                    'bear/project/info',
+                    'bear/project/diagnostics',
+                    'bear/project/contractCoverage',
+                ],
+            ])
             : $result);
 
         return new ProjectReportTools(new SemanticTools($client));

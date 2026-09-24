@@ -104,7 +104,7 @@ Resource一覧で`truncated: true`なら、返却item数だけ`offset`を進め�
 3. `scheme: app`を指定した`bear_resource_list`
 4. 選択したURIへの`bear_resource_describe`
 
-アプリケーションを実行せずに、Semantic API version、project capability、Resource一覧、method、
+アプリケーションを実行せずに、semantic protocol、利用可能なrequestとproject capability、Resource一覧、method、
 relation、template、schemaを把握できます。
 
 ## 4. Resource変更の影響範囲を調べる

@@ -33,9 +33,10 @@ final class BundledInstallTest extends TestCase
             $project = $client->callTool('bear_project_info')->structuredContent;
             self::assertIsArray($project);
             self::assertSame('ok', $project['status']);
-            self::assertSame(1, $project['data']['semanticApiVersion']);
+            self::assertSame('bear-semantic', $project['data']['semanticProtocol']);
+            self::assertContains('bear/project/contractCoverage', $project['data']['requests']);
             self::assertContains('contractCoverage', $project['data']['capabilities']);
-            self::assertSame('v0.1.8', $project['data']['versions']['suzumaze/bear-phpactor-extension']);
+            self::assertSame('v0.1.9', $project['data']['versions']['suzumaze/bear-phpactor-extension']);
 
             $coverage = $client->callTool('bear_contract_coverage', ['limit' => 1])->structuredContent;
             self::assertIsArray($coverage);

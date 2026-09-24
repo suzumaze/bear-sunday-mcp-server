@@ -13,8 +13,9 @@ normal agent workflow.
 
 1. Find `bear_project_info` among the available tools. Tool names may carry a client-specific
    server prefix.
-2. If it exists, call it first and inspect the Semantic API version, capabilities, package
-   versions, PSR-4 roots, and Resource count.
+2. If it exists, call it first and inspect the semantic protocol name, advertised requests,
+   capabilities, package versions, PSR-4 roots, and Resource count. Test the specific request or
+   capability needed for the task; do not infer compatibility from a whole-API version number.
 3. For a project-wide review, call `bear_project_diagnostics` when the capability is available.
    Inspect `total`, `truncated`, `resourceScanTruncated`, and `skippedChecks`; zero returned items
    do not prove that a skipped or truncated check is clean. For a complete audit, advance
