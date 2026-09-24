@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.10.2] - 2026-09-24
+
 ### Changed
 
 - Discover the stable `bear-semantic` protocol and individual request names instead of
@@ -178,7 +180,8 @@ All notable changes to this project will be documented in this file.
 - Bounded LSP framing, fixed workspace/process configuration, structured failure results, and
   fake and real stdio integration coverage.
 
-[Unreleased]: https://github.com/suzumaze/bear-sunday-mcp-server/compare/v0.10.1...HEAD
+[Unreleased]: https://github.com/suzumaze/bear-sunday-mcp-server/compare/v0.10.2...HEAD
+[0.10.2]: https://github.com/suzumaze/bear-sunday-mcp-server/compare/v0.10.1...v0.10.2
 [0.10.1]: https://github.com/suzumaze/bear-sunday-mcp-server/compare/v0.10.0...v0.10.1
 [0.10.0]: https://github.com/suzumaze/bear-sunday-mcp-server/compare/v0.9.1...v0.10.0
 [0.9.1]: https://github.com/suzumaze/bear-sunday-mcp-server/compare/v0.9.0...v0.9.1
