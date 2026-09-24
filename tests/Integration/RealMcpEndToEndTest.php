@@ -40,8 +40,10 @@ final class RealMcpEndToEndTest extends TestCase
             sort($names);
             self::assertSame([
                 'bear_alps_descriptor_lookup',
+                'bear_aop_pointcuts',
                 'bear_contract_compare',
                 'bear_contract_coverage',
+                'bear_di_bindings',
                 'bear_project_diagnostics',
                 'bear_project_info',
                 'bear_resource_attribute_index',
@@ -69,6 +71,8 @@ final class RealMcpEndToEndTest extends TestCase
             self::assertIsArray($project);
             self::assertSame('bear-semantic', $project['data']['semanticProtocol']);
             self::assertContains('bear/project/diagnostics', $project['data']['requests']);
+            self::assertContains('bear/di/bindings', $project['data']['requests']);
+            self::assertContains('bear/aop/pointcuts', $project['data']['requests']);
             self::assertContains('projectDiagnostics', $project['data']['capabilities']);
 
             $diagnostics = $client->callTool('bear_project_diagnostics', [
@@ -80,7 +84,7 @@ final class RealMcpEndToEndTest extends TestCase
             self::assertSame(2, $diagnostics['data']['total']);
             self::assertSame(0, $diagnostics['data']['offset']);
             self::assertFalse($diagnostics['data']['truncated']);
-            self::assertSame(7, $diagnostics['data']['scannedFiles']);
+            self::assertSame(8, $diagnostics['data']['scannedFiles']);
             self::assertSame(3, $diagnostics['data']['scannedResources']);
             self::assertFalse($diagnostics['data']['resourceScanTruncated']);
             self::assertSame(['request_schema_references'], $diagnostics['data']['skippedChecks']);
@@ -98,6 +102,23 @@ final class RealMcpEndToEndTest extends TestCase
             self::assertTrue($coverage['data']['gapsOnly']);
             self::assertSame($coverage['data']['total'], $coverage['data']['summary']['methods']);
             self::assertArrayHasKey('alps', $coverage['data']['items'][0]['surfaces']);
+
+            $bindings = $client->callTool('bear_di_bindings')->structuredContent;
+            self::assertIsArray($bindings);
+            self::assertSame('ok', $bindings['status']);
+            self::assertSame(1, $bindings['data']['total']);
+            self::assertSame('resolved', $bindings['data']['items'][0]['state']);
+            self::assertSame('Acme\\Demo\\Service\\ClockInterface', $bindings['data']['items'][0]['sourceType']);
+
+            $pointcuts = $client->callTool('bear_aop_pointcuts')->structuredContent;
+            self::assertIsArray($pointcuts);
+            self::assertSame('ok', $pointcuts['status']);
+            self::assertSame(1, $pointcuts['data']['total']);
+            self::assertSame('starts_with', $pointcuts['data']['items'][0]['methodMatcher']['kind']);
+            self::assertSame(
+                ['Acme\\Demo\\Interceptor\\AuditInterceptor'],
+                $pointcuts['data']['items'][0]['interceptors'],
+            );
 
             $resources = $client->callTool('bear_resource_list', [
                 'scheme' => 'app',

@@ -17,13 +17,13 @@ Phpactor + bear-phpactor-extension
 saved files in one BEAR.Sunday workspace
 ```
 
-The adapter contains no Resource URI, Router, SQL, template, ALPS, or JSON Schema
+The adapter contains no Resource URI, Router, SQL, template, ALPS, JSON Schema, DI, or AOP
 resolution rules. Phpactor remains the single semantic implementation used by both IDEs
 and AI clients.
 
 ## Status
 
-The server provides twenty-four read-only tools against the BEAR Semantic API and
+The server provides twenty-six read-only tools against the BEAR Semantic API and
 Phpactor's standard LSP. In addition to project, Resource, and schema facts, it resolves
 explicit Route names, SQL query IDs, Twig/Qiq template names, Resource templates, and ALPS
 descriptors. It also exposes allowlisted Resource attribute facts, a bounded attribute
@@ -31,6 +31,9 @@ inventory, presence-only contract comparison, static Resource references, and in
 Link/Embed relations. Project-level contract coverage distinguishes absent, dynamic,
 unresolved, available, and non-applicable JSON Schema and ALPS surfaces without treating
 optional adoption gaps as errors.
+It also inventories direct static Ray.Di binding declarations and Ray.Aop interceptor
+matcher trees. These are saved-source declarations, not claims about an active application
+context, binding precedence, evaluated pointcuts, or runtime weaving.
 Project diagnostics and contract coverage use stable offset pagination and an approximate
 serialized-byte budget: a page can be shorter than its requested count. Advance `offset` by
 the actual returned item count while `truncated` is true. Diagnostics accepts `limit` 1–200
@@ -61,7 +64,7 @@ constant records, not methods, and does not claim that its index is current.
 
 See [Project status](docs/project-status.md) ([日本語](docs/project-status.ja.md)) for the
 implemented boundary, real-workspace verification evidence, and deferred experiments.
-See the [tool table below](#tools) ([日本語の全24ツール一覧](docs/tools.ja.md)) for the
+See the [tool table below](#tools) ([日本語の全26ツール一覧](docs/tools.ja.md)) for the
 complete inventory, and [Use cases](docs/use-cases.md) ([日本語](docs/use-cases.ja.md))
 for task-oriented workflows.
 
@@ -72,9 +75,9 @@ for task-oriented workflows.
 - An MCP host that supports stdio servers
 
 The standard installation bundles Phpactor 2026.07.22.0 and
-`suzumaze/bear-phpactor-extension` 0.1.9 or newer. If you override `--phpactor`
-with an older compatible installation, `bear_contract_coverage` needs its
-`contractCoverage` capability; otherwise that tool returns `engine_unavailable`.
+`suzumaze/bear-phpactor-extension` 0.2.0 or newer. If you override `--phpactor`
+with an older compatible installation, each MCP tool checks that its backing semantic
+request is advertised; an unavailable request returns `unsupported` without being sent.
 
 The MCP SDK is fixed to the compatible `0.8.x` line because its public API is not yet 1.0.
 
@@ -236,6 +239,8 @@ Find the Qiq template for app://self/user.
 Describe the ALPS descriptor goArticle and its relationships.
 Find all static references to app://self/user.
 Find Link and Embed relations targeting app://self/user.
+List direct static Ray.Di bindings and keep unsupported binding chains unresolved.
+List Ray.Aop interceptor declarations without claiming that their pointcuts match at runtime.
 Show the supported attributes on app://self/user, mark dynamic arguments explicitly, and
 do not infer omitted constructor defaults.
 Audit cache, Link, Embed, Schema, and ALPS attributes across App Resources.
@@ -269,6 +274,8 @@ The complete Japanese reference is available in [MCPツール一覧](docs/tools.
 | `bear_project_info` | `bear/project/info` | Protocol, advertised requests, capabilities, package versions, PSR-4 roots, and Resource count |
 | `bear_project_diagnostics` | `bear/project/diagnostics` | Paginated project-wide static inconsistencies, scan coverage, and skipped checks |
 | `bear_contract_coverage` | `bear/project/contractCoverage` | Paginated Resource-method contract adoption, gap selection, complete summary, and scan bounds |
+| `bear_di_bindings` | `bear/di/bindings` | Direct static Ray.Di bind-to declarations; no active context, precedence, or winning-binding claim |
+| `bear_aop_pointcuts` | `bear/aop/pointcuts` | Static Ray.Aop interceptor declarations and matcher syntax trees; no evaluation or weaving claim |
 | `bear_resource_list` | `bear/resource/list` | Deterministic paginated Resource URI inventory with scheme and prefix filters |
 | `bear_resource_describe` | `bear/resource/describe` | Resource methods, Link/Embed relations, templates, and schemas |
 | `bear_resource_attributes` | `bear/resource/attributes` | Allowlisted class/method attributes with explicit source arguments and dynamic markers; constructor defaults are not expanded |

@@ -4,7 +4,7 @@ BEAR.Sunday MCP Serverは、保存済みの1つのworkspaceについて、AIク�
 事実を提供します。テキスト検索を完全に置き換えるものではありません。対応済みのBEAR概念は
 最初にSemantic toolで調べ、返されたファイルを読み、Semantic Model外のコードだけを検索します。
 
-利用できる24 toolの入力と結果は[MCPツール一覧](tools.ja.md)、実装・検証状況は
+利用できる26 toolの入力と結果は[MCPツール一覧](tools.ja.md)、実装・検証状況は
 [プロジェクト現在地点](project-status.ja.md)にまとめています。
 
 ## AIクライアント用Skill
@@ -23,6 +23,7 @@ SkillはMCP serverをinstall・起動・設定しません。また、BEAR appli
 |---|---|---|
 | project全体で静的に不整合な箇所はどこか | 独立した検索を繰り返し、未走査部分は分からない | 走査件数・打ち切り・skip情報を伴うbounded diagnostics |
 | JSON SchemaやALPSをまだ導入していない箇所はどこか | 属性と規約fileを個別検索し、適用可能性や網羅性は人が判断 | methodごとのsurface状態とboundedなproject集計 |
+| 静的に見えるDI/AOP宣言は何か | fluent callの断片を探し、aliasやchainを人が解釈 | 直接binding宣言、matcher構文木、理由付きunresolved |
 | Resource URIの実装は何か | 一致した文字列やクラス名の断片 | 正規化URI、FQN、workspace相対path |
 | Resourceの公開APIは何か | `on*` methodを個別検索 | public `on*` methodと宣言されたparameter type |
 | Resourceはどこで使われるか | 同じ文字列をすべて表示 | 同じcanonical Resourceへ解決された静的参照 |
@@ -158,7 +159,22 @@ application PHPは実行しません。
 両toolは引数policyを`explicit_only`として返します。属性で省略された引数はconstructorにdefaultが
 無いことを意味せず、install済みpackageのdefault値を展開・推測しません。
 
-## 7. Contract名のpresenceを比較する
+## 7. DI・AOP宣言を調べる
+
+質問例:
+
+```text
+直接記述された静的なRay.Di bindingとRay.Aop interceptor宣言を一覧してください。
+dynamicまたは未対応の形はunresolvedのままにし、active contextやruntime weavingを推測しないでください。
+```
+
+`bear_di_bindings`と`bear_aop_pointcuts`を使います。どちらも保存済みsourceの宣言inventoryを
+安定したpaginationで返し、typeまたはinterceptorの完全一致filterを指定できます。`resolved`は
+構文を静的に読めたという意味だけです。そのmoduleをどのapplication contextがinstallするか、
+override後にどのbindingが勝つか、matcherが実際のmethodへ一致するか、interceptorがruntimeで
+weaveされるかは証明しません。`unresolved`は推測せず、返されたsourceを確認します。
+
+## 8. Contract名のpresenceを比較する
 
 質問例:
 
@@ -169,10 +185,11 @@ ALPS operation descriptor間のrequest名presenceを比較してください。
 
 `schemaKind: request`で`bear_contract_compare`を使います。各面は独立した`status`、`subject`、
 名前を返し、2面以上が利用できる場合だけ比較を生成します。同名は綴りのpresenceの根拠にすぎず、
-型、制約、意味、runtime互換性の一致を証明しません。response比較ではResource body面は現在
-`unsupported`ですが、SchemaとALPSの`rt`先representationは比較できます。
+型、制約、意味、runtime互換性の一致を証明しません。response比較のResource body面は、直線的な
+sourceがliteral-key `$this->body`の完全なshapeを証明できる場合だけ利用でき、dynamicまたは
+条件付きの構築は`unsupported`のままです。
 
-## 8. 正確なsource位置から移動する
+## 9. 正確なsource位置から移動する
 
 保存済みファイルとcursor位置が分かる場合は、標準LSP toolを使います。
 
@@ -193,7 +210,7 @@ recordだけを返し、methodは対象外です。index freshnessは`unknown`�
 証明できず、新規保存fileがまだindexに無い可能性もあります。既知fileには
 `lsp_document_symbols`、method探索や結論不能な空結果にはsource検索を使います。
 
-## 9. AIが生成した変更を検証する
+## 10. AIが生成した変更を検証する
 
 サーバー自身はファイルを編集しませんが、保存した変更がIDEと同じsemantic layerから認識されるかを
 確認できます。
@@ -210,7 +227,7 @@ recordだけを返し、methodは対象外です。index freshnessは`unknown`�
 
 これは規約や解決の誤りを検出します。runtime behaviorを証明するものではありません。
 
-## 10. 結果を安全に解釈する
+## 11. 結果を安全に解釈する
 
 すべてのBEAR Semantic API resultは同じenvelopeを保ちます。
 

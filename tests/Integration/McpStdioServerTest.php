@@ -138,8 +138,10 @@ final class McpStdioServerTest extends TestCase
         sort($names);
         self::assertSame([
             'bear_alps_descriptor_lookup',
+            'bear_aop_pointcuts',
             'bear_contract_compare',
             'bear_contract_coverage',
+            'bear_di_bindings',
             'bear_project_diagnostics',
             'bear_project_info',
             'bear_resource_attribute_index',
@@ -196,6 +198,14 @@ final class McpStdioServerTest extends TestCase
             'not an error report or quality score',
             $toolsByName['bear_contract_coverage']['description'],
         );
+        self::assertStringContainsString(
+            'not an active application context',
+            $toolsByName['bear_di_bindings']['description'],
+        );
+        self::assertStringContainsString(
+            'does not evaluate matchers',
+            $toolsByName['bear_aop_pointcuts']['description'],
+        );
         self::assertSame(
             100,
             $toolsByName['bear_contract_coverage']['inputSchema']['properties']['limit']['maximum'] ?? null,
@@ -223,6 +233,14 @@ final class McpStdioServerTest extends TestCase
         self::assertSame(
             200,
             $toolsByName['bear_project_diagnostics']['inputSchema']['properties']['limit']['maximum'] ?? null,
+        );
+        self::assertSame(
+            100,
+            $toolsByName['bear_di_bindings']['inputSchema']['properties']['limit']['maximum'] ?? null,
+        );
+        self::assertSame(
+            100,
+            $toolsByName['bear_aop_pointcuts']['inputSchema']['properties']['limit']['maximum'] ?? null,
         );
         self::assertSame(
             [
@@ -266,6 +284,34 @@ final class McpStdioServerTest extends TestCase
         self::assertSame(
             $coverage['result']['structuredContent'],
             json_decode($coverage['result']['content'][0]['text'], true, 64, JSON_THROW_ON_ERROR),
+        );
+
+        $bindings = $this->request('tools/call', [
+            'name' => 'bear_di_bindings',
+            'arguments' => ['type' => 'App\\ClockInterface', 'limit' => 25, 'offset' => 10],
+        ]);
+        self::assertFalse($bindings['result']['isError'] ?? true);
+        self::assertSame(
+            'bear/di/bindings',
+            $bindings['result']['structuredContent']['data']['method'],
+        );
+        self::assertSame(
+            ['limit' => 25, 'offset' => 10, 'type' => 'App\\ClockInterface'],
+            $bindings['result']['structuredContent']['data']['params'],
+        );
+
+        $pointcuts = $this->request('tools/call', [
+            'name' => 'bear_aop_pointcuts',
+            'arguments' => ['interceptor' => 'App\\AuditInterceptor', 'limit' => 20, 'offset' => 5],
+        ]);
+        self::assertFalse($pointcuts['result']['isError'] ?? true);
+        self::assertSame(
+            'bear/aop/pointcuts',
+            $pointcuts['result']['structuredContent']['data']['method'],
+        );
+        self::assertSame(
+            ['limit' => 20, 'offset' => 5, 'interceptor' => 'App\\AuditInterceptor'],
+            $pointcuts['result']['structuredContent']['data']['params'],
         );
 
         $called = $this->request('tools/call', [
@@ -490,6 +536,18 @@ final class McpStdioServerTest extends TestCase
             'arguments' => ['offset' => -1],
         ]);
         self::assertSame(-32602, $invalidCoverageOffset['error']['code']);
+
+        $invalidDiLimit = $this->request('tools/call', [
+            'name' => 'bear_di_bindings',
+            'arguments' => ['limit' => 101],
+        ]);
+        self::assertSame(-32602, $invalidDiLimit['error']['code']);
+
+        $invalidAopOffset = $this->request('tools/call', [
+            'name' => 'bear_aop_pointcuts',
+            'arguments' => ['offset' => -1],
+        ]);
+        self::assertSame(-32602, $invalidAopOffset['error']['code']);
 
         $invalidContractKind = $this->request('tools/call', [
             'name' => 'bear_contract_compare',

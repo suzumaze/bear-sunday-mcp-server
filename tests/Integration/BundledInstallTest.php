@@ -35,12 +35,26 @@ final class BundledInstallTest extends TestCase
             self::assertSame('ok', $project['status']);
             self::assertSame('bear-semantic', $project['data']['semanticProtocol']);
             self::assertContains('bear/project/contractCoverage', $project['data']['requests']);
+            self::assertContains('bear/di/bindings', $project['data']['requests']);
+            self::assertContains('bear/aop/pointcuts', $project['data']['requests']);
             self::assertContains('contractCoverage', $project['data']['capabilities']);
-            self::assertSame('v0.1.9', $project['data']['versions']['suzumaze/bear-phpactor-extension']);
+            self::assertContains('diBindingInventory', $project['data']['capabilities']);
+            self::assertContains('aopPointcutInventory', $project['data']['capabilities']);
+            self::assertSame('v0.2.0', $project['data']['versions']['suzumaze/bear-phpactor-extension']);
 
             $coverage = $client->callTool('bear_contract_coverage', ['limit' => 1])->structuredContent;
             self::assertIsArray($coverage);
             self::assertSame('ok', $coverage['status']);
+
+            $bindings = $client->callTool('bear_di_bindings')->structuredContent;
+            self::assertIsArray($bindings);
+            self::assertSame('ok', $bindings['status']);
+            self::assertSame(1, $bindings['data']['total']);
+
+            $pointcuts = $client->callTool('bear_aop_pointcuts')->structuredContent;
+            self::assertIsArray($pointcuts);
+            self::assertSame('ok', $pointcuts['status']);
+            self::assertSame(1, $pointcuts['data']['total']);
         } finally {
             $client->disconnect();
         }

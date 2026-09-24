@@ -77,6 +77,34 @@ final class SemanticTools
     }
 
     /** @return array<string, mixed> */
+    public function diBindings(?string $type = null, int $limit = 50, int $offset = 0): array
+    {
+        $params = [
+            'limit' => $limit,
+            'offset' => $offset,
+        ];
+        if ($type !== null) {
+            $params['type'] = $type;
+        }
+
+        return $this->query('bear/di/bindings', $params);
+    }
+
+    /** @return array<string, mixed> */
+    public function aopPointcuts(?string $interceptor = null, int $limit = 50, int $offset = 0): array
+    {
+        $params = [
+            'limit' => $limit,
+            'offset' => $offset,
+        ];
+        if ($interceptor !== null) {
+            $params['interceptor'] = $interceptor;
+        }
+
+        return $this->query('bear/aop/pointcuts', $params);
+    }
+
+    /** @return array<string, mixed> */
     public function resourceList(
         ?string $scheme = null,
         string $prefix = '',

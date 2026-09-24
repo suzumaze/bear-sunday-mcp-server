@@ -51,6 +51,8 @@ final class RealPhpactorTest extends TestCase
             self::assertSame('ok', $result['status']);
             self::assertSame('bear-semantic', $result['data']['semanticProtocol']);
             self::assertContains('bear/resource/describe', $result['data']['requests']);
+            self::assertContains('bear/di/bindings', $result['data']['requests']);
+            self::assertContains('bear/aop/pointcuts', $result['data']['requests']);
             self::assertSame(3, $result['data']['resourceCount']);
 
             $outside = $client->request('bear/resource/describe', [

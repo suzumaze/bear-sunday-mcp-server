@@ -117,6 +117,50 @@ final class McpServerFactory
             outputSchema: self::envelopeSchema(),
         );
         $builder->addTool(
+            [$reports, 'diBindings'],
+            name: 'bear_di_bindings',
+            title: 'Inspect Ray.Di binding declarations',
+            description: 'Inventory direct static bind-to declarations from saved Ray.Di module source. '
+                . 'This is declaration evidence, not an active application context or winning runtime binding. '
+                . 'Dynamic and unsupported chains remain visible as reasoned unresolved items.',
+            annotations: $annotations,
+            inputSchema: self::objectSchema([
+                'type' => [
+                    'type' => 'string',
+                    'maxLength' => 2048,
+                    'description' => 'Optional exact source type filter, without a required leading backslash.',
+                ],
+                'limit' => self::limitSchema(
+                    'Maximum number of binding declarations per page (byte budget may return fewer).',
+                    self::PROJECT_REPORT_MAX_ITEMS,
+                ),
+                'offset' => self::offsetSchema(),
+            ]),
+            outputSchema: self::envelopeSchema(),
+        );
+        $builder->addTool(
+            [$reports, 'aopPointcuts'],
+            name: 'bear_aop_pointcuts',
+            title: 'Inspect Ray.Aop pointcut declarations',
+            description: 'Inventory static interceptor declarations and matcher syntax trees from saved module source. '
+                . 'This does not evaluate matchers or claim that interception is active or woven at runtime. '
+                . 'Dynamic and unsupported arguments remain visible as reasoned unresolved items.',
+            annotations: $annotations,
+            inputSchema: self::objectSchema([
+                'interceptor' => [
+                    'type' => 'string',
+                    'maxLength' => 2048,
+                    'description' => 'Optional exact interceptor class filter, without a required leading backslash.',
+                ],
+                'limit' => self::limitSchema(
+                    'Maximum number of pointcut declarations per page (byte budget may return fewer).',
+                    self::PROJECT_REPORT_MAX_ITEMS,
+                ),
+                'offset' => self::offsetSchema(),
+            ]),
+            outputSchema: self::envelopeSchema(),
+        );
+        $builder->addTool(
             [$tools, 'resourceList'],
             name: 'bear_resource_list',
             title: 'List BEAR Resources',
