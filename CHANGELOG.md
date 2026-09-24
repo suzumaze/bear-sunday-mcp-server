@@ -4,6 +4,21 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.11.0] - 2026-09-24
+
+### Added
+
+- `bear_di_bindings` exposes bounded, source-only inventories of direct static Ray.Di
+  `bind()->to()` declarations, retaining unsupported chains as reasoned unresolved items.
+- `bear_aop_pointcuts` exposes bounded, source-only Ray.Aop interceptor declarations and
+  matcher syntax trees without evaluating pointcuts or claiming runtime weaving.
+
+### Changed
+
+- Bundle `suzumaze/bear-phpactor-extension` 0.2.0 and advertise 26 read-only tools.
+- The bundled `bear-semantic` skill distinguishes saved-source DI/AOP declarations from
+  active contexts, winning bindings, evaluated matchers, and runtime behavior.
+
 ## [0.10.2] - 2026-09-24
 
 ### Changed
@@ -180,7 +195,8 @@ All notable changes to this project will be documented in this file.
 - Bounded LSP framing, fixed workspace/process configuration, structured failure results, and
   fake and real stdio integration coverage.
 
-[Unreleased]: https://github.com/suzumaze/bear-sunday-mcp-server/compare/v0.10.2...HEAD
+[Unreleased]: https://github.com/suzumaze/bear-sunday-mcp-server/compare/v0.11.0...HEAD
+[0.11.0]: https://github.com/suzumaze/bear-sunday-mcp-server/compare/v0.10.2...v0.11.0
 [0.10.2]: https://github.com/suzumaze/bear-sunday-mcp-server/compare/v0.10.1...v0.10.2
 [0.10.1]: https://github.com/suzumaze/bear-sunday-mcp-server/compare/v0.10.0...v0.10.1
 [0.10.0]: https://github.com/suzumaze/bear-sunday-mcp-server/compare/v0.9.1...v0.10.0

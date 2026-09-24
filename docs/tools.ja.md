@@ -1,7 +1,7 @@
 # MCPツール一覧
 
 BEAR.Sunday MCP Serverは、BEAR Semantic APIとPhpactorの標準LSPを
-用途別の24個のread-only toolとして公開します。
+用途別の26個のread-only toolとして公開します。
 
 - Resource URIなど、調べたいBEAR識別子が分かる場合は`bear_*` toolを使います。
 - 保存済みファイルのcursor位置が分かる場合は`lsp_*` toolを使います。
@@ -17,6 +17,8 @@ BEAR.Sunday MCP Serverは、BEAR Semantic APIとPhpactorの標準LSPを
 | `bear_project_info` | `bear/project/info` | optionalなcontext path | protocol、request一覧、capability、package version、PSR-4 root、Resource数 |
 | `bear_project_diagnostics` | `bear/project/diagnostics` | limit、offset | project全体の静的に証明できる不整合、走査件数、pagination、skipされた検査 |
 | `bear_contract_coverage` | `bear/project/contractCoverage` | limit、offset、gapsOnly、scheme | Resource methodごとのrequest/response SchemaとALPSの導入状態、URI scheme選択、全体集計、走査範囲 |
+| `bear_di_bindings` | `bear/di/bindings` | type、limit、offset | 直接記述された静的なRay.Di `bind()->to()`宣言。active context、優先順位、最終bindingは主張しない |
+| `bear_aop_pointcuts` | `bear/aop/pointcuts` | interceptor、limit、offset | 静的なRay.Aop interceptor宣言とmatcher構文木。pointcut評価やruntime weavingは主張しない |
 | `bear_resource_list` | `bear/resource/list` | scheme、prefix、limit、offset | 正規化されたResource URI、FQN、workspace相対pathの決定的なページ一覧 |
 | `bear_resource_describe` | `bear/resource/describe` | Resource URI | public `on*` method、parameter、Link/Embed、template、schema |
 | `bear_resource_attributes` | `bear/resource/attributes` | Resource URI | allowlist済みclass/method属性と明示引数。省略されたconstructor defaultは展開しない |
@@ -80,7 +82,7 @@ Resource自体が無い場合は`partial`もありません。
 
 ## 安全境界
 
-全24 toolはread-onlyです。MCP serverは次の操作を行いません。
+全26 toolはread-onlyです。MCP serverは次の操作を行いません。
 
 - BEAR applicationや任意PHPの実行
 - templateのrender

@@ -57,6 +57,34 @@ final class ProjectReportToolsTest extends TestCase
         self::assertSame($failure, json_decode($content->text, true, 64, JSON_THROW_ON_ERROR));
     }
 
+    public function testArchitectureInventoriesKeepStructuredAndCompactTextResults(): void
+    {
+        $result = self::envelope([
+            'items' => [['state' => 'unresolved', 'reason' => 'binding_chain_unsupported']],
+            'total' => 1,
+            'truncated' => false,
+        ]);
+        $reports = self::reports($result);
+
+        $bindings = $reports->diBindings();
+        $pointcuts = $reports->aopPointcuts();
+
+        self::assertSame($result, $bindings->structuredContent);
+        self::assertSame($result, $pointcuts->structuredContent);
+        $bindingContent = $bindings->content[0];
+        $pointcutContent = $pointcuts->content[0];
+        self::assertInstanceOf(TextContent::class, $bindingContent);
+        self::assertInstanceOf(TextContent::class, $pointcutContent);
+        self::assertSame(
+            $result,
+            json_decode($bindingContent->text, true, 64, JSON_THROW_ON_ERROR),
+        );
+        self::assertSame(
+            $result,
+            json_decode($pointcutContent->text, true, 64, JSON_THROW_ON_ERROR),
+        );
+    }
+
     /** @param array<string,mixed> $result */
     private static function reports(array $result): ProjectReportTools
     {
@@ -67,6 +95,8 @@ final class ProjectReportToolsTest extends TestCase
                     'bear/project/info',
                     'bear/project/diagnostics',
                     'bear/project/contractCoverage',
+                    'bear/di/bindings',
+                    'bear/aop/pointcuts',
                 ],
             ])
             : $result);

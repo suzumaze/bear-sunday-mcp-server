@@ -59,6 +59,7 @@ app://self/userはどのファイルですか？
 このSQL名は、どのSQLファイルを指していますか？
 存在しないResource URIを静的に探してください。
 JSON SchemaとALPSが、どこまで用意されているか教えてください。
+コードに直接書かれたDI bindingとAOP interceptorを一覧してください。
 ```
 
 AIは必要なMCPツールを選び、ファイルへの相対パスや確認した範囲と一緒に結果を返せます。
@@ -87,6 +88,7 @@ JSON SchemaやALPSがないResourceもあります。テストのために、わ
 - ResourceへHTTPリクエストを送りません。
 - PHPファイル、SQL、Schema、ALPSを書き換えません。
 - 実行して初めて決まる値を想像で補いません。
+- どのDI bindingが勝つか、AOPがruntimeで効くかを宣言だけから断定しません。
 - 設計が良いか悪いかを採点しません。
 
 保存済みのファイルを読む、読み取り専用の道具です。
@@ -124,7 +126,7 @@ codex mcp add bear-sunday -- \
   --workspace=/absolute/path/to/bear-project
 ```
 
-詳しい要件、Claude Codeやほかのクライアントへの登録方法、全24ツールの仕様は
+詳しい要件、Claude Codeやほかのクライアントへの登録方法、全26ツールの仕様は
 [通常のREADME](README.md)にあります。
 
 ## 理解できたか確かめる四つの質問

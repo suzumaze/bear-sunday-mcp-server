@@ -17,6 +17,7 @@ MCP serverには、汎用の[`bear-semantic` Skill](../skills/bear-semantic/SKIL
 - `bear_project_info`によるcapability確認
 - `bear_project_diagnostics`によるproject全体の静的不整合と走査範囲の確認
 - `bear_contract_coverage`によるJSON Schema・ALPS導入候補と解析不能箇所の分離
+- `bear_di_bindings`と`bear_aop_pointcuts`によるsource宣言とruntime推測の分離
 - BEAR identifierにはsemantic tool、source位置にはLSP toolを選ぶrouting
 - status、ambiguity、truncation、provenanceの解釈
 - 対象外だけをsource検索するfallback
@@ -71,6 +72,7 @@ Skillへ残すもの:
 | `bear-clean-style-consultant` | reachability、attribute、contract coverageの候補 | level選択とproject適合判断 | P2 |
 | `bear-clean-style` | 同上、およびexact path/range | opinionatedな変更とbatch設計 | P2 |
 | `bear-refactor` | 対象symbol、Named/Qualifier利用箇所、Resource method signature | source変換、format、test | P2 |
+| DI/AOP設計・review | 直接binding宣言、interceptor、matcher構文木、unresolved理由 | context/module合成、override優先順位、runtime適用判断 | P2 |
 | `bear-documenter` | Resource/method/attributeの構造 | 自然言語の説明生成とPHPDoc編集 | P3 |
 | `bear-web-form` | request schema、Resource method、route、template | architecture選択、validation/CSRF実装 | P3 |
 | `bear-security-setup` | BEAR entrypoint/contextとsource location | package導入、scanner実行、finding修正 | 対象外 |
@@ -205,13 +207,14 @@ bear/project/contractCoverage
 1. `bear_project_info`でcapabilityとversionを確認する。
 2. project全体のreviewでは`bear_project_diagnostics`を呼び、走査範囲とskipを確認する。
 3. contract導入支援では`bear_contract_coverage`を呼び、未導入と解析不能を分ける。
-4. BEAR identifierが分かる場合はGrepより先にsemantic toolを呼ぶ。
-5. `status`、`available`、`truncated`を確認する。
-6. provenanceにある最小限のファイルだけを読む。
-7. semantic toolが対象外と明示した部分だけを検索する。
-8. Skillの判断基準を適用する。
-9. 編集後、同じqueryを再実行してsemantic resolutionを確認する。
-10. test/static analysisは別のcommandとして実行する。
+4. DI/AOP調査では宣言inventoryを取得し、active contextやruntime適用を推測しない。
+5. BEAR identifierが分かる場合はGrepより先にsemantic toolを呼ぶ。
+6. `status`、`available`、`truncated`を確認する。
+7. provenanceにある最小限のファイルだけを読む。
+8. semantic toolが対象外と明示した部分だけを検索する。
+9. Skillの判断基準を適用する。
+10. 編集後、同じqueryを再実行してsemantic resolutionを確認する。
+11. test/static analysisは別のcommandとして実行する。
 
 ## 非目標
 

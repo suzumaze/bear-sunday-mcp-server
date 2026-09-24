@@ -11,6 +11,7 @@ semantic model.
 |---|---|---|
 | What is statically inconsistent across the project? | Many independent searches with no coverage signal | Bounded diagnostics with scan counts, truncation, and skipped checks |
 | Where are JSON Schema or ALPS contracts not adopted yet? | Attribute and convention searches with no applicability or completeness signal | Per-method surface states and a bounded project summary |
+| Which DI/AOP declarations are statically visible? | Fluent-call fragments that require manual alias and chain interpretation | Direct binding declarations, matcher trees, and reasoned unresolved forms |
 | What implements a Resource URI? | Matching string or class fragments | Normalized URI, FQN, and workspace-relative path |
 | What is the Resource interface? | Separate searches for `on*` methods | Public `on*` methods and declared parameter types |
 | Where is the Resource used? | Every matching string | Static references that resolve to the same canonical Resource |
@@ -153,7 +154,23 @@ Both tools return an explicit-only argument policy. An omitted attribute argumen
 not mean that the constructor has no default, and installed-package defaults are not
 expanded or guessed.
 
-## 7. Compare contract name presence
+## 7. Inspect DI and AOP declarations
+
+Ask:
+
+```text
+List direct static Ray.Di bindings and Ray.Aop interceptor declarations. Keep dynamic or
+unsupported forms unresolved, and do not infer the active context or runtime weaving.
+```
+
+Use `bear_di_bindings` and `bear_aop_pointcuts`. Both return saved-source declaration
+inventories with stable pagination and optional exact type/interceptor filters. A resolved
+declaration proves only that its syntax was read. It does not prove which application context
+installs the module, which binding wins after overrides, whether a matcher selects a method, or
+whether an interceptor is woven at runtime. Inspect `unresolved` items in source rather than
+turning them into guessed facts.
+
+## 8. Compare contract name presence
 
 Ask:
 
@@ -166,9 +183,10 @@ Use `bear_contract_compare` with `schemaKind: request`. Each surface reports its
 `status`, `subject`, and names. A comparison appears only when two or more surfaces are
 available. Equal names are evidence of spelling presence only—not type, constraint,
 meaning, or runtime compatibility. For response comparison the Resource body surface is
-currently `unsupported`; Schema and an ALPS `rt` representation can still be compared.
+available only when straight-line source proves a complete literal-key `$this->body` shape;
+dynamic or conditional construction remains `unsupported`.
 
-## 8. Navigate from an exact source position
+## 9. Navigate from an exact source position
 
 When the client already knows a saved file and cursor position, use the standard LSP tools:
 
@@ -191,7 +209,7 @@ reported as unknown, so an empty result is not proof of absence and a newly save
 not be indexed yet. For a known file, use `lsp_document_symbols`; for method discovery or
 an inconclusive empty result, fall back to source search.
 
-## 9. Validate an AI-generated change
+## 10. Validate an AI-generated change
 
 The server never edits files, but it can verify that a saved change is visible through the
 same semantic layer used by the IDE:
@@ -208,7 +226,7 @@ same semantic layer used by the IDE:
 
 This catches convention and resolution mistakes. It does not prove runtime behavior.
 
-## 10. Interpret results safely
+## 11. Interpret results safely
 
 Every BEAR Semantic API result preserves the same envelope:
 

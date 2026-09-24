@@ -69,6 +69,37 @@ final class SemanticToolsTest extends TestCase
         );
     }
 
+    public function testMapsDiAndAopInventoriesWithoutChangingSemanticResults(): void
+    {
+        $client = new InMemoryLspClient(static function (string $method, array $params): array {
+            if ($method === 'bear/project/info') {
+                return self::projectInfoResult();
+            }
+
+            return self::ok(['method' => $method, 'params' => $params]);
+        });
+        $tools = new SemanticTools($client);
+
+        self::assertSame(
+            self::ok([
+                'method' => 'bear/di/bindings',
+                'params' => ['limit' => 25, 'offset' => 10, 'type' => 'App\\ClockInterface'],
+            ]),
+            $tools->diBindings('App\\ClockInterface', 25, 10),
+        );
+        self::assertSame(
+            self::ok([
+                'method' => 'bear/aop/pointcuts',
+                'params' => ['limit' => 20, 'offset' => 5, 'interceptor' => 'App\\AuditInterceptor'],
+            ]),
+            $tools->aopPointcuts('App\\AuditInterceptor', 20, 5),
+        );
+        self::assertSame(
+            ['bear/project/info', 'bear/di/bindings', 'bear/aop/pointcuts'],
+            array_column($client->requests, 'method'),
+        );
+    }
+
     public function testMapsTheFourM1ToolsWithoutChangingSemanticResults(): void
     {
         $client = new InMemoryLspClient(static function (string $method, array $params): array {
@@ -417,6 +448,8 @@ final class SemanticToolsTest extends TestCase
                 'bear/project/info',
                 'bear/project/diagnostics',
                 'bear/project/contractCoverage',
+                'bear/di/bindings',
+                'bear/aop/pointcuts',
                 'bear/resource/list',
                 'bear/resource/describe',
                 'bear/resource/attributes',

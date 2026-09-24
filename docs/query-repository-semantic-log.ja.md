@@ -259,7 +259,7 @@ tree traversal invariant、schema version compatibilityはupstream readerの責�
 
 ## Acceptance criteria
 
-- provider未設定時に現在の24 toolと起動方法が変わらない。
+- provider未設定時に現在の26 toolと起動方法が変わらない。
 - tool inputから任意のpathを指定できない。
 - invalid JSON、oversized log、symlink escape、unknown contextをtestする。
 - sensitive valueがtool resultとerror messageへ現れない。

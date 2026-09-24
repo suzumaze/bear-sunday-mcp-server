@@ -28,6 +28,16 @@ final readonly class ProjectReportTools
         return self::result($this->tools->contractCoverage($limit, $offset, $gapsOnly, $scheme));
     }
 
+    public function diBindings(?string $type = null, int $limit = 50, int $offset = 0): CallToolResult
+    {
+        return self::result($this->tools->diBindings($type, $limit, $offset));
+    }
+
+    public function aopPointcuts(?string $interceptor = null, int $limit = 50, int $offset = 0): CallToolResult
+    {
+        return self::result($this->tools->aopPointcuts($interceptor, $limit, $offset));
+    }
+
     /** @param array<string,mixed> $data */
     private static function result(array $data): CallToolResult
     {

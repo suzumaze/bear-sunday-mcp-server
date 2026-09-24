@@ -1,6 +1,6 @@
 ---
 name: bear-semantic
-description: Inspect and reason about saved BEAR.Sunday PHP projects with the bear-sunday MCP semantic tools before text search or edits. Use for Resource discovery, URI/route/SQL/template resolution, JSON Schema or ALPS contracts and adoption coverage, Resource attributes, Link/Embed relations, references and impact analysis, or LSP navigation in a BEAR.Sunday workspace. Also use to verify semantic effects after edits, while falling back safely when the MCP tools are unavailable.
+description: Inspect and reason about saved BEAR.Sunday PHP projects with the bear-sunday MCP semantic tools before text search or edits. Use for Resource discovery, URI/route/SQL/template resolution, JSON Schema or ALPS contracts and adoption coverage, DI binding or AOP pointcut declarations, Resource attributes, Link/Embed relations, references and impact analysis, or LSP navigation in a BEAR.Sunday workspace. Also use to verify semantic effects after edits, while falling back safely when the MCP tools are unavailable.
 ---
 
 # BEAR Semantic
@@ -52,6 +52,7 @@ normal agent workflow.
 | Discover capabilities or inventory | `bear_project_info`, then `bear_resource_list` |
 | Audit project-wide static inconsistencies | `bear_project_diagnostics` |
 | Plan JSON Schema and ALPS adoption | `bear_contract_coverage` |
+| Inspect static DI/AOP declarations | `bear_di_bindings`, `bear_aop_pointcuts` |
 | Inspect a Resource contract | `bear_resource_describe`, `bear_resource_attributes` |
 | Review attributes across Resources | `bear_resource_attribute_index` |
 | Compare Resource, schema, and ALPS names | `bear_contract_compare` |
@@ -71,6 +72,11 @@ Before proposing files, select a small coherent Resource workflow based on the u
 its description and existing Schema/ALPS conventions, and separate `absent` adoption candidates
 from `dynamic` or `unresolved` declarations. Do not bulk-generate placeholder contracts merely to
 increase the covered count.
+
+Treat DI and AOP results as source declaration inventories, not a resolved runtime graph. A
+resolved item proves only that the supported syntax was read. Do not infer an active application
+context, module-install composition, override precedence, the winning binding, matcher evaluation,
+or runtime weaving. Preserve and inspect reasoned `unresolved` items instead of guessing them.
 
 Treat Resource attribute arguments as explicit source syntax only unless `argumentPolicy` says
 otherwise. An omitted argument does not prove that its constructor has no default. Do not invent
