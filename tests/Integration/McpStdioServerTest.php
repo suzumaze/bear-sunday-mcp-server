@@ -138,8 +138,10 @@ final class McpStdioServerTest extends TestCase
         sort($names);
         self::assertSame([
             'bear_alps_descriptor_lookup',
+            'bear_aop_applications',
             'bear_aop_pointcuts',
                 'bear_app_context_list',
+            'bear_attribute_catalog',
             'bear_contract_compare',
             'bear_contract_coverage',
             'bear_di_binding_lookup',
@@ -317,6 +319,15 @@ final class McpStdioServerTest extends TestCase
         ]);
         self::assertSame('bear/di/moduleGraph', $tree['result']['structuredContent']['data']['method']);
 
+        self::assertSame(['applicationContext'], $toolsByName['bear_aop_applications']['inputSchema']['required']);
+        $aop = $this->request('tools/call', [
+            'name' => 'bear_aop_applications',
+            'arguments' => ['applicationContext' => 'dev-html-app', 'attribute' => 'App\\Auth'],
+        ]);
+        self::assertSame('bear/aop/applications', $aop['result']['structuredContent']['data']['method']);
+        self::assertSame('App\\Auth', $aop['result']['structuredContent']['data']['params']['attribute']);
+        $catalog = $this->request('tools/call', ['name' => 'bear_attribute_catalog', 'arguments' => []]);
+        self::assertSame('bear/attribute/catalog', $catalog['result']['structuredContent']['data']['method']);
         $bindings = $this->request('tools/call', [
             'name' => 'bear_di_bindings',
             'arguments' => ['type' => 'App\\ClockInterface', 'limit' => 25, 'offset' => 10],

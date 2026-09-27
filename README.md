@@ -384,7 +384,7 @@ The proposed read-only boundary for optional runtime cache evidence is documente
 
 MIT
 
-### DI inspection under development
+### DI and AOP inspection under development
 
 `bear_app_context_list` discovers saved entry-point context candidates and their source
 locations. It does not choose a context. Pass an explicit `applicationContext` to
@@ -396,8 +396,25 @@ are not runtime winners. Instance values are never returned.
 `bear_di_module_tree_read` reads the existing workspace module relationships. Its coverage
 is narrower than binding lookup: it does not expand vendor Modules or evaluate precedence.
 
-These tools require an engine advertising `bear/app/contexts`, `bear/di/bindingLookup` and
-`bear/di/moduleGraph`, respectively. The bundled published extension does not yet provide
+`bear_attribute_catalog` lists available PHP attribute definitions, including unused ones,
+with package origin, allowed targets, constructor parameter signatures and source docblocks.
+It never returns default argument values. An optional explicit context adds AOP condition
+references and interceptor `invoke()` locations. A condition reference does not prove application.
+Inspect `scanTruncated`, `skippedFiles` and unknowns; framework consumers and usage counts are
+not inferred.
+
+`bear_aop_applications` requires an explicit context and accepts `uri`, `interceptor` and
+`attribute` filters. By default it inspects public Resource `on*` request handlers; an exact
+`method` filter inspects another public method. It returns source matches and interceptor order, following
+source-selected DI class replacements. Read `status`, `unknownTotal`, `unresolvedPointcutTotal`
+and `weavingBlockers`. A `source_matched` result follows the reported Ray.Aop PHP-attribute
+ordering model; it does not prove runtime execution or successful weaving. Providers, custom
+matchers, incomplete hierarchies and trait methods can remain unresolved. Filtered empty results
+are not proof of absence when unknowns remain.
+
+These tools require an engine advertising their corresponding requests:
+`bear/app/contexts`, `bear/di/bindingLookup`, `bear/di/moduleGraph`,
+`bear/attribute/catalog`, and `bear/aop/applications`. The bundled published extension does not yet provide
 all of them; the adapter returns `unsupported` instead of fabricating a result. The matching
 extension checkout is tested before release:
 
@@ -407,6 +424,5 @@ BEAR_MCP_TEST_EXTENSION_ROOT=/path/to/bear-phpactor-extension \
 ```
 
 The earlier DI/AOP map UI is preserved on `codex/archive-di-aop-map`, not included in this
-branch. AOP application matching and an available-attribute catalog are subsequent work;
-`bear_aop_pointcuts` remains a declaration inventory. No installed server is upgraded by
-these source changes.
+branch. `bear_aop_pointcuts` remains a declaration inventory alongside the new source matcher.
+No installed server is upgraded by these source changes.

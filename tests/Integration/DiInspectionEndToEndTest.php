@@ -91,6 +91,29 @@ PHP;
             ])->structuredContent;
             self::assertSame('string', $scalar['data']['items'][0]['selected']['kind']);
             self::assertStringNotContainsString('fixture-private-value', json_encode($scalar, JSON_THROW_ON_ERROR));
+            $aop = $client->callTool('bear_aop_applications', [
+                'applicationContext' => 'advice-app', 'uri' => 'app://self/advice',
+                'attribute' => 'Acme\\Shop\\Annotation\\First',
+            ])->structuredContent;
+            self::assertSame('ok', $aop['status']);
+            self::assertSame(1, $aop['data']['total']);
+            self::assertSame('onGet', $aop['data']['items'][0]['method']);
+            self::assertSame('Acme\\Shop\\Interceptor\\Priority', $aop['data']['items'][0]['chain'][0]['interceptor']);
+            self::assertSame('provisional', $aop['data']['items'][0]['status']);
+            $helper = $client->callTool('bear_aop_applications', [
+                'applicationContext' => 'advice-app', 'uri' => 'app://self/advice', 'method' => 'helper',
+            ])->structuredContent;
+            self::assertSame('ok', $helper['status']);
+            self::assertSame(1, $helper['data']['total']);
+            self::assertSame('helper', $helper['data']['items'][0]['method']);
+            self::assertSame('exact_public_method', $helper['data']['coverage']['methodScope']);
+            $catalog = $client->callTool('bear_attribute_catalog', [
+                'applicationContext' => 'advice-app', 'attribute' => 'Acme\\Shop\\Annotation\\First',
+            ])->structuredContent;
+            self::assertSame('ok', $catalog['status']);
+            self::assertSame(['method'], $catalog['data']['items'][0]['targets']);
+            self::assertNotEmpty($catalog['data']['items'][0]['mechanisms']);
+            self::assertStringNotContainsString('fixture-private-default', json_encode($catalog, JSON_THROW_ON_ERROR));
         } finally {
             $client->disconnect();
             $this->removeTree($temporary);

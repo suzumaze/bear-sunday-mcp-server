@@ -65,6 +65,44 @@ final readonly class ProjectReportTools
         ));
     }
 
+    public function aopApplications(
+        string $applicationContext,
+        ?string $uri = null,
+        ?string $interceptor = null,
+        ?string $attribute = null,
+        ?string $method = null,
+        ?string $contextPath = null,
+        int $limit = 50,
+        int $offset = 0,
+    ): CallToolResult {
+        return self::result($this->tools->aopApplications(
+            $applicationContext,
+            $uri,
+            $interceptor,
+            $attribute,
+            $method,
+            $contextPath,
+            $limit,
+            $offset,
+        ));
+    }
+
+    public function attributeCatalog(
+        ?string $applicationContext = null,
+        ?string $attribute = null,
+        ?string $contextPath = null,
+        int $limit = 50,
+        int $offset = 0,
+    ): CallToolResult {
+        return self::result($this->tools->attributeCatalog(
+            $applicationContext,
+            $attribute,
+            $contextPath,
+            $limit,
+            $offset,
+        ));
+    }
+
     public function diModuleTreeRead(string $applicationContext): CallToolResult
     {
         return self::result($this->tools->diModuleGraph($applicationContext));

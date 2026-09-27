@@ -173,6 +173,46 @@ final class SemanticTools
     }
 
     /** @return array<string, mixed> */
+    public function aopApplications(
+        string $applicationContext,
+        ?string $uri = null,
+        ?string $interceptor = null,
+        ?string $attribute = null,
+        ?string $method = null,
+        ?string $contextPath = null,
+        int $limit = 50,
+        int $offset = 0,
+    ): array {
+        return $this->query('bear/aop/applications', [
+            'applicationContext' => $applicationContext,
+            'uri' => $uri,
+            'interceptor' => $interceptor,
+            'attribute' => $attribute,
+            'method' => $method,
+            'contextPath' => $contextPath,
+            'limit' => $limit,
+            'offset' => $offset,
+        ]);
+    }
+
+    /** @return array<string, mixed> */
+    public function attributeCatalog(
+        ?string $applicationContext = null,
+        ?string $attribute = null,
+        ?string $contextPath = null,
+        int $limit = 50,
+        int $offset = 0,
+    ): array {
+        return $this->query('bear/attribute/catalog', [
+            'applicationContext' => $applicationContext,
+            'attribute' => $attribute,
+            'contextPath' => $contextPath,
+            'limit' => $limit,
+            'offset' => $offset,
+        ]);
+    }
+
+    /** @return array<string, mixed> */
     public function resourceList(
         ?string $scheme = null,
         string $prefix = '',

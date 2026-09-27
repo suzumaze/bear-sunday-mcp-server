@@ -4,8 +4,6 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-## [0.11.0] - 2026-09-24
-
 ### Added
 
 - Add `bear_app_context_list`, `bear_di_binding_lookup`, and `bear_di_module_tree_read`
@@ -13,7 +11,15 @@ All notable changes to this project will be documented in this file.
   binding evidence preserves provisional status, source locations and independent bounds.
   Unsupported engines return an explicit unsupported result. Add a real MCP-to-Phpactor
   integration test against the matching extension checkout.
+- Add `bear_attribute_catalog` for PHP attribute definitions, source documentation and
+  optional context-specific AOP condition references, without exposing default argument values.
+- Add `bear_aop_applications` for source-matched Resource methods and interceptor order under
+  an explicit context. Preserve unknowns and weaving limitations; this is not a runtime trace.
+  Verify both tools through real MCP-to-Phpactor integration tests.
 
+## [0.11.0] - 2026-09-24
+
+### Added
 
 - `bear_di_bindings` exposes bounded, source-only inventories of direct static Ray.Di
   `bind()->to()` declarations, retaining unsupported chains as reasoned unresolved items.

@@ -137,6 +137,8 @@ final class SemanticToolsTest extends TestCase
         $tools = new SemanticTools($client);
         self::assertSame('unsupported', $tools->appContextList()['status']);
         self::assertSame('unsupported', $tools->diBindingLookup('prod-html-app')['status']);
+        self::assertSame('unsupported', $tools->aopApplications('prod-html-app')['status']);
+        self::assertSame('unsupported', $tools->attributeCatalog()['status']);
         self::assertSame(['bear/project/info'], array_column($client->requests, 'method'));
     }
 

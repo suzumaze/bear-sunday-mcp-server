@@ -156,6 +156,51 @@ final class McpServerFactory
             outputSchema: self::envelopeSchema(),
         );
         $builder->addTool(
+            [$reports, 'aopApplications'],
+            name: 'bear_aop_applications',
+            title: 'Inspect source-matched Resource AOP',
+            description: 'List Resource methods and interceptor chains under an explicit context using the Ray.Aop '
+                . 'PHP-attribute source matching model. Read status, unresolvedPointcuts and unknownTotal. '
+                . 'This does not execute PHP, validate weaving or observe runtime applications. '
+                . 'DI Resource replacements are followed only for source-selected class bindings.',
+            annotations: $annotations,
+            inputSchema: self::objectSchema([
+                'applicationContext' => self::applicationContextSchema(),
+                'uri' => ['type' => 'string', 'maxLength' => 2048, 'description' => 'Exact Resource URI filter.'],
+                'interceptor' => ['type' => 'string', 'maxLength' => 2048,
+                    'description' => 'Exact interceptor FQCN among known matches; '
+                        . 'inspect unresolvedPointcutTotal for omissions.'],
+                'attribute' => ['type' => 'string', 'maxLength' => 2048,
+                    'description' => 'Exact attribute FQCN referenced by a matching condition.'],
+                'method' => ['type' => 'string', 'maxLength' => 255,
+                    'description' => 'Exact public method filter; defaults to public on* Resource methods.'],
+                'contextPath' => self::pathSchema('Optional workspace-relative project context path.'),
+                'limit' => self::limitSchema('Maximum methods per page.', self::PROJECT_REPORT_MAX_ITEMS),
+                'offset' => self::offsetSchema(),
+            ], ['applicationContext']),
+            outputSchema: self::envelopeSchema(),
+        );
+        $builder->addTool(
+            [$reports, 'attributeCatalog'],
+            name: 'bear_attribute_catalog',
+            title: 'List available PHP attribute definitions',
+            description: 'Discover PHP attribute definitions from Composer source maps, including unused definitions. '
+                . 'Return targets, constructor parameter signatures, source docblocks and locations. '
+                . 'With an explicit context, include AOP condition references and interceptor invoke locations. '
+                . 'References are not proof of application. Inspect scanTruncated and unknownTotal. '
+                . 'Default argument values are never returned; arbitrary framework consumers are not inferred.',
+            annotations: $annotations,
+            inputSchema: self::objectSchema([
+                'applicationContext' => self::applicationContextSchema(),
+                'attribute' => ['type' => 'string', 'maxLength' => 2048,
+                    'description' => 'Exact attribute FQCN filter.'],
+                'contextPath' => self::pathSchema('Optional workspace-relative project context path.'),
+                'limit' => self::limitSchema('Maximum definitions per page.', self::PROJECT_REPORT_MAX_ITEMS),
+                'offset' => self::offsetSchema(),
+            ]),
+            outputSchema: self::envelopeSchema(),
+        );
+        $builder->addTool(
             [$reports, 'diModuleTreeRead'],
             name: 'bear_di_module_tree_read',
             title: 'Read declared module relationships',

@@ -40,8 +40,10 @@ final class RealMcpEndToEndTest extends TestCase
             sort($names);
             self::assertSame([
                 'bear_alps_descriptor_lookup',
-                'bear_aop_pointcuts',
+                'bear_aop_applications',
+            'bear_aop_pointcuts',
                 'bear_app_context_list',
+            'bear_attribute_catalog',
                 'bear_contract_compare',
                 'bear_contract_coverage',
                 'bear_di_binding_lookup',
