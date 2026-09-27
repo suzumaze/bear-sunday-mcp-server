@@ -94,3 +94,20 @@ Resource自体が無い場合は`partial`もありません。
 
 workspace rootとPhpactor commandはserver起動時に固定されます。tool callは、保存済みsourceから
 得られる事実だけを問い合わせます。
+
+
+## DI設定の根拠を確認する（開発中）
+
+| MCPツール | 対応LSP | 内容 |
+|---|---|---|
+| `bear_app_context_list` | `bear/app/contexts` | 起動コードのcontext候補と出典。自動選択しない |
+| `bear_di_binding_lookup` | `bear/di/bindingLookup` | 明示したcontextの束縛候補、衝突時の採用・破棄、宣言と組み込み経路 |
+| `bear_di_module_tree_read` | `bear/di/moduleGraph` | workspace内のModule関係。vendor展開・優先順位評価は対象外 |
+
+`overridesOnly`は衝突が記録されたキー、`resourcesOnly`はキー・採用先・破棄先に既知の
+ResourceObject派生クラスを含むキーに絞ります。プロバイダの戻り型までは推論しません。
+未解決条件が残る照会は`provisional`です。`source_selected`も実行時の確定結果ではありません。
+設定の実値は返しません。決定履歴・未解決箇所は、それぞれの件数と打ち切りフラグを確認してください。
+
+現行の公開版拡張では新しい要求が未対応の場合があります。実装済みの要求をproject infoで確認し、
+未対応を空の検索結果と解釈しないでください。属性カタログとAOP適用先一覧は次段階です。

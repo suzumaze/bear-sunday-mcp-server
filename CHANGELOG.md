@@ -8,6 +8,13 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
+- Add `bear_app_context_list`, `bear_di_binding_lookup`, and `bear_di_module_tree_read`
+  as read-only adapters to advertised inspection requests. Context selection is explicit;
+  binding evidence preserves provisional status, source locations and independent bounds.
+  Unsupported engines return an explicit unsupported result. Add a real MCP-to-Phpactor
+  integration test against the matching extension checkout.
+
+
 - `bear_di_bindings` exposes bounded, source-only inventories of direct static Ray.Di
   `bind()->to()` declarations, retaining unsupported chains as reasoned unresolved items.
 - `bear_aop_pointcuts` exposes bounded, source-only Ray.Aop interceptor declarations and

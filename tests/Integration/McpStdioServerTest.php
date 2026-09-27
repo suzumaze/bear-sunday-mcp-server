@@ -139,9 +139,12 @@ final class McpStdioServerTest extends TestCase
         self::assertSame([
             'bear_alps_descriptor_lookup',
             'bear_aop_pointcuts',
+                'bear_app_context_list',
             'bear_contract_compare',
             'bear_contract_coverage',
-            'bear_di_bindings',
+            'bear_di_binding_lookup',
+                'bear_di_bindings',
+                'bear_di_module_tree_read',
             'bear_project_diagnostics',
             'bear_project_info',
             'bear_resource_attribute_index',
@@ -285,6 +288,34 @@ final class McpStdioServerTest extends TestCase
             $coverage['result']['structuredContent'],
             json_decode($coverage['result']['content'][0]['text'], true, 64, JSON_THROW_ON_ERROR),
         );
+
+        self::assertSame(['applicationContext'], $toolsByName['bear_di_binding_lookup']['inputSchema']['required']);
+        self::assertArrayNotHasKey(
+            'default',
+            $toolsByName['bear_di_binding_lookup']['inputSchema']['properties']['applicationContext'],
+        );
+        $missingContext = $this->request('tools/call', [
+            'name' => 'bear_di_binding_lookup',
+            'arguments' => [],
+        ]);
+        self::assertTrue(isset($missingContext['error']) || ($missingContext['result']['isError'] ?? false));
+        $lookup = $this->request('tools/call', [
+            'name' => 'bear_di_binding_lookup',
+            'arguments' => ['applicationContext' => 'prod-html-app', 'overridesOnly' => true, 'resourcesOnly' => true],
+        ]);
+        self::assertFalse($lookup['result']['isError']);
+        self::assertSame('bear/di/bindingLookup', $lookup['result']['structuredContent']['data']['method']);
+        self::assertSame(
+            'prod-html-app',
+            $lookup['result']['structuredContent']['data']['params']['applicationContext'],
+        );
+        self::assertTrue($lookup['result']['structuredContent']['data']['params']['resourcesOnly']);
+        $contexts = $this->request('tools/call', ['name' => 'bear_app_context_list', 'arguments' => []]);
+        self::assertSame('bear/app/contexts', $contexts['result']['structuredContent']['data']['method']);
+        $tree = $this->request('tools/call', [
+            'name' => 'bear_di_module_tree_read', 'arguments' => ['applicationContext' => 'prod-html-app'],
+        ]);
+        self::assertSame('bear/di/moduleGraph', $tree['result']['structuredContent']['data']['method']);
 
         $bindings = $this->request('tools/call', [
             'name' => 'bear_di_bindings',

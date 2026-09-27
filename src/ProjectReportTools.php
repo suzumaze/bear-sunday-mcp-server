@@ -38,6 +38,38 @@ final readonly class ProjectReportTools
         return self::result($this->tools->aopPointcuts($interceptor, $limit, $offset));
     }
 
+    public function appContextList(?string $contextPath = null, int $limit = 50, int $offset = 0): CallToolResult
+    {
+        return self::result($this->tools->appContextList($contextPath, $limit, $offset));
+    }
+
+    public function diBindingLookup(
+        string $applicationContext,
+        ?string $type = null,
+        ?string $name = null,
+        ?string $contextPath = null,
+        int $limit = 50,
+        int $offset = 0,
+        bool $overridesOnly = false,
+        bool $resourcesOnly = false,
+    ): CallToolResult {
+        return self::result($this->tools->diBindingLookup(
+            $applicationContext,
+            $type,
+            $name,
+            $contextPath,
+            $limit,
+            $offset,
+            $overridesOnly,
+            $resourcesOnly,
+        ));
+    }
+
+    public function diModuleTreeRead(string $applicationContext): CallToolResult
+    {
+        return self::result($this->tools->diModuleGraph($applicationContext));
+    }
+
     /** @param array<string,mixed> $data */
     private static function result(array $data): CallToolResult
     {

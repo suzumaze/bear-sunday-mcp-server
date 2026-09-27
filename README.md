@@ -383,3 +383,30 @@ The proposed read-only boundary for optional runtime cache evidence is documente
 ## License
 
 MIT
+
+### DI inspection under development
+
+`bear_app_context_list` discovers saved entry-point context candidates and their source
+locations. It does not choose a context. Pass an explicit `applicationContext` to
+`bear_di_binding_lookup` to inspect source-selected bindings and local retained/discarded
+choices with declaration and module-import evidence. Filter by `type`, `name`,
+`overridesOnly` or `resourcesOnly`. Inspect unknowns and truncation; provisional selections
+are not runtime winners. Instance values are never returned.
+
+`bear_di_module_tree_read` reads the existing workspace module relationships. Its coverage
+is narrower than binding lookup: it does not expand vendor Modules or evaluate precedence.
+
+These tools require an engine advertising `bear/app/contexts`, `bear/di/bindingLookup` and
+`bear/di/moduleGraph`, respectively. The bundled published extension does not yet provide
+all of them; the adapter returns `unsupported` instead of fabricating a result. The matching
+extension checkout is tested before release:
+
+```sh
+BEAR_MCP_TEST_EXTENSION_ROOT=/path/to/bear-phpactor-extension \
+  vendor/bin/phpunit tests/Integration/DiInspectionEndToEndTest.php
+```
+
+The earlier DI/AOP map UI is preserved on `codex/archive-di-aop-map`, not included in this
+branch. AOP application matching and an available-attribute catalog are subsequent work;
+`bear_aop_pointcuts` remains a declaration inventory. No installed server is upgraded by
+these source changes.

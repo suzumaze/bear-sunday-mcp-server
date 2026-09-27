@@ -41,9 +41,12 @@ final class RealMcpEndToEndTest extends TestCase
             self::assertSame([
                 'bear_alps_descriptor_lookup',
                 'bear_aop_pointcuts',
+                'bear_app_context_list',
                 'bear_contract_compare',
                 'bear_contract_coverage',
+                'bear_di_binding_lookup',
                 'bear_di_bindings',
+                'bear_di_module_tree_read',
                 'bear_project_diagnostics',
                 'bear_project_info',
                 'bear_resource_attribute_index',

@@ -117,6 +117,58 @@ final class McpServerFactory
             outputSchema: self::envelopeSchema(),
         );
         $builder->addTool(
+            [$reports, 'appContextList'],
+            name: 'bear_app_context_list',
+            title: 'Find declared BEAR contexts',
+            description: 'Find context candidates in saved Bootstrap and Injector entry points with source locations. '
+                . 'This does not observe runtime usage or select a context. Inspect scanTruncated and unresolvedTotal; '
+                . 'use the user-requested context for binding lookup, or clarify when candidates differ.',
+            annotations: $annotations,
+            inputSchema: self::objectSchema([
+                'contextPath' => self::pathSchema('Optional workspace-relative project context path.'),
+                'limit' => self::limitSchema('Maximum contexts per page.', self::PROJECT_REPORT_MAX_ITEMS),
+                'offset' => self::offsetSchema(),
+            ]),
+            outputSchema: self::envelopeSchema(),
+        );
+        $builder->addTool(
+            [$reports, 'diBindingLookup'],
+            name: 'bear_di_binding_lookup',
+            title: 'Explain a context binding selection',
+            description: 'Inspect source-derived binding selections, discarded declarations, and module import paths. '
+                . 'The applicationContext is required and never guessed. When coverage.hasUnknowns is true, '
+                . 'selections are provisional. Empty results do not prove runtime unboundness. '
+                . 'Instance values are never returned. This does not evaluate AOP applications.',
+            annotations: $annotations,
+            inputSchema: self::objectSchema([
+                'applicationContext' => self::applicationContextSchema(),
+                'type' => ['type' => 'string', 'maxLength' => 2048,
+                    'description' => 'Exact DI type; an empty string selects scalar bindings. Omit to list types.'],
+                'name' => ['type' => 'string', 'maxLength' => 2048,
+                    'description' => 'Exact qualifier; an empty string selects unqualified bindings.'],
+                'contextPath' => self::pathSchema('Optional workspace-relative project context path.'),
+                'limit' => self::limitSchema('Maximum bindings per page.', self::PROJECT_REPORT_MAX_ITEMS),
+                'offset' => self::offsetSchema(),
+                'overridesOnly' => ['type' => 'boolean', 'description' => 'Only keys with recorded binding conflicts.'],
+                'resourcesOnly' => ['type' => 'boolean',
+                    'description' => 'Only keys whose type or selected/discarded target is a known Resource subclass.'],
+            ], ['applicationContext']),
+            outputSchema: self::envelopeSchema(),
+        );
+        $builder->addTool(
+            [$reports, 'diModuleTreeRead'],
+            name: 'bear_di_module_tree_read',
+            title: 'Read declared module relationships',
+            description: 'Read source-derived context segments and workspace install/override relationships. '
+                . 'This is a structural inventory: vendor expansion and binding precedence are not evaluated. '
+                . 'Use bear_di_binding_lookup for context binding selections and their evidence.',
+            annotations: $annotations,
+            inputSchema: self::objectSchema([
+                'applicationContext' => self::applicationContextSchema(),
+            ], ['applicationContext']),
+            outputSchema: self::envelopeSchema(),
+        );
+        $builder->addTool(
             [$reports, 'diBindings'],
             name: 'bear_di_bindings',
             title: 'Inspect Ray.Di binding declarations',
@@ -489,6 +541,17 @@ final class McpServerFactory
         );
 
         return $builder->build();
+    }
+
+    /** @return array<string,mixed> */
+    private static function applicationContextSchema(): array
+    {
+        return [
+            'type' => 'string',
+            'maxLength' => 2048,
+            'pattern' => '^[A-Za-z0-9_]+(?:-[A-Za-z0-9_]+)*$',
+            'description' => 'Explicit BEAR context, such as prod-html-app; do not infer it from candidate order.',
+        ];
     }
 
     /**
