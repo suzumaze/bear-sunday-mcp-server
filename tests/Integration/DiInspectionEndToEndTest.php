@@ -104,6 +104,16 @@ PHP;
             self::assertSame('onGet', $aop['data']['items'][0]['method']);
             self::assertSame('Acme\\Shop\\Interceptor\\Priority', $aop['data']['items'][0]['chain'][0]['interceptor']);
             self::assertSame('provisional', $aop['data']['items'][0]['status']);
+            $unknownSummary = $aop['data']['unknownSummary'];
+            self::assertSame(1, $unknownSummary['filterMatchedMethods']);
+            self::assertSame(
+                $aop['data']['unknownTotal'],
+                $unknownSummary['compositionOccurrences']
+                    + $unknownSummary['resourceOccurrences']
+                    + $unknownSummary['applicationOccurrences'],
+            );
+            self::assertArrayHasKey('items', $unknownSummary['groups']);
+            self::assertGreaterThanOrEqual(0, $unknownSummary['groups']['total']);
             $helper = $client->callTool('bear_aop_applications', [
                 'applicationContext' => 'advice-app', 'uri' => 'app://self/advice', 'method' => 'helper',
             ])->structuredContent;
