@@ -66,7 +66,11 @@ PHP;
             ], dirname(__DIR__, 2)));
             $contexts = $client->callTool('bear_app_context_list')->structuredContent;
             self::assertSame('ok', $contexts['status'], json_encode($contexts, JSON_THROW_ON_ERROR));
-            self::assertSame(4, $contexts['data']['total']);
+            self::assertSame(6, $contexts['data']['total']);
+            self::assertSame(
+                ['cli-app', 'dev-html-app', 'forwarded-app', 'override-app', 'prod-app', 'prod-html-app'],
+                array_column($contexts['data']['items'], 'applicationContext'),
+            );
             self::assertArrayNotHasKey('selectedContext', $contexts['data']); // LSP omits nulls on the wire.
             $bindings = $client->callTool('bear_di_binding_lookup', [
                 'applicationContext' => 'inspect-app',
