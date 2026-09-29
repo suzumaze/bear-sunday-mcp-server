@@ -182,9 +182,14 @@ final class PhpactorLanguageServer implements SemanticLspClient
             'method' => $method,
             'params' => $params,
         ]);
+        $deadline = microtime(true) + ($timeout ?? $this->timeout);
 
         while (true) {
-            $message = $this->read($timeout ?? $this->timeout);
+            $remaining = $deadline - microtime(true);
+            if ($remaining <= 0) {
+                throw new LspTimeoutException('Timed out waiting for Phpactor');
+            }
+            $message = $this->read($remaining);
             if (isset($message['method']) && is_string($message['method'])) {
                 if (array_key_exists('id', $message)) {
                     $this->answerServerRequest($message);
