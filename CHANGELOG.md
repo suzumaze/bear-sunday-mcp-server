@@ -4,18 +4,28 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.12.0] - 2026-09-29
+
 ### Added
 
 - Add `bear_app_context_list`, `bear_di_binding_lookup`, and `bear_di_module_tree_read`
-  as read-only adapters to advertised inspection requests. Context selection is explicit;
-  binding evidence preserves provisional status, source locations and independent bounds.
-  Unsupported engines return an explicit unsupported result. Add a real MCP-to-Phpactor
-  integration test against the matching extension checkout.
+  for context discovery, source-derived binding selection, and Module relationships. Context
+  selection is explicit; binding evidence preserves provisional status, source locations and
+  independent bounds. Binding lookup follows composition through installed dependencies; the
+  Module map remains limited to workspace Modules and does not evaluate precedence.
 - Add `bear_attribute_catalog` for PHP attribute definitions, source documentation and
   optional context-specific AOP condition references, without exposing default argument values.
 - Add `bear_aop_applications` for source-matched Resource methods and interceptor order under
   an explicit context. Preserve unknowns and weaving limitations; this is not a runtime trace.
   Verify both tools through real MCP-to-Phpactor integration tests.
+
+### Documentation
+
+- Update the English and Japanese tool references and use cases for the released DI/AOP
+  inspection workflow, including explicit context selection, source locations, uncertainty,
+  and the distinction between workspace Module maps and dependency-aware binding lookup.
+- Document Module browsing as an optional overview; source paths and lines support direct
+  inspection without requiring a dedicated UI.
 
 ## [0.11.0] - 2026-09-24
 
@@ -208,7 +218,8 @@ All notable changes to this project will be documented in this file.
 - Bounded LSP framing, fixed workspace/process configuration, structured failure results, and
   fake and real stdio integration coverage.
 
-[Unreleased]: https://github.com/suzumaze/bear-sunday-mcp-server/compare/v0.11.0...HEAD
+[Unreleased]: https://github.com/suzumaze/bear-sunday-mcp-server/compare/v0.12.0...HEAD
+[0.12.0]: https://github.com/suzumaze/bear-sunday-mcp-server/compare/v0.11.0...v0.12.0
 [0.11.0]: https://github.com/suzumaze/bear-sunday-mcp-server/compare/v0.10.2...v0.11.0
 [0.10.2]: https://github.com/suzumaze/bear-sunday-mcp-server/compare/v0.10.1...v0.10.2
 [0.10.1]: https://github.com/suzumaze/bear-sunday-mcp-server/compare/v0.10.0...v0.10.1

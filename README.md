@@ -23,7 +23,7 @@ and AI clients.
 
 ## Status
 
-The server provides twenty-six read-only tools against the BEAR Semantic API and
+The server provides thirty-two read-only tools against the BEAR Semantic API and
 Phpactor's standard LSP. In addition to project, Resource, and schema facts, it resolves
 explicit Route names, SQL query IDs, Twig/Qiq template names, Resource templates, and ALPS
 descriptors. It also exposes allowlisted Resource attribute facts, a bounded attribute
@@ -31,9 +31,13 @@ inventory, presence-only contract comparison, static Resource references, and in
 Link/Embed relations. Project-level contract coverage distinguishes absent, dynamic,
 unresolved, available, and non-applicable JSON Schema and ALPS surfaces without treating
 optional adoption gaps as errors.
-It also inventories direct static Ray.Di binding declarations and Ray.Aop interceptor
-matcher trees. These are saved-source declarations, not claims about an active application
-context, binding precedence, evaluated pointcuts, or runtime weaving.
+It also explains source-derived binding selections under an explicitly supplied application
+context, shows candidate contexts declared in saved startup code, maps workspace Modules,
+lists PHP attribute definitions, and reports source-matched Resource AOP candidates. These
+are inspection results derived from saved source, not observations of a running application.
+Context selection is never guessed. The Module map does not expand vendor packages, while
+binding lookup can follow imported composition through installed dependencies. Neither proves
+runtime behavior, and AOP candidates do not prove that weaving occurred.
 Project diagnostics and contract coverage use stable offset pagination and an approximate
 serialized-byte budget: a page can be shorter than its requested count. Advance `offset` by
 the actual returned item count while `truncated` is true. Diagnostics accepts `limit` 1–200
@@ -64,7 +68,7 @@ constant records, not methods, and does not claim that its index is current.
 
 See [Project status](docs/project-status.md) ([日本語](docs/project-status.ja.md)) for the
 implemented boundary, real-workspace verification evidence, and deferred experiments.
-See the [tool table below](#tools) ([日本語の全26ツール一覧](docs/tools.ja.md)) for the
+See the [tool table below](#tools) ([日本語の全32ツール一覧](docs/tools.ja.md)) for the
 complete inventory, and [Use cases](docs/use-cases.md) ([日本語](docs/use-cases.ja.md))
 for task-oriented workflows.
 
@@ -75,7 +79,7 @@ for task-oriented workflows.
 - An MCP host that supports stdio servers
 
 The standard installation bundles Phpactor 2026.07.22.0 and
-`suzumaze/bear-phpactor-extension` 0.2.0 or newer. If you override `--phpactor`
+`suzumaze/bear-phpactor-extension` 0.3.0 or newer. If you override `--phpactor`
 with an older compatible installation, each MCP tool checks that its backing semantic
 request is advertised; an unavailable request returns `unsupported` without being sent.
 
@@ -241,6 +245,13 @@ Find all static references to app://self/user.
 Find Link and Embed relations targeting app://self/user.
 List direct static Ray.Di bindings and keep unsupported binding chains unresolved.
 List Ray.Aop interceptor declarations without claiming that their pointcuts match at runtime.
+Which application contexts are declared in the saved startup code? Show their source locations.
+For the explicitly selected App context, explain the source-derived binding for a type and show
+the selected declaration and composition path, including unknowns and provisional results.
+For the explicitly selected App context, show source-matched interceptors for Resource methods,
+their order, and source locations; keep unresolved matches visible.
+List attribute definitions used by the project and installed dependencies, with source docs and
+locations; distinguish AOP condition references from proof that an attribute is applied.
 Show the supported attributes on app://self/user, mark dynamic arguments explicitly, and
 do not infer omitted constructor defaults.
 Audit cache, Link, Embed, Schema, and ALPS attributes across App Resources.
@@ -277,6 +288,11 @@ The complete Japanese reference is available in [MCPツール一覧](docs/tools.
 | `bear_di_bindings` | `bear/di/bindings` | Direct static Ray.Di bind-to declarations; no active context, precedence, or winning-binding claim |
 | `bear_di_module_declarations` | `bear/di/moduleDeclarations` | Exact Module source declarations; optional context membership overlay, no binding-winner claim |
 | `bear_aop_pointcuts` | `bear/aop/pointcuts` | Static Ray.Aop interceptor declarations and matcher syntax trees; no evaluation or weaving claim |
+| `bear_app_context_list` | `bear/app/contexts` | Context candidates declared in saved startup code with source locations; no automatic selection |
+| `bear_di_binding_lookup` | `bear/di/bindingLookup` | Source-derived binding selection and discarded declarations for an explicitly named context, with composition paths and uncertainty |
+| `bear_di_module_tree_read` | `bear/di/moduleGraph` | Bounded workspace Module map or one context source graph; no vendor expansion or precedence evaluation |
+| `bear_attribute_catalog` | `bear/attribute/catalog` | Attribute definitions, targets, constructor signatures, docs, and optional context-specific AOP condition references |
+| `bear_aop_applications` | `bear/aop/applications` | Source-matched Resource methods and interceptor order for an explicit context; no runtime weaving claim |
 | `bear_resource_list` | `bear/resource/list` | Deterministic paginated Resource URI inventory with scheme and prefix filters |
 | `bear_resource_describe` | `bear/resource/describe` | Resource methods, Link/Embed relations, templates, and schemas |
 | `bear_resource_attributes` | `bear/resource/attributes` | Allowlisted class/method attributes with explicit source arguments and dynamic markers; constructor defaults are not expanded |
@@ -385,7 +401,7 @@ The proposed read-only boundary for optional runtime cache evidence is documente
 
 MIT
 
-### DI and AOP inspection under development
+### Context, DI, and AOP inspection
 
 `bear_app_context_list` discovers saved entry-point context candidates and their source
 locations. It does not choose a context. Pass an explicit `applicationContext` to
@@ -416,9 +432,9 @@ are not proof of absence when unknowns remain.
 
 These tools require an engine advertising their corresponding requests:
 `bear/app/contexts`, `bear/di/bindingLookup`, `bear/di/moduleGraph`,
-`bear/attribute/catalog`, and `bear/aop/applications`. The bundled published extension does not yet provide
-all of them; the adapter returns `unsupported` instead of fabricating a result. The matching
-extension checkout is tested before release:
+`bear/attribute/catalog`, and `bear/aop/applications`. The bundled extension v0.3.0 provides
+these requests. An older or otherwise incompatible engine returns `unsupported` instead of
+fabricating a result. The matching extension checkout is tested with:
 
 ```sh
 BEAR_MCP_TEST_EXTENSION_ROOT=/path/to/bear-phpactor-extension \

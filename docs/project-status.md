@@ -1,7 +1,7 @@
 # Project status
 
 This is the combined implementation, verification, and release status of the Phpactor extension
-and MCP server as of 2026-09-24.
+and MCP server as of 2026-09-29.
 
 See the [complete tool inventory](../README.md#tools) ([Japanese](tools.ja.md)) and the
 [task-oriented use cases](use-cases.md) ([Japanese](use-cases.ja.md)).
@@ -15,17 +15,17 @@ flowchart TB
         C4["Resource, Schema, and ALPS<br/>name-presence comparison<br/>complete"]
         C5["Project-wide static diagnostics<br/>complete"]
         C6["Project-wide contract adoption coverage<br/>complete"]
-        C7["Source-only DI bindings and AOP pointcuts<br/>complete"]
+        C7["Source-derived Module relationships,<br/>binding routes, and AOP applications<br/>complete"]
         C1 --> C2
         C1 --> C3 --> C4 --> C5 --> C6 --> C7
     end
 
     subgraph MCP["bear-sunday-mcp-server"]
-        M1["26 read-only tools<br/>complete"]
+        M1["32 read-only tools<br/>complete"]
         M0["Optional MCP Apps contract coverage view<br/>complete"]
         M2["Grep comparison and task-oriented use cases<br/>complete"]
         M3["BEAR.Skills responsibility map<br/>complete"]
-        M4["Real Phpactor fixture E2E<br/>26 tools<br/>complete"]
+        M4["Real Phpactor fixture and Kata E2E<br/>complete"]
         M5["276-Resource workspace<br/>read-only connection verified"]
         M1 --> M0 --> M2 --> M3 --> M4 --> M5
     end
@@ -38,26 +38,27 @@ flowchart TB
         D1 -.-> D2
     end
 
-    M5 --> R1["core v0.2.0 / MCP v0.11.0<br/>bundled installation"]
-    R1 --> S1["bear-semantic skill bundled<br/>contract adoption workflow included"]
+    M5 --> R1["core v0.3.0 / MCP v0.12.0<br/>bundled installation"]
+    R1 --> S1["bear-semantic skill bundled<br/>context, DI, and AOP workflow included"]
 ```
 
 ## Release status
 
 | Component | Version | Status |
 |---|---|---|
-| `suzumaze/bear-phpactor-extension` | `v0.2.0` | Standard LSP diagnostics, response shape facts, and source-only DI/AOP inventories |
-| `suzumaze/bear-sunday-mcp-server` | `v0.11.0` | 26 read-only tools with bundled Phpactor and BEAR extension v0.2.0 |
-| MCP tool inventory | 26 in `v0.11.0` | English and Japanese manuals complete |
+| `suzumaze/bear-phpactor-extension` | `v0.3.0` | Source-derived Module relationships, binding routes, attribute catalog, and AOP applications |
+| `suzumaze/bear-sunday-mcp-server` | `v0.12.0` | 32 read-only tools with bundled Phpactor and BEAR extension v0.3.0 |
+| MCP tool inventory | 32 in `v0.12.0` | English and Japanese manuals complete |
 | Contract coverage UI | optional MCP Apps view | Read-only; structured/text fallback retained |
-| `bear-semantic` agent skill | bundled with `v0.11.0` | Project, contract-adoption, and DI/AOP declaration workflows included |
+| `bear-semantic` agent skill | bundled with `v0.12.0` | Project, contract-adoption, context, DI, and AOP workflows included |
 
 ## What improved beyond grep
 
 Grep returns matching text. The Semantic API resolves saved-source facts: canonical Resource
 identity, methods, Link/Embed relations, references, Route/SQL/template/ALPS targets,
-allowlisted attributes, contract-name presence, contract-adoption coverage, source-declared DI/AOP
-facts, and standard LSP navigation.
+allowlisted attributes, contract-name presence, contract-adoption coverage, source-derived Module
+relationships and binding routes under an explicit context, attribute definitions, AOP
+applications, and standard LSP navigation.
 
 Comments, arbitrary configuration, dynamic expressions, and unsupported framework
 extensions remain outside the semantic model and still require source inspection or search.

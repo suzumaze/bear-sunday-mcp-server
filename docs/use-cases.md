@@ -11,7 +11,7 @@ semantic model.
 |---|---|---|
 | What is statically inconsistent across the project? | Many independent searches with no coverage signal | Bounded diagnostics with scan counts, truncation, and skipped checks |
 | Where are JSON Schema or ALPS contracts not adopted yet? | Attribute and convention searches with no applicability or completeness signal | Per-method surface states and a bounded project summary |
-| Which DI/AOP declarations are statically visible? | Fluent-call fragments that require manual alias and chain interpretation | Direct binding declarations, matcher trees, and reasoned unresolved forms |
+| What is selected for a type or Resource under an explicit context? | Manually trace Module and attribute fragments with no clear path or uncertainty summary | Source-derived binding selections and discarded candidates, plus source-matched Resource AOP candidates with evidence locations |
 | What implements a Resource URI? | Matching string or class fragments | Normalized URI, FQN, and workspace-relative path |
 | What is the Resource interface? | Separate searches for `on*` methods | Public `on*` methods and declared parameter types |
 | Where is the Resource used? | Every matching string | Static references that resolve to the same canonical Resource |
@@ -154,25 +154,51 @@ Both tools return an explicit-only argument policy. An omitted attribute argumen
 not mean that the constructor has no default, and installed-package defaults are not
 expanded or guessed.
 
-## 7. Inspect DI and AOP declarations
+## 7. Inspect context-specific DI bindings and AOP candidates
 
 Ask:
 
 ```text
-List direct static Ray.Di bindings and Ray.Aop interceptor declarations. Keep dynamic or
-unsupported forms unresolved, and do not infer the active context or runtime weaving.
+List contexts declared in the startup source with locations. This application uses the App
+context. For that explicit context, explain the source-derived binding selection and Module
+path for a type, including conflicts and unknowns. Also show source-matched AOP candidates and
+interceptor order for Resource methods, retaining unresolved pointcuts. Do not present source
+analysis as an observation of runtime behavior.
 ```
 
-Use `bear_di_bindings`, `bear_aop_pointcuts`, and `bear_di_module_declarations`. When you know
-a Module FQCN, the last tool shows its direct declarations with file and line. With no context it
-is source-only; with a context it adds only saved-workspace graph membership. Binding and pointcut
-items paginate independently. A resolved declaration proves only that its syntax was read. The
-source graph does not prove runtime installation for a context. It also cannot establish which
-binding wins after overrides, whether a matcher selects a method, or whether an interceptor is
-woven at runtime. Inspect `unresolved` items in source rather than
-turning them into guessed facts.
+Start with `bear_app_context_list` to see context candidates declared in startup code and their
+source locations. Pass the user-selected context explicitly to `bear_di_binding_lookup` and
+`bear_aop_applications`; when several candidates exist, do not choose one silently. Binding
+lookup reports source-derived selected and discarded candidates and their composition paths.
+A binding result is `provisional` when unknown conditions remain. AOP applications reports
+interceptor candidates per Resource method and their order; inspect unresolved-pointcut and
+unknown counts.
 
-## 8. Compare contract name presence
+Use the returned paths, lines, and provenance to inspect the declarations. A dedicated screen
+for browsing every Module is not required: `bear_di_module_tree_read` is available when a
+relationship overview helps, and `bear_di_module_declarations` can inspect one known Module.
+The Module map covers workspace Modules and does not expand vendor packages. Binding lookup can
+follow source composition through installed dependencies. Both are analyses of saved source,
+not observations of the running application. They cannot establish runtime binding winners,
+evaluated pointcuts, or whether weaving occurred. For direct declaration inventories, the
+existing `bear_di_bindings` and `bear_aop_pointcuts` tools remain available.
+
+## 8. Catalog attribute definitions and AOP condition references
+
+Ask:
+
+```text
+List PHP attribute definitions available in the project and installed dependencies, with
+targets, constructor signatures, docs, and source locations. Under the App context, show AOP
+condition attribute references too, but do not treat a reference as proof of application.
+```
+
+Use `bear_attribute_catalog` to discover definitions from Composer source maps. Supplying a
+context adds AOP condition references. This catalog identifies definitions and references; it
+does not prove an attribute was applied to a Resource or evaluated at runtime. Inspect
+`total`, `scanTruncated`, `unknownTotal`, and pagination.
+
+## 9. Compare contract name presence
 
 Ask:
 
@@ -188,7 +214,7 @@ meaning, or runtime compatibility. For response comparison the Resource body sur
 available only when straight-line source proves a complete literal-key `$this->body` shape;
 dynamic or conditional construction remains `unsupported`.
 
-## 9. Navigate from an exact source position
+## 10. Navigate from an exact source position
 
 When the client already knows a saved file and cursor position, use the standard LSP tools:
 

@@ -1,7 +1,7 @@
 # MCPツール一覧
 
 BEAR.Sunday MCP Serverは、BEAR Semantic APIとPhpactorの標準LSPを
-用途別の26個のread-only toolとして公開します。
+用途別の32個のread-only toolとして公開します。
 
 - Resource URIなど、調べたいBEAR識別子が分かる場合は`bear_*` toolを使います。
 - 保存済みファイルのcursor位置が分かる場合は`lsp_*` toolを使います。
@@ -20,6 +20,11 @@ BEAR.Sunday MCP Serverは、BEAR Semantic APIとPhpactorの標準LSPを
 | `bear_di_bindings` | `bear/di/bindings` | type、limit、offset | 直接記述された静的なRay.Di `bind()->to()`宣言。active context、優先順位、最終bindingは主張しない |
 | `bear_di_module_declarations` | `bear/di/moduleDeclarations` | exact module、optional applicationContext、limit、offset | 1つのModuleの直接宣言とfile:line。context未指定はsource view、指定時もsource graph上のmembershipのみ。bindings/pointcutsは各categoryで別々にページングされ、最大2×limit件 |
 | `bear_aop_pointcuts` | `bear/aop/pointcuts` | interceptor、limit、offset | 静的なRay.Aop interceptor宣言とmatcher構文木。pointcut評価やruntime weavingは主張しない |
+| `bear_app_context_list` | `bear/app/contexts` | optional context path、limit、offset | 起動コードに宣言されたcontext候補とsource位置。実行時に使われたcontextを観測せず、自動選択もしない |
+| `bear_di_binding_lookup` | `bear/di/bindingLookup` | 必須applicationContext、optional type/name、limit、offset、filters | 明示したcontextについて、sourceから導いたbinding選択候補、衝突時の破棄宣言、Module経路、未確定情報。unknownがあればprovisional。vendorを含むcompositionをたどるが、実行時結果ではない |
+| `bear_di_module_tree_read` | `bear/di/moduleGraph` | optional applicationContext | context未指定ではworkspace内Module map、指定時はそのcontextのsource graph。workspace外vendor Moduleは展開せず、優先順位も評価しない |
+| `bear_attribute_catalog` | `bear/attribute/catalog` | optional applicationContext、attribute、context path、limit、offset | Composer source mapから見つけたPHP attribute定義、target、constructor signature、docblock、source位置。context指定時はAOP condition参照も示すが、適用の証明ではない |
+| `bear_aop_applications` | `bear/aop/applications` | 必須applicationContext、optional Resource/interceptor/attribute/method、limit、offset | 明示contextにおけるResource methodとsource上で一致したinterceptor候補・順序。未解決pointcutを保持し、PHP実行やruntime weavingは観測しない |
 | `bear_resource_list` | `bear/resource/list` | scheme、prefix、limit、offset | 正規化されたResource URI、FQN、workspace相対pathの決定的なページ一覧 |
 | `bear_resource_describe` | `bear/resource/describe` | Resource URI | public `on*` method、parameter、Link/Embed、template、schema |
 | `bear_resource_attributes` | `bear/resource/attributes` | Resource URI | allowlist済みclass/method属性と明示引数。省略されたconstructor defaultは展開しない |
@@ -83,7 +88,7 @@ Resource自体が無い場合は`partial`もありません。
 
 ## 安全境界
 
-全26 toolはread-onlyです。MCP serverは次の操作を行いません。
+全32 toolはread-onlyです。MCP serverは次の操作を行いません。
 
 - BEAR applicationや任意PHPの実行
 - templateのrender
@@ -97,18 +102,16 @@ workspace rootとPhpactor commandはserver起動時に固定されます。tool 
 得られる事実だけを問い合わせます。
 
 
-## DI設定の根拠を確認する（開発中）
+## DI/AOPツールの使い分け
 
-| MCPツール | 対応LSP | 内容 |
-|---|---|---|
-| `bear_app_context_list` | `bear/app/contexts` | 起動コードのcontext候補と出典。自動選択しない |
-| `bear_di_binding_lookup` | `bear/di/bindingLookup` | 明示したcontextの束縛候補、衝突時の採用・破棄、宣言と組み込み経路 |
-| `bear_di_module_tree_read` | `bear/di/moduleGraph` | workspace内のModule関係。vendor展開・優先順位評価は対象外 |
+「このcontextでこの型はどこから来るか」「このResource methodにどのinterceptorが候補として並ぶか」のような
+質問には、`bear_di_binding_lookup`または`bear_aop_applications`を使い、`applicationContext`を明示します。
+context名が分からなければ、まず`bear_app_context_list`で起動コード上の候補と出典を調べます。候補が複数ある場合、
+利用者の意図に合うcontextを選びます。Module群の関係を概観する必要があるときだけ`bear_di_module_tree_read`を使います。
+専用のModule閲覧画面は前提にせず、結果の`path`/`line`とprovenanceから宣言元を開いて確認します。
 
-`overridesOnly`は衝突が記録されたキー、`resourcesOnly`はキー・採用先・破棄先に既知の
-ResourceObject派生クラスを含むキーに絞ります。プロバイダの戻り型までは推論しません。
-未解決条件が残る照会は`provisional`です。`source_selected`も実行時の確定結果ではありません。
-設定の実値は返しません。決定履歴・未解決箇所は、それぞれの件数と打ち切りフラグを確認してください。
-
-現行の公開版拡張では新しい要求が未対応の場合があります。実装済みの要求をproject infoで確認し、
-未対応を空の検索結果と解釈しないでください。属性カタログとAOP適用先一覧は次段階です。
+`bear_di_binding_lookup`はinstalled dependencyを含むsource compositionをたどれます。対して
+`bear_di_module_tree_read`のModule mapはworkspace内に限られます。どちらも保存済みsourceに基づく診断です。
+`source_selected`は実行時の確定ではなく、未知条件が残る場合は`provisional`です。AOPの一致候補もPHPを実行せずに
+Ray.Aopのattribute source modelから求めるため、実際のpointcut評価やweavingを観測した結果ではありません。
+設定値は返しません。各結果のunknown、unresolved、total、truncatedとsource位置を確認してください。

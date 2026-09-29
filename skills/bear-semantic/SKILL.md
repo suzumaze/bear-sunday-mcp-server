@@ -1,6 +1,6 @@
 ---
 name: bear-semantic
-description: Inspect and reason about saved BEAR.Sunday PHP projects with the bear-sunday MCP semantic tools before text search or edits. Use for Resource discovery, URI/route/SQL/template resolution, JSON Schema or ALPS contracts and adoption coverage, DI binding or AOP pointcut declarations, Resource attributes, Link/Embed relations, references and impact analysis, or LSP navigation in a BEAR.Sunday workspace. Also use to verify semantic effects after edits, while falling back safely when the MCP tools are unavailable.
+description: Inspect saved BEAR.Sunday PHP projects with the bear-sunday MCP semantic tools before text search or edits. Use for Resource, Route, SQL, template, Schema and ALPS questions; context-specific DI bindings and AOP applications; Module declarations, PHP attributes, references, impact analysis, and LSP navigation. Also verify semantic effects after edits while falling back safely when MCP tools are unavailable.
 ---
 
 # BEAR Semantic
@@ -53,6 +53,10 @@ normal agent workflow.
 | Audit project-wide static inconsistencies | `bear_project_diagnostics` |
 | Plan JSON Schema and ALPS adoption | `bear_contract_coverage` |
 | Inspect static DI/AOP declarations | `bear_di_bindings`, `bear_aop_pointcuts` |
+| Find declared application contexts | `bear_app_context_list` |
+| Inspect Module relationships or one Module's direct declarations | `bear_di_module_tree_read`, `bear_di_module_declarations` |
+| Explain a binding for an explicit context | `bear_di_binding_lookup` |
+| Find available attribute definitions or source-matched Resource AOP | `bear_attribute_catalog`, `bear_aop_applications` |
 | Inspect a Resource contract | `bear_resource_describe`, `bear_resource_attributes` |
 | Review attributes across Resources | `bear_resource_attribute_index` |
 | Compare Resource, schema, and ALPS names | `bear_contract_compare` |
@@ -73,10 +77,16 @@ its description and existing Schema/ALPS conventions, and separate `absent` adop
 from `dynamic` or `unresolved` declarations. Do not bulk-generate placeholder contracts merely to
 increase the covered count.
 
-Treat DI and AOP results as source declaration inventories, not a resolved runtime graph. A
-resolved item proves only that the supported syntax was read. Do not infer an active application
-context, module-install composition, override precedence, the winning binding, matcher evaluation,
-or runtime weaving. Preserve and inspect reasoned `unresolved` items instead of guessing them.
+Choose an application context explicitly when a question depends on one. Use a context supplied
+by the user; otherwise inspect entry-point candidates and their source locations with
+`bear_app_context_list`. Do not choose the first candidate or invent a default. A Module's
+direct declaration list remains distinct from a context-specific binding selection. Follow
+returned paths and lines to the relevant source; the Module map is optional and does not
+expand installed vendor Modules. `bear_di_binding_lookup` does follow supported source
+composition through dependencies and reports selected/discarded candidates with import paths.
+Unknown composition makes its selection provisional. Source-matched AOP results do not prove
+that weaving succeeded or the method ran. Preserve unknown and truncation counts; do not turn
+an empty filtered result into proof of absence. Instance values are not returned.
 
 Treat Resource attribute arguments as explicit source syntax only unless `argumentPolicy` says
 otherwise. An omitted argument does not prove that its constructor has no default. Do not invent
