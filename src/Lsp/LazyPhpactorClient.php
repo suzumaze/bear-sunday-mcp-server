@@ -28,7 +28,14 @@ final class LazyPhpactorClient implements SemanticLspClient
             $this->timeout,
         );
 
-        return $this->client->request($method, $params);
+        try {
+            return $this->client->request($method, $params);
+        } catch (LspException $exception) {
+            // A timed-out or dead server may leave the LSP stream out of sync.
+            // Discard it so the next MCP call can start a fresh Phpactor process.
+            $this->close();
+            throw $exception;
+        }
     }
 
     public function notify(string $method, array $params): void

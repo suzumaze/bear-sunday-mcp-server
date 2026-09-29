@@ -4,6 +4,21 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.12.1] - 2026-09-29
+
+### Fixed
+
+- Retry semantic capability discovery after transient failures, keep PHP diagnostics off MCP
+  stdout, and close the Phpactor child when the server receives SIGTERM.
+- Correct the released create-project version, document independent Module declaration
+  pagination, and complete the v0.12.0 tool and extension changelog entries.
+- Clarify the supported extension version range and make use-case section numbers unique.
+
+### Changed
+
+- Bundle `suzumaze/bear-phpactor-extension` 0.3.1 with corrected uncertainty propagation
+  and AOP attribute ordering.
+
 ## [0.12.0] - 2026-09-29
 
 ### Added
@@ -13,11 +28,16 @@ All notable changes to this project will be documented in this file.
   selection is explicit; binding evidence preserves provisional status, source locations and
   independent bounds. Binding lookup follows composition through installed dependencies; the
   Module map remains limited to workspace Modules and does not evaluate precedence.
+- Add `bear_di_module_declarations` for direct declarations in one Module.
 - Add `bear_attribute_catalog` for PHP attribute definitions, source documentation and
   optional context-specific AOP condition references, without exposing default argument values.
 - Add `bear_aop_applications` for source-matched Resource methods and interceptor order under
   an explicit context. Preserve unknowns and weaving limitations; this is not a runtime trace.
   Verify both tools through real MCP-to-Phpactor integration tests.
+
+### Changed
+
+- Bundle `suzumaze/bear-phpactor-extension` 0.3.0 and advertise 32 read-only tools.
 
 ### Documentation
 
@@ -218,7 +238,8 @@ All notable changes to this project will be documented in this file.
 - Bounded LSP framing, fixed workspace/process configuration, structured failure results, and
   fake and real stdio integration coverage.
 
-[Unreleased]: https://github.com/suzumaze/bear-sunday-mcp-server/compare/v0.12.0...HEAD
+[Unreleased]: https://github.com/suzumaze/bear-sunday-mcp-server/compare/v0.12.1...HEAD
+[0.12.1]: https://github.com/suzumaze/bear-sunday-mcp-server/compare/v0.12.0...v0.12.1
 [0.12.0]: https://github.com/suzumaze/bear-sunday-mcp-server/compare/v0.11.0...v0.12.0
 [0.11.0]: https://github.com/suzumaze/bear-sunday-mcp-server/compare/v0.10.2...v0.11.0
 [0.10.2]: https://github.com/suzumaze/bear-sunday-mcp-server/compare/v0.10.1...v0.10.2

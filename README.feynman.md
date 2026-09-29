@@ -112,7 +112,7 @@ PHP 8.2以上とComposerが必要です。次のコマンドは、MCPサーバ�
 composer create-project --no-dev --prefer-dist \
   suzumaze/bear-sunday-mcp-server \
   /absolute/path/to/bear-sunday-mcp-server \
-  '^0.10'
+  '^0.12'
 ```
 
 このコマンドは、調べたいBEAR.Sundayプロジェクトを変更しません。
@@ -126,7 +126,7 @@ codex mcp add bear-sunday -- \
   --workspace=/absolute/path/to/bear-project
 ```
 
-詳しい要件、Claude Codeやほかのクライアントへの登録方法、全26ツールの仕様は
+詳しい要件、Claude Codeやほかのクライアントへの登録方法、全32ツールの仕様は
 [通常のREADME](README.md)にあります。
 
 ## 理解できたか確かめる四つの質問

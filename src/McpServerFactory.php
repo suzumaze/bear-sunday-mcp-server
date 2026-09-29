@@ -222,7 +222,8 @@ final class McpServerFactory
             description: 'Read direct bind() and interceptor declarations for one exact Module FQCN. '
                 . 'Without applicationContext this is only a saved-source view. With a context, '
                 . 'source-graph membership is added; it does not establish a runtime winner. '
-                . 'not_observed_in_workspace_graph does not prove exclusion. '
+                . 'not_observed_in_workspace_graph does not prove exclusion. Bindings and pointcuts '
+                . 'are paged independently with the same offset; advance offset by limit per page. '
                 . 'Use bear_di_binding_lookup for context binding selections. Values are not returned, '
                 . 'and vendor Modules or dynamic edges are not expanded.',
             annotations: $annotations,

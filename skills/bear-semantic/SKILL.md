@@ -33,6 +33,8 @@ normal agent workflow.
 6. Read `status`, capability or `available`, ambiguity candidates, `total`, and `truncated`
    before interpreting the data. For `bear_resource_list` and `bear_resource_attribute_index`,
    advance `offset` by the number of returned items while `truncated` is true.
+   For `bear_di_module_declarations`, bindings and pointcuts are separate lists sharing one
+   `offset`; advance by the requested `limit` per page, not by the combined returned count.
 7. When `status` is not `ok`, expect no successful `data` (null members are omitted on the
    stdio wire) and inspect an optional `partial` member only as narrower facts proven before
    the failure. In particular, a missing Resource template may preserve the resolved Resource

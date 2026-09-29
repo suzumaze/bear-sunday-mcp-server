@@ -237,7 +237,7 @@ reported as unknown, so an empty result is not proof of absence and a newly save
 not be indexed yet. For a known file, use `lsp_document_symbols`; for method discovery or
 an inconclusive empty result, fall back to source search.
 
-## 10. Validate an AI-generated change
+## 11. Validate an AI-generated change
 
 The server never edits files, but it can verify that a saved change is visible through the
 same semantic layer used by the IDE:

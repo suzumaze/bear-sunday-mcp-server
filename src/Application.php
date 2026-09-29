@@ -23,6 +23,13 @@ final class Application
         }
 
         $client = new LazyPhpactorClient($workspace, $command, $options->timeout);
+        if (function_exists('pcntl_async_signals') && function_exists('pcntl_signal')) {
+            pcntl_async_signals(true);
+            pcntl_signal(SIGTERM, static function () use ($client): never {
+                $client->close();
+                exit(143);
+            });
+        }
         try {
             return McpServerFactory::create(
                 new SemanticTools($client),
