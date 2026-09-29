@@ -394,8 +394,9 @@ choices with declaration and module-import evidence. Filter by `type`, `name`,
 `overridesOnly` or `resourcesOnly`. Inspect unknowns and truncation; provisional selections
 are not runtime winners. Instance values are never returned.
 
-`bear_di_module_tree_read` reads the existing workspace module relationships. Its coverage
-is narrower than binding lookup: it does not expand vendor Modules or evaluate precedence.
+`bear_di_module_tree_read` reads a bounded workspace Module source map when no context is supplied,
+including direct binding/interceptor counts and declaration navigation. With a context it keeps the
+existing context graph view. It does not expand vendor Modules, infer dynamic edges, or evaluate precedence.
 
 `bear_attribute_catalog` lists available PHP attribute definitions, including unused ones,
 with package origin, allowed targets, constructor parameter signatures and source docblocks.

@@ -72,6 +72,25 @@ PHP;
                 array_column($contexts['data']['items'], 'applicationContext'),
             );
             self::assertArrayNotHasKey('selectedContext', $contexts['data']); // LSP omits nulls on the wire.
+            $sourceMap = $client->callTool('bear_di_module_tree_read')->structuredContent;
+            self::assertSame('ok', $sourceMap['status']);
+            self::assertSame('workspace_source_map', $sourceMap['data']['view']);
+            self::assertGreaterThan(0, $sourceMap['data']['coverage']['totalModules']);
+            $inspectNode = array_values(array_filter(
+                $sourceMap['data']['modules'],
+                static fn (array $module): bool => $module['module'] === 'Acme\\Shop\\Module\\InspectModule',
+            ))[0];
+            self::assertSame('src/Module/InspectModule.php', $inspectNode['path']);
+            self::assertSame(12, $inspectNode['line']);
+            self::assertSame(2, $inspectNode['bindingDeclarations']);
+            self::assertSame(0, $inspectNode['interceptorDeclarations']);
+            self::assertSame('bear/di/moduleDeclarations', $inspectNode['declarationsRequest']);
+            $contextGraph = $client->callTool('bear_di_module_tree_read', [
+                'applicationContext' => 'inspect-app',
+            ])->structuredContent;
+            self::assertSame('ok', $contextGraph['status']);
+            self::assertArrayNotHasKey('view', $contextGraph['data']);
+            self::assertSame('inspect-app', $contextGraph['data']['applicationContext']);
             $moduleSource = $client->callTool('bear_di_module_declarations', [
                 'module' => 'Acme\\Shop\\Module\\InspectModule',
                 'limit' => 2,

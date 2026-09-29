@@ -103,7 +103,7 @@ final readonly class ProjectReportTools
         ));
     }
 
-    public function diModuleTreeRead(string $applicationContext): CallToolResult
+    public function diModuleTreeRead(?string $applicationContext = null): CallToolResult
     {
         return self::result($this->tools->diModuleGraph($applicationContext));
     }

@@ -204,13 +204,15 @@ final class McpServerFactory
             [$reports, 'diModuleTreeRead'],
             name: 'bear_di_module_tree_read',
             title: 'Read declared module relationships',
-            description: 'Read source-derived context segments and workspace install/override relationships. '
-                . 'This is a structural inventory: vendor expansion and binding precedence are not evaluated. '
-                . 'Use bear_di_binding_lookup for context binding selections and their evidence.',
+            description: 'Read either a bounded workspace Module map or one context source graph. '
+                . 'Without applicationContext, output is capped at 300 nodes and 1,200 edges. '
+                . 'Nodes include direct declaration counts and locations. '
+                . 'Vendor expansion, dynamic edges and binding precedence are not evaluated. '
+                . 'Use bear_di_module_declarations to inspect one Module and bear_di_binding_lookup for selections.',
             annotations: $annotations,
             inputSchema: self::objectSchema([
                 'applicationContext' => self::applicationContextSchema(),
-            ], ['applicationContext']),
+            ]),
             outputSchema: self::envelopeSchema(),
         );
         $builder->addTool(

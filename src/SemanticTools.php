@@ -130,13 +130,14 @@ final class SemanticTools
     }
 
     /** @return array<string, mixed> */
-    public function diModuleGraph(string $applicationContext): array
+    public function diModuleGraph(?string $applicationContext = null): array
     {
-        return $this->query(
-            'bear/di/moduleGraph',
-            ['applicationContext' => $applicationContext],
-            'diModuleGraph',
-        );
+        $params = [];
+        if ($applicationContext !== null) {
+            $params['applicationContext'] = $applicationContext;
+        }
+
+        return $this->query('bear/di/moduleGraph', $params, 'diModuleGraph');
     }
 
     /** @return array<string, mixed> */

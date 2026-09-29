@@ -105,7 +105,11 @@ final class SemanticToolsTest extends TestCase
             $tools->aopPointcuts('App\\AuditInterceptor', 20, 5, 'dev-html-app'),
         );
         self::assertSame(
-            ['bear/project/info', 'bear/di/bindings', 'bear/aop/pointcuts'],
+            self::ok(['method' => 'bear/di/moduleGraph', 'params' => []]),
+            $tools->diModuleGraph(),
+        );
+        self::assertSame(
+            ['bear/project/info', 'bear/di/bindings', 'bear/aop/pointcuts', 'bear/di/moduleGraph'],
             array_column($client->requests, 'method'),
         );
     }

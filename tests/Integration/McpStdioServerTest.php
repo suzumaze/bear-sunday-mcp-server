@@ -294,6 +294,7 @@ final class McpStdioServerTest extends TestCase
 
         self::assertSame(['applicationContext'], $toolsByName['bear_di_binding_lookup']['inputSchema']['required']);
         self::assertSame(['module'], $toolsByName['bear_di_module_declarations']['inputSchema']['required']);
+        self::assertArrayNotHasKey('required', $toolsByName['bear_di_module_tree_read']['inputSchema']);
         self::assertArrayNotHasKey(
             'default',
             $toolsByName['bear_di_binding_lookup']['inputSchema']['properties']['applicationContext'],
@@ -320,6 +321,11 @@ final class McpStdioServerTest extends TestCase
             'name' => 'bear_di_module_tree_read', 'arguments' => ['applicationContext' => 'prod-html-app'],
         ]);
         self::assertSame('bear/di/moduleGraph', $tree['result']['structuredContent']['data']['method']);
+        $sourceMap = $this->request('tools/call', [
+            'name' => 'bear_di_module_tree_read', 'arguments' => [],
+        ]);
+        self::assertSame('bear/di/moduleGraph', $sourceMap['result']['structuredContent']['data']['method']);
+        self::assertSame([], $sourceMap['result']['structuredContent']['data']['params']);
         $moduleDeclarations = $this->request('tools/call', [
             'name' => 'bear_di_module_declarations',
             'arguments' => ['module' => 'Acme\\Module\\InspectModule', 'applicationContext' => 'inspect-app'],
