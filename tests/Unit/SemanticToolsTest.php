@@ -175,10 +175,12 @@ final class SemanticToolsTest extends TestCase
                         return $result;
                     }
                     $offset = $params['offset'];
+                    $bindings = $honorsListOffsets ? $params['bindingsOffset'] ?? $offset : $offset;
+                    $pointcuts = $honorsListOffsets ? $params['pointcutsOffset'] ?? $offset : $offset;
 
                     return self::ok([
-                        'bindings' => ['offset' => $honorsListOffsets ? $params['bindingsOffset'] ?? $offset : $offset],
-                        'pointcuts' => ['offset' => $honorsListOffsets ? $params['pointcutsOffset'] ?? $offset : $offset],
+                        'bindings' => ['offset' => $bindings],
+                        'pointcuts' => ['offset' => $pointcuts],
                     ]);
                 },
             ));
