@@ -117,6 +117,126 @@ final class McpServerFactory
             outputSchema: self::envelopeSchema(),
         );
         $builder->addTool(
+            [$reports, 'appContextList'],
+            name: 'bear_app_context_list',
+            title: 'Find declared BEAR contexts',
+            description: 'Find context candidates in saved Bootstrap and Injector entry points with source locations. '
+                . 'This does not observe runtime usage or select a context. Inspect scanTruncated and unresolvedTotal; '
+                . 'use the user-requested context for binding lookup, or clarify when candidates differ.',
+            annotations: $annotations,
+            inputSchema: self::objectSchema([
+                'contextPath' => self::pathSchema('Optional workspace-relative project context path.'),
+                'limit' => self::limitSchema('Maximum contexts per page.', self::PROJECT_REPORT_MAX_ITEMS),
+                'offset' => self::offsetSchema(),
+            ]),
+            outputSchema: self::envelopeSchema(),
+        );
+        $builder->addTool(
+            [$reports, 'diBindingLookup'],
+            name: 'bear_di_binding_lookup',
+            title: 'Explain a context binding selection',
+            description: 'Inspect source-derived binding selections, discarded declarations, and module import paths. '
+                . 'The applicationContext is required and never guessed. When coverage.hasUnknowns is true, '
+                . 'selections are provisional. Empty results do not prove runtime unboundness. '
+                . 'Instance values are never returned. This does not evaluate AOP applications.',
+            annotations: $annotations,
+            inputSchema: self::objectSchema([
+                'applicationContext' => self::applicationContextSchema(),
+                'type' => ['type' => 'string', 'maxLength' => 2048,
+                    'description' => 'Exact DI type; an empty string selects scalar bindings. Omit to list types.'],
+                'name' => ['type' => 'string', 'maxLength' => 2048,
+                    'description' => 'Exact qualifier; an empty string selects unqualified bindings.'],
+                'contextPath' => self::pathSchema('Optional workspace-relative project context path.'),
+                'limit' => self::limitSchema('Maximum bindings per page.', self::PROJECT_REPORT_MAX_ITEMS),
+                'offset' => self::offsetSchema(),
+                'overridesOnly' => ['type' => 'boolean', 'description' => 'Only keys with recorded binding conflicts.'],
+                'resourcesOnly' => ['type' => 'boolean',
+                    'description' => 'Only keys whose type or selected/discarded target is a known Resource subclass.'],
+            ], ['applicationContext']),
+            outputSchema: self::envelopeSchema(),
+        );
+        $builder->addTool(
+            [$reports, 'aopApplications'],
+            name: 'bear_aop_applications',
+            title: 'Inspect source-matched Resource AOP',
+            description: 'List Resource methods and interceptor chains under an explicit context using the Ray.Aop '
+                . 'PHP-attribute source matching model. Read status, unresolvedPointcuts and unknownTotal. '
+                . 'This does not execute PHP, validate weaving or observe runtime applications. '
+                . 'DI Resource replacements are followed only for source-selected class bindings.',
+            annotations: $annotations,
+            inputSchema: self::objectSchema([
+                'applicationContext' => self::applicationContextSchema(),
+                'uri' => ['type' => 'string', 'maxLength' => 2048, 'description' => 'Exact Resource URI filter.'],
+                'interceptor' => ['type' => 'string', 'maxLength' => 2048,
+                    'description' => 'Exact interceptor FQCN among known matches; '
+                        . 'inspect unresolvedPointcutTotal for omissions.'],
+                'attribute' => ['type' => 'string', 'maxLength' => 2048,
+                    'description' => 'Exact attribute FQCN referenced by a matching condition.'],
+                'method' => ['type' => 'string', 'maxLength' => 255,
+                    'description' => 'Exact public method filter; defaults to public on* Resource methods.'],
+                'contextPath' => self::pathSchema('Optional workspace-relative project context path.'),
+                'limit' => self::limitSchema('Maximum methods per page.', self::PROJECT_REPORT_MAX_ITEMS),
+                'offset' => self::offsetSchema(),
+            ], ['applicationContext']),
+            outputSchema: self::envelopeSchema(),
+        );
+        $builder->addTool(
+            [$reports, 'attributeCatalog'],
+            name: 'bear_attribute_catalog',
+            title: 'List available PHP attribute definitions',
+            description: 'Discover PHP attribute definitions from Composer source maps, including unused definitions. '
+                . 'Return targets, constructor parameter signatures, source docblocks and locations. '
+                . 'With an explicit context, include AOP condition references and interceptor invoke locations. '
+                . 'References are not proof of application. Inspect scanTruncated and unknownTotal. '
+                . 'Default argument values are never returned; arbitrary framework consumers are not inferred.',
+            annotations: $annotations,
+            inputSchema: self::objectSchema([
+                'applicationContext' => self::applicationContextSchema(),
+                'attribute' => ['type' => 'string', 'maxLength' => 2048,
+                    'description' => 'Exact attribute FQCN filter.'],
+                'contextPath' => self::pathSchema('Optional workspace-relative project context path.'),
+                'limit' => self::limitSchema('Maximum definitions per page.', self::PROJECT_REPORT_MAX_ITEMS),
+                'offset' => self::offsetSchema(),
+            ]),
+            outputSchema: self::envelopeSchema(),
+        );
+        $builder->addTool(
+            [$reports, 'diModuleTreeRead'],
+            name: 'bear_di_module_tree_read',
+            title: 'Read declared module relationships',
+            description: 'Read either a bounded workspace Module map or one context source graph. '
+                . 'Without applicationContext, output is capped at 300 nodes and 1,200 edges. '
+                . 'Nodes include direct declaration counts and locations. '
+                . 'Vendor expansion, dynamic edges and binding precedence are not evaluated. '
+                . 'Use bear_di_module_declarations to inspect one Module and bear_di_binding_lookup for selections.',
+            annotations: $annotations,
+            inputSchema: self::objectSchema([
+                'applicationContext' => self::applicationContextSchema(),
+            ]),
+            outputSchema: self::envelopeSchema(),
+        );
+        $builder->addTool(
+            [$reports, 'diModuleDeclarations'],
+            name: 'bear_di_module_declarations',
+            title: 'Inspect declarations in one Module',
+            description: 'Read direct bind() and interceptor declarations for one exact Module FQCN. '
+                . 'Without applicationContext this is only a saved-source view. With a context, '
+                . 'source-graph membership is added; it does not establish a runtime winner. '
+                . 'not_observed_in_workspace_graph does not prove exclusion. '
+                . 'Use bear_di_binding_lookup for context binding selections. Values are not returned, '
+                . 'and vendor Modules or dynamic edges are not expanded.',
+            annotations: $annotations,
+            inputSchema: self::objectSchema([
+                'module' => ['type' => 'string', 'minLength' => 1, 'maxLength' => 2048,
+                    'description' => 'Exact Module class FQCN.'],
+                'applicationContext' => self::applicationContextSchema(),
+                'contextPath' => self::pathSchema('Optional workspace-relative project context path.'),
+                'limit' => self::limitSchema('Maximum declarations per category page.', self::PROJECT_REPORT_MAX_ITEMS),
+                'offset' => self::offsetSchema(),
+            ], ['module']),
+            outputSchema: self::envelopeSchema(),
+        );
+        $builder->addTool(
             [$reports, 'diBindings'],
             name: 'bear_di_bindings',
             title: 'Inspect Ray.Di binding declarations',
@@ -489,6 +609,17 @@ final class McpServerFactory
         );
 
         return $builder->build();
+    }
+
+    /** @return array<string,mixed> */
+    private static function applicationContextSchema(): array
+    {
+        return [
+            'type' => 'string',
+            'maxLength' => 2048,
+            'pattern' => '^[A-Za-z0-9_]+(?:-[A-Za-z0-9_]+)*$',
+            'description' => 'Explicit BEAR context, such as prod-html-app; do not infer it from candidate order.',
+        ];
     }
 
     /**

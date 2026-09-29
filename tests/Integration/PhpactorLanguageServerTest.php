@@ -7,6 +7,7 @@ namespace Suzumaze\BearSundayMcp\Tests\Integration;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Suzumaze\BearSundayMcp\Lsp\LspFrameCodec;
+use Suzumaze\BearSundayMcp\Lsp\LspTimeoutException;
 use Suzumaze\BearSundayMcp\Lsp\PhpactorLanguageServer;
 use Suzumaze\BearSundayMcp\Workspace;
 
@@ -62,6 +63,22 @@ final class PhpactorLanguageServerTest extends TestCase
             ]);
             self::assertIsArray($locations);
             self::assertCount(2, $locations);
+        } finally {
+            $client->close();
+        }
+    }
+
+    public function testNotificationsDoNotResetTheRequestDeadline(): void
+    {
+        $client = PhpactorLanguageServer::start(
+            Workspace::fromPath(__DIR__ . '/../Fixture/workspace'),
+            [__DIR__ . '/../Fixture/fake-phpactor', '--test-notification-deadline'],
+            0.18,
+        );
+
+        $this->expectException(LspTimeoutException::class);
+        try {
+            $client->request('bear/resource/list', ['scheme' => 'app']);
         } finally {
             $client->close();
         }

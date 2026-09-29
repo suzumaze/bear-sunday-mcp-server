@@ -32,6 +32,9 @@ final class SemanticTools
     /** @var array<string, true> */
     private array $availableRequests = [];
 
+    /** @var array<string, true> */
+    private array $availableCapabilities = [];
+
     public function __construct(private readonly SemanticLspClient $client)
     {
     }
@@ -77,8 +80,12 @@ final class SemanticTools
     }
 
     /** @return array<string, mixed> */
-    public function diBindings(?string $type = null, int $limit = 50, int $offset = 0): array
-    {
+    public function diBindings(
+        ?string $type = null,
+        int $limit = 50,
+        int $offset = 0,
+        ?string $applicationContext = null,
+    ): array {
         $params = [
             'limit' => $limit,
             'offset' => $offset,
@@ -86,13 +93,24 @@ final class SemanticTools
         if ($type !== null) {
             $params['type'] = $type;
         }
+        if ($applicationContext !== null) {
+            $params['applicationContext'] = $applicationContext;
+        }
 
-        return $this->query('bear/di/bindings', $params);
+        return $this->query(
+            'bear/di/bindings',
+            $params,
+            $applicationContext === null ? null : 'contextScopedDiAopInventory',
+        );
     }
 
     /** @return array<string, mixed> */
-    public function aopPointcuts(?string $interceptor = null, int $limit = 50, int $offset = 0): array
-    {
+    public function aopPointcuts(
+        ?string $interceptor = null,
+        int $limit = 50,
+        int $offset = 0,
+        ?string $applicationContext = null,
+    ): array {
         $params = [
             'limit' => $limit,
             'offset' => $offset,
@@ -100,8 +118,120 @@ final class SemanticTools
         if ($interceptor !== null) {
             $params['interceptor'] = $interceptor;
         }
+        if ($applicationContext !== null) {
+            $params['applicationContext'] = $applicationContext;
+        }
 
-        return $this->query('bear/aop/pointcuts', $params);
+        return $this->query(
+            'bear/aop/pointcuts',
+            $params,
+            $applicationContext === null ? null : 'contextScopedDiAopInventory',
+        );
+    }
+
+    /** @return array<string, mixed> */
+    public function diModuleGraph(?string $applicationContext = null): array
+    {
+        $params = [];
+        if ($applicationContext !== null) {
+            $params['applicationContext'] = $applicationContext;
+        }
+
+        return $this->query('bear/di/moduleGraph', $params, 'diModuleGraph');
+    }
+
+    /** @return array<string, mixed> */
+    public function diModuleDeclarations(
+        string $module,
+        ?string $applicationContext = null,
+        ?string $contextPath = null,
+        int $limit = 50,
+        int $offset = 0,
+    ): array {
+        $params = [
+            'module' => $module,
+            'contextPath' => $contextPath,
+            'limit' => $limit,
+            'offset' => $offset,
+        ];
+        if ($applicationContext !== null) {
+            $params['applicationContext'] = $applicationContext;
+        }
+
+        return $this->query('bear/di/moduleDeclarations', $params, 'contextScopedDiAopInventory');
+    }
+
+    /** @return array<string, mixed> */
+    public function appContextList(?string $contextPath = null, int $limit = 50, int $offset = 0): array
+    {
+        return $this->query('bear/app/contexts', [
+            'contextPath' => $contextPath,
+            'limit' => $limit,
+            'offset' => $offset,
+        ]);
+    }
+
+    /** @return array<string, mixed> */
+    public function diBindingLookup(
+        string $applicationContext,
+        ?string $type = null,
+        ?string $name = null,
+        ?string $contextPath = null,
+        int $limit = 50,
+        int $offset = 0,
+        bool $overridesOnly = false,
+        bool $resourcesOnly = false,
+    ): array {
+        return $this->query('bear/di/bindingLookup', [
+            'applicationContext' => $applicationContext,
+            'type' => $type,
+            'name' => $name,
+            'contextPath' => $contextPath,
+            'limit' => $limit,
+            'offset' => $offset,
+            'overridesOnly' => $overridesOnly,
+            'resourcesOnly' => $resourcesOnly,
+        ]);
+    }
+
+    /** @return array<string, mixed> */
+    public function aopApplications(
+        string $applicationContext,
+        ?string $uri = null,
+        ?string $interceptor = null,
+        ?string $attribute = null,
+        ?string $method = null,
+        ?string $contextPath = null,
+        int $limit = 50,
+        int $offset = 0,
+    ): array {
+        return $this->query('bear/aop/applications', [
+            'applicationContext' => $applicationContext,
+            'uri' => $uri,
+            'interceptor' => $interceptor,
+            'attribute' => $attribute,
+            'method' => $method,
+            'contextPath' => $contextPath,
+            'limit' => $limit,
+            'offset' => $offset,
+        ]);
+    }
+
+    /** @return array<string, mixed> */
+    public function attributeCatalog(
+        ?string $applicationContext = null,
+        ?string $attribute = null,
+        ?string $contextPath = null,
+        int $limit = 50,
+        int $offset = 0,
+    ): array {
+        return $this->query('bear/attribute/catalog', [
+            'applicationContext' => $applicationContext,
+            'attribute' => $attribute,
+            'contextPath' => $contextPath,
+            'limit' => $limit,
+            'offset' => $offset,
+        ]);
     }
 
     /** @return array<string, mixed> */
@@ -266,11 +396,18 @@ final class SemanticTools
      * @param array<string, mixed> $params
      * @return array<string, mixed>
      */
-    private function query(string $method, array $params): array
+    private function query(string $method, array $params, ?string $capability = null): array
     {
         $failure = $this->preflight($method);
         if ($failure !== null) {
             return $failure;
+        }
+        if ($capability !== null && !isset($this->availableCapabilities[$capability])) {
+            return self::failure(
+                'unsupported',
+                'semantic_capability_unavailable',
+                'Phpactor does not advertise the required BEAR semantic capability.',
+            );
         }
 
         return $this->forward($method, $params);
@@ -352,12 +489,21 @@ final class SemanticTools
         $this->preflightComplete = true;
         $this->preflightFailure = null;
         $this->availableRequests = [];
+        $this->availableCapabilities = [];
 
         $data = $result['data'] ?? null;
         $requests = is_array($data) ? ($data['requests'] ?? []) : [];
         foreach ($requests as $request) {
             if (is_string($request)) {
                 $this->availableRequests[$request] = true;
+            }
+        }
+        $capabilities = $data['capabilities'] ?? [];
+        if (is_array($capabilities)) {
+            foreach ($capabilities as $capability) {
+                if (is_string($capability)) {
+                    $this->availableCapabilities[$capability] = true;
+                }
             }
         }
     }

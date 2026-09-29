@@ -4,7 +4,7 @@ BEAR.Sunday MCP Serverは、保存済みの1つのworkspaceについて、AIク�
 事実を提供します。テキスト検索を完全に置き換えるものではありません。対応済みのBEAR概念は
 最初にSemantic toolで調べ、返されたファイルを読み、Semantic Model外のコードだけを検索します。
 
-利用できる26 toolの入力と結果は[MCPツール一覧](tools.ja.md)、実装・検証状況は
+利用できる32 toolの入力と結果は[MCPツール一覧](tools.ja.md)、実装・検証状況は
 [プロジェクト現在地点](project-status.ja.md)にまとめています。
 
 ## AIクライアント用Skill
@@ -23,7 +23,7 @@ SkillはMCP serverをinstall・起動・設定しません。また、BEAR appli
 |---|---|---|
 | project全体で静的に不整合な箇所はどこか | 独立した検索を繰り返し、未走査部分は分からない | 走査件数・打ち切り・skip情報を伴うbounded diagnostics |
 | JSON SchemaやALPSをまだ導入していない箇所はどこか | 属性と規約fileを個別検索し、適用可能性や網羅性は人が判断 | methodごとのsurface状態とboundedなproject集計 |
-| 静的に見えるDI/AOP宣言は何か | fluent callの断片を探し、aliasやchainを人が解釈 | 直接binding宣言、matcher構文木、理由付きunresolved |
+| 明示したcontextで型やResourceに何が組み込まれるか | Moduleやattributeの断片を追い、経路と不明点を手で整理 | source由来のbinding選択・破棄候補、Resource methodごとのAOP候補と根拠位置 |
 | Resource URIの実装は何か | 一致した文字列やクラス名の断片 | 正規化URI、FQN、workspace相対path |
 | Resourceの公開APIは何か | `on*` methodを個別検索 | public `on*` methodと宣言されたparameter type |
 | Resourceはどこで使われるか | 同じ文字列をすべて表示 | 同じcanonical Resourceへ解決された静的参照 |
@@ -159,22 +159,43 @@ application PHPは実行しません。
 両toolは引数policyを`explicit_only`として返します。属性で省略された引数はconstructorにdefaultが
 無いことを意味せず、install済みpackageのdefault値を展開・推測しません。
 
-## 7. DI・AOP宣言を調べる
+## 7. context内のDI bindingとAOP候補を調べる
 
 質問例:
 
 ```text
-直接記述された静的なRay.Di bindingとRay.Aop interceptor宣言を一覧してください。
-dynamicまたは未対応の形はunresolvedのままにし、active contextやruntime weavingを推測しないでください。
+起動コードで宣言されたcontext候補を出典付きで示してください。このアプリで使うcontextはAppです。
+そのcontextについて、指定した型のbinding選択候補とModule経路を示し、衝突・unknown・source位置も含めてください。
+さらにResource methodへのAOP適用候補とinterceptor順を示し、未解決pointcutも残してください。
+保存済みsourceから分かる範囲に限定し、runtimeの確定結果とは扱わないでください。
 ```
 
-`bear_di_bindings`と`bear_aop_pointcuts`を使います。どちらも保存済みsourceの宣言inventoryを
-安定したpaginationで返し、typeまたはinterceptorの完全一致filterを指定できます。`resolved`は
-構文を静的に読めたという意味だけです。そのmoduleをどのapplication contextがinstallするか、
-override後にどのbindingが勝つか、matcherが実際のmethodへ一致するか、interceptorがruntimeで
-weaveされるかは証明しません。`unresolved`は推測せず、返されたsourceを確認します。
+まず`bear_app_context_list`で起動コード上の候補とsource位置を確認します。利用者が指定したcontextを
+`bear_di_binding_lookup`と`bear_aop_applications`に明示します。候補が複数なら自動で選ばず、どの構成を調べるか
+利用者に確認します。前者はbindingの選択・破棄候補と組み込み経路を、後者はResource methodごとのinterceptor候補と
+順番を返します。unknownがあるbindingは`provisional`となり、AOP側はunresolved pointcut数やunknown総数を確認します。
 
-## 8. Contract名のpresenceを比較する
+結果の`path`、`line`、provenanceから宣言元を開いて確認できます。全Moduleを一覧する専用画面は必要条件ではありません。
+`bear_di_module_tree_read`は関係の概観が必要なときの補助で、contextなしではworkspace内Module map、contextありでは
+source graphを返します。vendor Moduleはこのmapでは展開しません。一方、binding lookupはinstalled dependencyを含む
+source compositionを追えます。いずれも実行済みアプリの観測ではありません。binding優先順位の実行時確定、AOP pointcutの
+runtime評価、interceptor weavingは証明しません。直接宣言だけを調べるときは、従来どおり`bear_di_bindings`、
+`bear_aop_pointcuts`、`bear_di_module_declarations`を使います。
+
+## 8. PHP attribute定義とAOP condition参照を調べる
+
+質問例:
+
+```text
+このprojectと依存packageで利用可能なPHP attribute定義、target、constructor signature、docblock、source位置を調べてください。
+App contextで参照されるAOP condition attributeも示してください。参照を適用済みの証拠として扱わないでください。
+```
+
+`bear_attribute_catalog`はComposer source mapからattribute定義を見つけ、contextを指定した場合はAOP conditionによる参照も
+追加します。参照先attributeがどこで定義されるかは返されたsource位置から確認します。これは定義・参照カタログであり、
+Resourceへの適用やruntime評価を証明しません。`total`、`scanTruncated`、`unknownTotal`とpaginationを確認します。
+
+## 9. Contract名のpresenceを比較する
 
 質問例:
 
@@ -189,7 +210,7 @@ ALPS operation descriptor間のrequest名presenceを比較してください。
 sourceがliteral-key `$this->body`の完全なshapeを証明できる場合だけ利用でき、dynamicまたは
 条件付きの構築は`unsupported`のままです。
 
-## 9. 正確なsource位置から移動する
+## 10. 正確なsource位置から移動する
 
 保存済みファイルとcursor位置が分かる場合は、標準LSP toolを使います。
 

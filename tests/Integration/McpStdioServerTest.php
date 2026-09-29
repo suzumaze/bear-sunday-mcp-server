@@ -138,10 +138,16 @@ final class McpStdioServerTest extends TestCase
         sort($names);
         self::assertSame([
             'bear_alps_descriptor_lookup',
+            'bear_aop_applications',
             'bear_aop_pointcuts',
+                'bear_app_context_list',
+            'bear_attribute_catalog',
             'bear_contract_compare',
             'bear_contract_coverage',
+            'bear_di_binding_lookup',
             'bear_di_bindings',
+            'bear_di_module_declarations',
+            'bear_di_module_tree_read',
             'bear_project_diagnostics',
             'bear_project_info',
             'bear_resource_attribute_index',
@@ -286,6 +292,59 @@ final class McpStdioServerTest extends TestCase
             json_decode($coverage['result']['content'][0]['text'], true, 64, JSON_THROW_ON_ERROR),
         );
 
+        self::assertSame(['applicationContext'], $toolsByName['bear_di_binding_lookup']['inputSchema']['required']);
+        self::assertSame(['module'], $toolsByName['bear_di_module_declarations']['inputSchema']['required']);
+        self::assertArrayNotHasKey('required', $toolsByName['bear_di_module_tree_read']['inputSchema']);
+        self::assertArrayNotHasKey(
+            'default',
+            $toolsByName['bear_di_binding_lookup']['inputSchema']['properties']['applicationContext'],
+        );
+        $missingContext = $this->request('tools/call', [
+            'name' => 'bear_di_binding_lookup',
+            'arguments' => [],
+        ]);
+        self::assertTrue(isset($missingContext['error']) || ($missingContext['result']['isError'] ?? false));
+        $lookup = $this->request('tools/call', [
+            'name' => 'bear_di_binding_lookup',
+            'arguments' => ['applicationContext' => 'prod-html-app', 'overridesOnly' => true, 'resourcesOnly' => true],
+        ]);
+        self::assertFalse($lookup['result']['isError']);
+        self::assertSame('bear/di/bindingLookup', $lookup['result']['structuredContent']['data']['method']);
+        self::assertSame(
+            'prod-html-app',
+            $lookup['result']['structuredContent']['data']['params']['applicationContext'],
+        );
+        self::assertTrue($lookup['result']['structuredContent']['data']['params']['resourcesOnly']);
+        $contexts = $this->request('tools/call', ['name' => 'bear_app_context_list', 'arguments' => []]);
+        self::assertSame('bear/app/contexts', $contexts['result']['structuredContent']['data']['method']);
+        $tree = $this->request('tools/call', [
+            'name' => 'bear_di_module_tree_read', 'arguments' => ['applicationContext' => 'prod-html-app'],
+        ]);
+        self::assertSame('bear/di/moduleGraph', $tree['result']['structuredContent']['data']['method']);
+        $sourceMap = $this->request('tools/call', [
+            'name' => 'bear_di_module_tree_read', 'arguments' => [],
+        ]);
+        self::assertSame('bear/di/moduleGraph', $sourceMap['result']['structuredContent']['data']['method']);
+        self::assertSame([], $sourceMap['result']['structuredContent']['data']['params']);
+        $moduleDeclarations = $this->request('tools/call', [
+            'name' => 'bear_di_module_declarations',
+            'arguments' => ['module' => 'Acme\\Module\\InspectModule', 'applicationContext' => 'inspect-app'],
+        ]);
+        self::assertFalse($moduleDeclarations['result']['isError']);
+        self::assertSame(
+            'bear/di/moduleDeclarations',
+            $moduleDeclarations['result']['structuredContent']['data']['method'],
+        );
+
+        self::assertSame(['applicationContext'], $toolsByName['bear_aop_applications']['inputSchema']['required']);
+        $aop = $this->request('tools/call', [
+            'name' => 'bear_aop_applications',
+            'arguments' => ['applicationContext' => 'dev-html-app', 'attribute' => 'App\\Auth'],
+        ]);
+        self::assertSame('bear/aop/applications', $aop['result']['structuredContent']['data']['method']);
+        self::assertSame('App\\Auth', $aop['result']['structuredContent']['data']['params']['attribute']);
+        $catalog = $this->request('tools/call', ['name' => 'bear_attribute_catalog', 'arguments' => []]);
+        self::assertSame('bear/attribute/catalog', $catalog['result']['structuredContent']['data']['method']);
         $bindings = $this->request('tools/call', [
             'name' => 'bear_di_bindings',
             'arguments' => ['type' => 'App\\ClockInterface', 'limit' => 25, 'offset' => 10],
@@ -298,6 +357,14 @@ final class McpStdioServerTest extends TestCase
         self::assertSame(
             ['limit' => 25, 'offset' => 10, 'type' => 'App\\ClockInterface'],
             $bindings['result']['structuredContent']['data']['params'],
+        );
+        self::assertStringNotContainsString(
+            'targetExpression',
+            json_encode($bindings, JSON_THROW_ON_ERROR),
+        );
+        self::assertStringNotContainsString(
+            'constructorArguments',
+            json_encode($bindings, JSON_THROW_ON_ERROR),
         );
 
         $pointcuts = $this->request('tools/call', [

@@ -1,8 +1,8 @@
 # プロジェクト現在地点
 
-2026-09-24時点の、Phpactor extensionとMCP serverを合わせた実装・検証・公開状況です。
+2026-09-29時点の、Phpactor extensionとMCP serverを合わせた実装・検証・公開状況です。
 
-全26 toolの入力と結果は[MCPツール一覧](tools.ja.md)、具体的な調査手順は
+全32 toolの入力と結果は[MCPツール一覧](tools.ja.md)、具体的な調査手順は
 [ユースケース](use-cases.ja.md)を参照してください。
 
 ```mermaid
@@ -14,17 +14,17 @@ flowchart TB
         C4["Resource・Schema・ALPS<br/>名前presence比較<br/>完了"]
         C5["Project全体の静的diagnostics<br/>完了"]
         C6["Project全体のcontract導入coverage<br/>完了"]
-        C7["source-only DI binding・AOP pointcut<br/>完了"]
+        C7["sourceから求めるModule関係・束縛経路・<br/>AOP適用先<br/>完了"]
         C1 --> C2
         C1 --> C3 --> C4 --> C5 --> C6 --> C7
     end
 
     subgraph MCP["bear-sunday-mcp-server"]
-        M1["26 read-only tools<br/>完了"]
+        M1["32 read-only tools<br/>完了"]
         M0["任意のMCP Apps contract coverage view<br/>完了"]
         M2["Grepとの差とtask-oriented use cases<br/>完了"]
         M3["BEAR.Skills責務対応表<br/>完了"]
-        M4["実Phpactor fixture E2E<br/>26 tools<br/>完了"]
+        M4["実Phpactor fixture・Kata E2E<br/>完了"]
         M5["276-Resource実規模workspace<br/>read-only疎通<br/>完了"]
         M1 --> M0 --> M2 --> M3 --> M4 --> M5
     end
@@ -37,19 +37,19 @@ flowchart TB
         D1 -.-> D2
     end
 
-    M5 --> R1["core v0.2.0 / MCP v0.11.0<br/>一括インストール"]
-    R1 --> S1["bear-semantic Skill同梱<br/>contract導入workflow追加"]
+    M5 --> R1["core v0.3.0 / MCP v0.12.0<br/>一括インストール"]
+    R1 --> S1["bear-semantic Skill同梱<br/>context・DI・AOP workflow追加"]
 ```
 
 ## 公開状況
 
 | component | version | 状態 |
 |---|---|---|
-| `suzumaze/bear-phpactor-extension` | `v0.2.0` | 標準LSP診断、response shape、source-only DI/AOP inventory |
-| `suzumaze/bear-sunday-mcp-server` | `v0.11.0` | Phpactor・BEAR拡張v0.2.0を同梱した26 read-only tools |
-| MCP tool inventory | `v0.11.0`で26 tools | 日本語・英語manual整備済み |
+| `suzumaze/bear-phpactor-extension` | `v0.3.0` | sourceから求めるModule関係・束縛経路・属性カタログ・AOP適用先 |
+| `suzumaze/bear-sunday-mcp-server` | `v0.12.0` | Phpactor・BEAR拡張v0.3.0を同梱した32 read-only tools |
+| MCP tool inventory | `v0.12.0`で32 tools | 日本語・英語manual整備済み |
 | Contract coverage UI | 任意のMCP Apps view | read-only、structured/text fallbackを維持 |
-| `bear-semantic` agent Skill | `v0.11.0`に同梱 | project、contract導入、DI/AOP宣言workflowを含む |
+| `bear-semantic` agent Skill | `v0.12.0`に同梱 | project、contract導入、context・DI・AOP workflowを含む |
 
 ## Grepから進歩した点
 
@@ -61,6 +61,8 @@ Grepは一致した文字列を返します。Semantic APIは、保存済みsour
 - allowlist済みResource属性をstatic値とdynamic markerに分ける。
 - Resource parameter、JSON Schema、ALPS間の名前presenceを比較する。
 - Resource methodごとのJSON Schema・ALPS導入状態と全体集計を得る。
+- contextを明示してModuleの組み込み関係と束縛経路をsourceから求め、宣言位置へ移動する。
+- 属性定義とAOP適用候補を調べ、静的に確定できない点はそのまま示す。
 - 直接記述されたRay.Di bindingとRay.Aop interceptor matcher構文木を、runtimeを推測せず得る。
 - definition、type definition、references、hover、completionなどを標準LSPで補う。
 

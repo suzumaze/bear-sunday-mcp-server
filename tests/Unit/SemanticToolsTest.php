@@ -83,21 +83,67 @@ final class SemanticToolsTest extends TestCase
         self::assertSame(
             self::ok([
                 'method' => 'bear/di/bindings',
-                'params' => ['limit' => 25, 'offset' => 10, 'type' => 'App\\ClockInterface'],
+                'params' => [
+                    'limit' => 25,
+                    'offset' => 10,
+                    'type' => 'App\\ClockInterface',
+                    'applicationContext' => 'dev-html-app',
+                ],
             ]),
-            $tools->diBindings('App\\ClockInterface', 25, 10),
+            $tools->diBindings('App\\ClockInterface', 25, 10, 'dev-html-app'),
         );
         self::assertSame(
             self::ok([
                 'method' => 'bear/aop/pointcuts',
-                'params' => ['limit' => 20, 'offset' => 5, 'interceptor' => 'App\\AuditInterceptor'],
+                'params' => [
+                    'limit' => 20,
+                    'offset' => 5,
+                    'interceptor' => 'App\\AuditInterceptor',
+                    'applicationContext' => 'dev-html-app',
+                ],
             ]),
-            $tools->aopPointcuts('App\\AuditInterceptor', 20, 5),
+            $tools->aopPointcuts('App\\AuditInterceptor', 20, 5, 'dev-html-app'),
         );
         self::assertSame(
-            ['bear/project/info', 'bear/di/bindings', 'bear/aop/pointcuts'],
+            self::ok(['method' => 'bear/di/moduleGraph', 'params' => []]),
+            $tools->diModuleGraph(),
+        );
+        self::assertSame(
+            ['bear/project/info', 'bear/di/bindings', 'bear/aop/pointcuts', 'bear/di/moduleGraph'],
             array_column($client->requests, 'method'),
         );
+    }
+
+    public function testDoesNotSendContextScopeToAnExtensionThatDoesNotAdvertiseIt(): void
+    {
+        $client = new InMemoryLspClient(static function (string $method): array {
+            if ($method === 'bear/project/info') {
+                $result = self::projectInfoResult();
+                $result['data']['capabilities'] = [];
+
+                return $result;
+            }
+
+            return self::ok([]);
+        });
+        $tools = new SemanticTools($client);
+
+        $result = $tools->diBindings(applicationContext: 'dev-html-app');
+
+        self::assertSame('unsupported', $result['status']);
+        self::assertSame('semantic_capability_unavailable', $result['error']['code']);
+        self::assertSame(['bear/project/info'], array_column($client->requests, 'method'));
+    }
+
+    public function testNewInspectionToolsFailClosedOnOlderEngines(): void
+    {
+        $client = new InMemoryLspClient(static fn (): array => self::projectInfoResult());
+        $tools = new SemanticTools($client);
+        self::assertSame('unsupported', $tools->appContextList()['status']);
+        self::assertSame('unsupported', $tools->diBindingLookup('prod-html-app')['status']);
+        self::assertSame('unsupported', $tools->aopApplications('prod-html-app')['status']);
+        self::assertSame('unsupported', $tools->attributeCatalog()['status']);
+        self::assertSame(['bear/project/info'], array_column($client->requests, 'method'));
     }
 
     public function testMapsTheFourM1ToolsWithoutChangingSemanticResults(): void
@@ -449,6 +495,7 @@ final class SemanticToolsTest extends TestCase
                 'bear/project/diagnostics',
                 'bear/project/contractCoverage',
                 'bear/di/bindings',
+                'bear/di/moduleGraph',
                 'bear/aop/pointcuts',
                 'bear/resource/list',
                 'bear/resource/describe',
@@ -465,6 +512,7 @@ final class SemanticToolsTest extends TestCase
                 'bear/alps/describeDescriptor',
             ],
             'workspaceName' => 'fixture',
+            'capabilities' => ['contextScopedDiAopInventory', 'diModuleGraph'],
         ]);
     }
 

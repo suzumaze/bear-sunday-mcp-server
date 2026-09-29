@@ -72,6 +72,7 @@ function fileUri(string $path): string
 
 $workingDirectory = null;
 $autoConfigEnabled = true;
+$sendRepeatedNotifications = in_array('--test-notification-deadline', $argv, true);
 foreach (array_slice($argv, 1) as $argument) {
     if (str_starts_with($argument, '--working-dir=')) {
         $workingDirectory = substr($argument, strlen('--working-dir='));
@@ -117,6 +118,12 @@ while (($message = readMessage()) !== null) {
                 'bear/project/diagnostics',
                 'bear/project/contractCoverage',
                 'bear/di/bindings',
+                'bear/app/contexts',
+                'bear/di/bindingLookup',
+                'bear/aop/applications',
+                'bear/attribute/catalog',
+                'bear/di/moduleGraph',
+                'bear/di/moduleDeclarations',
                 'bear/aop/pointcuts',
                 'bear/resource/list',
                 'bear/resource/describe',
@@ -143,6 +150,8 @@ while (($message = readMessage()) !== null) {
                 'projectDiagnostics',
                 'diBindingInventory',
                 'aopPointcutInventory',
+                'diModuleGraph',
+                'contextScopedDiAopInventory',
             ],
             'versions' => [],
             'compatibilityIssues' => [],
@@ -150,6 +159,12 @@ while (($message = readMessage()) !== null) {
         'bear/project/diagnostics',
         'bear/project/contractCoverage',
         'bear/di/bindings',
+                'bear/app/contexts',
+                'bear/di/bindingLookup',
+                'bear/aop/applications',
+                'bear/attribute/catalog',
+                'bear/di/moduleGraph',
+        'bear/di/moduleDeclarations',
         'bear/aop/pointcuts',
         'bear/resource/list',
         'bear/resource/describe',
@@ -229,6 +244,17 @@ while (($message = readMessage()) !== null) {
         ]],
         default => null,
     };
+
+    if ($method === 'bear/resource/list' && $sendRepeatedNotifications) {
+        for ($index = 0; $index < 3; $index++) {
+            usleep(70000);
+            sendMessage([
+                'jsonrpc' => '2.0',
+                'method' => 'window/logMessage',
+                'params' => ['type' => 3, 'message' => 'ready'],
+            ]);
+        }
+    }
 
     sendMessage(['jsonrpc' => '2.0', 'id' => $message['id'], 'result' => $result]);
 }
