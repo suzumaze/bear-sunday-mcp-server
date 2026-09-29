@@ -132,6 +132,12 @@ and appended arguments are rejected.
 
 The process normally appears to wait silently because MCP messages use stdin and stdout.
 
+`--timeout=SECONDS` (default 20, at most 60) bounds each Phpactor request. A timeout or a
+rejected request keeps the running Phpactor, so a large project can finish its first
+indexing across later calls; a Phpactor that exits is restarted on the next call. The
+adapter stops Phpactor when it receives SIGTERM if the PHP `pcntl` extension is available;
+a SIGKILL cannot be intercepted and may leave the child running.
+
 ## Configure Codex
 
 Register one BEAR.Sunday workspace with Codex CLI:
@@ -413,8 +419,11 @@ are not runtime winners. Instance values are never returned.
 `bear_di_module_tree_read` reads a bounded workspace Module source map when no context is supplied,
 including direct binding/interceptor counts and declaration navigation. With a context it keeps the
 existing context graph view. It does not expand vendor Modules, infer dynamic edges, or evaluate precedence.
-`bear_di_module_declarations` pages bindings and pointcuts independently with the same
-`offset`; advance by `limit` between pages, not by the combined number of returned items.
+`bear_di_module_declarations` returns bindings and pointcuts as separate lists; either may stop
+early at the page size budget. To read both completely, pass `bindingsOffset` and
+`pointcutsOffset` and advance each by the number of items that list returned while it is truncated.
+An engine that does not support these offsets would ignore them and repeat the first page, so the
+tool returns `unsupported` with `semantic_parameter_unsupported` instead.
 
 `bear_attribute_catalog` lists available PHP attribute definitions, including unused ones,
 with package origin, allowed targets, constructor parameter signatures and source docblocks.

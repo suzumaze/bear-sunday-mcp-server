@@ -101,6 +101,19 @@ PHP;
             self::assertSame(0, $moduleSource['data']['pointcuts']['total']);
             self::assertSame('src/Module/InspectModule.php', $moduleSource['data']['bindings']['items'][0]['path']);
             self::assertSame(17, $moduleSource['data']['bindings']['items'][0]['line']);
+            $nextBindings = $client->callTool('bear_di_module_declarations', [
+                'module' => 'Acme\\Shop\\Module\\InspectModule',
+                'limit' => 2,
+                'bindingsOffset' => 1,
+                'pointcutsOffset' => 0,
+            ])->structuredContent;
+            self::assertSame('ok', $nextBindings['status']);
+            self::assertSame(1, $nextBindings['data']['bindings']['offset']);
+            self::assertSame(0, $nextBindings['data']['pointcuts']['offset']);
+            self::assertSame(
+                $moduleSource['data']['bindings']['items'][1]['line'],
+                $nextBindings['data']['bindings']['items'][0]['line'],
+            );
             $moduleContext = $client->callTool('bear_di_module_declarations', [
                 'module' => 'Acme\\Shop\\Module\\InspectModule',
                 'applicationContext' => 'inspect-app',

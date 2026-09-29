@@ -4,6 +4,25 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+
+- Accept `bindingsOffset` and `pointcutsOffset` in `bear_di_module_declarations`. Each list can
+  stop early at the page size budget, so advancing both by `limit` could skip declarations.
+  The values are forwarded only when given, and an engine that ignores them returns
+  `unsupported` (`semantic_parameter_unsupported`) instead of repeating the first page.
+
+### Fixed
+
+- Keep the running Phpactor after a request timeout or a rejected request. Restarting on every
+  timeout could prevent a large project from ever finishing its first response. A Phpactor
+  that exits or whose stream becomes unreadable is still replaced on the next call.
+- Stop reporting a write to an exited Phpactor as a PHP notice; the failure is still returned.
+- Make the use-case section numbers unique.
+
+### Documentation
+
+- Document `--timeout`, restart behavior, and the `pcntl` requirement for SIGTERM cleanup.
+
 ## [0.12.1] - 2026-09-29
 
 ### Fixed

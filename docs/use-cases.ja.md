@@ -248,7 +248,7 @@ recordだけを返し、methodは対象外です。index freshnessは`unknown`�
 
 これは規約や解決の誤りを検出します。runtime behaviorを証明するものではありません。
 
-## 11. 結果を安全に解釈する
+## 12. 結果を安全に解釈する
 
 すべてのBEAR Semantic API resultは同じenvelopeを保ちます。
 

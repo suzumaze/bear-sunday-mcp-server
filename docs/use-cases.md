@@ -254,7 +254,7 @@ same semantic layer used by the IDE:
 
 This catches convention and resolution mistakes. It does not prove runtime behavior.
 
-## 11. Interpret results safely
+## 12. Interpret results safely
 
 Every BEAR Semantic API result preserves the same envelope:
 

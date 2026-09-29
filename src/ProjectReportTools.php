@@ -114,6 +114,8 @@ final readonly class ProjectReportTools
         ?string $contextPath = null,
         int $limit = 50,
         int $offset = 0,
+        ?int $bindingsOffset = null,
+        ?int $pointcutsOffset = null,
     ): CallToolResult {
         return self::result($this->tools->diModuleDeclarations(
             $module,
@@ -121,6 +123,8 @@ final readonly class ProjectReportTools
             $contextPath,
             $limit,
             $offset,
+            $bindingsOffset,
+            $pointcutsOffset,
         ));
     }
 

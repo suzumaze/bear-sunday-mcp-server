@@ -144,6 +144,8 @@ final class SemanticTools
         ?string $contextPath = null,
         int $limit = 50,
         int $offset = 0,
+        ?int $bindingsOffset = null,
+        ?int $pointcutsOffset = null,
     ): array {
         $params = [
             'module' => $module,
@@ -154,8 +156,34 @@ final class SemanticTools
         if ($applicationContext !== null) {
             $params['applicationContext'] = $applicationContext;
         }
+        // Sent only when given, so engines without per-list offsets keep accepting the call.
+        if ($bindingsOffset !== null) {
+            $params['bindingsOffset'] = $bindingsOffset;
+        }
+        if ($pointcutsOffset !== null) {
+            $params['pointcutsOffset'] = $pointcutsOffset;
+        }
 
-        return $this->query('bear/di/moduleDeclarations', $params, 'contextScopedDiAopInventory');
+        $result = $this->query('bear/di/moduleDeclarations', $params, 'contextScopedDiAopInventory');
+        if (($result['status'] ?? null) !== 'ok') {
+            return $result;
+        }
+        // An engine without per-list offsets ignores them and returns the first page again,
+        // which would make a client following them re-read that page forever.
+        $data = is_array($result['data'] ?? null) ? $result['data'] : [];
+        if (
+            ($bindingsOffset !== null && ($data['bindings']['offset'] ?? null) !== $bindingsOffset)
+            || ($pointcutsOffset !== null && ($data['pointcuts']['offset'] ?? null) !== $pointcutsOffset)
+        ) {
+            return self::failure(
+                'unsupported',
+                'semantic_parameter_unsupported',
+                'The BEAR extension ignores bindingsOffset and pointcutsOffset; upgrade '
+                    . 'suzumaze/bear-phpactor-extension or page both lists with offset.',
+            );
+        }
+
+        return $result;
     }
 
     /** @return array<string, mixed> */
