@@ -79,7 +79,7 @@ for task-oriented workflows.
 - An MCP host that supports stdio servers
 
 The standard installation bundles Phpactor 2026.07.22.0 and
-`suzumaze/bear-phpactor-extension` 0.3.0 or newer. If you override `--phpactor`
+`suzumaze/bear-phpactor-extension` in the `^0.3.1` range. If you override `--phpactor`
 with an older compatible installation, each MCP tool checks that its backing semantic
 request is advertised; an unavailable request returns `unsupported` without being sent.
 
@@ -93,7 +93,7 @@ Install the released server into a dedicated directory:
 composer create-project --no-dev --prefer-dist \
   suzumaze/bear-sunday-mcp-server \
   /absolute/path/to/bear-sunday-mcp-server \
-  '^0.10'
+  '^0.12'
 ```
 
 This installs the MCP adapter, Phpactor, and the BEAR extension into one dedicated
@@ -413,6 +413,8 @@ are not runtime winners. Instance values are never returned.
 `bear_di_module_tree_read` reads a bounded workspace Module source map when no context is supplied,
 including direct binding/interceptor counts and declaration navigation. With a context it keeps the
 existing context graph view. It does not expand vendor Modules, infer dynamic edges, or evaluate precedence.
+`bear_di_module_declarations` pages bindings and pointcuts independently with the same
+`offset`; advance by `limit` between pages, not by the combined number of returned items.
 
 `bear_attribute_catalog` lists available PHP attribute definitions, including unused ones,
 with package origin, allowed targets, constructor parameter signatures and source docblocks.
@@ -432,7 +434,7 @@ are not proof of absence when unknowns remain.
 
 These tools require an engine advertising their corresponding requests:
 `bear/app/contexts`, `bear/di/bindingLookup`, `bear/di/moduleGraph`,
-`bear/attribute/catalog`, and `bear/aop/applications`. The bundled extension v0.3.0 provides
+`bear/attribute/catalog`, and `bear/aop/applications`. The bundled extension v0.3.1 provides
 these requests. An older or otherwise incompatible engine returns `unsupported` instead of
 fabricating a result. The matching extension checkout is tested with:
 

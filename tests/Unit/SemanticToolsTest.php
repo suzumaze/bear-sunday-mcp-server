@@ -14,6 +14,34 @@ use Suzumaze\BearSundayMcp\Tests\Support\InMemoryLspClient;
 #[CoversClass(SemanticTools::class)]
 final class SemanticToolsTest extends TestCase
 {
+    public function testRetriesDiscoveryAfterATransientFailure(): void
+    {
+        $infoCalls = 0;
+        $client = new InMemoryLspClient(static function (string $method) use (&$infoCalls): array {
+            if ($method === 'bear/project/info' && ++$infoCalls === 1) {
+                return [
+                    'status' => 'timeout',
+                    'error' => ['code' => 'lsp_timeout', 'message' => 'Phpactor timed out.'],
+                    'candidates' => [],
+                    'provenance' => [],
+                ];
+            }
+            if ($method === 'bear/project/info') {
+                return self::projectInfoResult();
+            }
+
+            return self::ok(['method' => $method]);
+        });
+        $tools = new SemanticTools($client);
+
+        self::assertSame('timeout', $tools->resourceList()['status']);
+        self::assertSame('ok', $tools->resourceList()['status']);
+        self::assertSame(
+            ['bear/project/info', 'bear/project/info', 'bear/resource/list'],
+            array_column($client->requests, 'method'),
+        );
+    }
+
     public function testMapsProjectDiagnosticsWithoutChangingSemanticResults(): void
     {
         $client = new InMemoryLspClient(static function (string $method, array $params): array {

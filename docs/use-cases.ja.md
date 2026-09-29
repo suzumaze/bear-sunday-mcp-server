@@ -231,7 +231,7 @@ recordだけを返し、methodは対象外です。index freshnessは`unknown`�
 証明できず、新規保存fileがまだindexに無い可能性もあります。既知fileには
 `lsp_document_symbols`、method探索や結論不能な空結果にはsource検索を使います。
 
-## 10. AIが生成した変更を検証する
+## 11. AIが生成した変更を検証する
 
 サーバー自身はファイルを編集しませんが、保存した変更がIDEと同じsemantic layerから認識されるかを
 確認できます。

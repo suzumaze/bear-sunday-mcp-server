@@ -26,9 +26,6 @@ final class SemanticTools
 
     private bool $preflightComplete = false;
 
-    /** @var array<string, mixed>|null */
-    private ?array $preflightFailure = null;
-
     /** @var array<string, true> */
     private array $availableRequests = [];
 
@@ -418,16 +415,12 @@ final class SemanticTools
     {
         if (! $this->preflightComplete) {
             $result = $this->checkDiscovery($this->forward('bear/project/info', ['contextPath' => null]));
-            $this->preflightComplete = true;
             if (($result['status'] ?? null) === 'ok') {
                 $this->rememberDiscovery($result);
             } else {
-                $this->preflightFailure = $result;
+                // A transient startup timeout must not poison every later tool call.
+                return $result;
             }
-        }
-
-        if ($this->preflightFailure !== null) {
-            return $this->preflightFailure;
         }
 
         if (! isset($this->availableRequests[$method])) {
@@ -487,7 +480,6 @@ final class SemanticTools
     private function rememberDiscovery(array $result): void
     {
         $this->preflightComplete = true;
-        $this->preflightFailure = null;
         $this->availableRequests = [];
         $this->availableCapabilities = [];
 

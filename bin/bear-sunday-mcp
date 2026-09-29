@@ -3,6 +3,9 @@
 
 declare(strict_types=1);
 
+// MCP stdio reserves stdout for JSON-RPC frames. Keep PHP diagnostics off it.
+ini_set('display_errors', 'stderr');
+
 $autoloadCandidates = [
     __DIR__ . '/../vendor/autoload.php',
     __DIR__ . '/../../../autoload.php',
