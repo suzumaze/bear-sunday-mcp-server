@@ -214,6 +214,27 @@ final class McpServerFactory
             outputSchema: self::envelopeSchema(),
         );
         $builder->addTool(
+            [$reports, 'diModuleDeclarations'],
+            name: 'bear_di_module_declarations',
+            title: 'Inspect declarations in one Module',
+            description: 'Read direct bind() and interceptor declarations for one exact Module FQCN. '
+                . 'Without applicationContext this is only a saved-source view. With a context, '
+                . 'source-graph membership is added; it does not establish a runtime winner. '
+                . 'not_observed_in_workspace_graph does not prove exclusion. '
+                . 'Use bear_di_binding_lookup for context binding selections. Values are not returned, '
+                . 'and vendor Modules or dynamic edges are not expanded.',
+            annotations: $annotations,
+            inputSchema: self::objectSchema([
+                'module' => ['type' => 'string', 'minLength' => 1, 'maxLength' => 2048,
+                    'description' => 'Exact Module class FQCN.'],
+                'applicationContext' => self::applicationContextSchema(),
+                'contextPath' => self::pathSchema('Optional workspace-relative project context path.'),
+                'limit' => self::limitSchema('Maximum declarations per category page.', self::PROJECT_REPORT_MAX_ITEMS),
+                'offset' => self::offsetSchema(),
+            ], ['module']),
+            outputSchema: self::envelopeSchema(),
+        );
+        $builder->addTool(
             [$reports, 'diBindings'],
             name: 'bear_di_bindings',
             title: 'Inspect Ray.Di binding declarations',

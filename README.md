@@ -275,6 +275,7 @@ The complete Japanese reference is available in [MCPツール一覧](docs/tools.
 | `bear_project_diagnostics` | `bear/project/diagnostics` | Paginated project-wide static inconsistencies, scan coverage, and skipped checks |
 | `bear_contract_coverage` | `bear/project/contractCoverage` | Paginated Resource-method contract adoption, gap selection, complete summary, and scan bounds |
 | `bear_di_bindings` | `bear/di/bindings` | Direct static Ray.Di bind-to declarations; no active context, precedence, or winning-binding claim |
+| `bear_di_module_declarations` | `bear/di/moduleDeclarations` | Exact Module source declarations; optional context membership overlay, no binding-winner claim |
 | `bear_aop_pointcuts` | `bear/aop/pointcuts` | Static Ray.Aop interceptor declarations and matcher syntax trees; no evaluation or weaving claim |
 | `bear_resource_list` | `bear/resource/list` | Deterministic paginated Resource URI inventory with scheme and prefix filters |
 | `bear_resource_describe` | `bear/resource/describe` | Resource methods, Link/Embed relations, templates, and schemas |

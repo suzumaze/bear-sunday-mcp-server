@@ -18,6 +18,7 @@ BEAR.Sunday MCP Serverは、BEAR Semantic APIとPhpactorの標準LSPを
 | `bear_project_diagnostics` | `bear/project/diagnostics` | limit、offset | project全体の静的に証明できる不整合、走査件数、pagination、skipされた検査 |
 | `bear_contract_coverage` | `bear/project/contractCoverage` | limit、offset、gapsOnly、scheme | Resource methodごとのrequest/response SchemaとALPSの導入状態、URI scheme選択、全体集計、走査範囲 |
 | `bear_di_bindings` | `bear/di/bindings` | type、limit、offset | 直接記述された静的なRay.Di `bind()->to()`宣言。active context、優先順位、最終bindingは主張しない |
+| `bear_di_module_declarations` | `bear/di/moduleDeclarations` | exact module、optional applicationContext、limit、offset | 1つのModuleの直接宣言とfile:line。context未指定はsource view、指定時もsource graph上のmembershipのみ。bindings/pointcutsは各categoryで別々にページングされ、最大2×limit件 |
 | `bear_aop_pointcuts` | `bear/aop/pointcuts` | interceptor、limit、offset | 静的なRay.Aop interceptor宣言とmatcher構文木。pointcut評価やruntime weavingは主張しない |
 | `bear_resource_list` | `bear/resource/list` | scheme、prefix、limit、offset | 正規化されたResource URI、FQN、workspace相対pathの決定的なページ一覧 |
 | `bear_resource_describe` | `bear/resource/describe` | Resource URI | public `on*` method、parameter、Link/Embed、template、schema |

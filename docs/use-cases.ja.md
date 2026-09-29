@@ -168,9 +168,10 @@ application PHPは実行しません。
 dynamicまたは未対応の形はunresolvedのままにし、active contextやruntime weavingを推測しないでください。
 ```
 
-`bear_di_bindings`と`bear_aop_pointcuts`を使います。どちらも保存済みsourceの宣言inventoryを
-安定したpaginationで返し、typeまたはinterceptorの完全一致filterを指定できます。`resolved`は
-構文を静的に読めたという意味だけです。そのmoduleをどのapplication contextがinstallするか、
+`bear_di_bindings`、`bear_aop_pointcuts`、`bear_di_module_declarations`を使います。Module名が分かる場合は
+最後のtoolで直接宣言をfile:line付きで確認できます。context未指定はsource view、指定時もworkspace source graph上の
+membershipを重ねるだけです。bindingsとpointcutsは別々にpaginationされます。`resolved`は
+構文を静的に読めたという意味だけです。指定contextでそのModuleが実行時に組み込まれること、
 override後にどのbindingが勝つか、matcherが実際のmethodへ一致するか、interceptorがruntimeで
 weaveされるかは証明しません。`unresolved`は推測せず、返されたsourceを確認します。
 

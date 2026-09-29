@@ -163,11 +163,13 @@ List direct static Ray.Di bindings and Ray.Aop interceptor declarations. Keep dy
 unsupported forms unresolved, and do not infer the active context or runtime weaving.
 ```
 
-Use `bear_di_bindings` and `bear_aop_pointcuts`. Both return saved-source declaration
-inventories with stable pagination and optional exact type/interceptor filters. A resolved
-declaration proves only that its syntax was read. It does not prove which application context
-installs the module, which binding wins after overrides, whether a matcher selects a method, or
-whether an interceptor is woven at runtime. Inspect `unresolved` items in source rather than
+Use `bear_di_bindings`, `bear_aop_pointcuts`, and `bear_di_module_declarations`. When you know
+a Module FQCN, the last tool shows its direct declarations with file and line. With no context it
+is source-only; with a context it adds only saved-workspace graph membership. Binding and pointcut
+items paginate independently. A resolved declaration proves only that its syntax was read. The
+source graph does not prove runtime installation for a context. It also cannot establish which
+binding wins after overrides, whether a matcher selects a method, or whether an interceptor is
+woven at runtime. Inspect `unresolved` items in source rather than
 turning them into guessed facts.
 
 ## 8. Compare contract name presence

@@ -108,6 +108,22 @@ final readonly class ProjectReportTools
         return self::result($this->tools->diModuleGraph($applicationContext));
     }
 
+    public function diModuleDeclarations(
+        string $module,
+        ?string $applicationContext = null,
+        ?string $contextPath = null,
+        int $limit = 50,
+        int $offset = 0,
+    ): CallToolResult {
+        return self::result($this->tools->diModuleDeclarations(
+            $module,
+            $applicationContext,
+            $contextPath,
+            $limit,
+            $offset,
+        ));
+    }
+
     /** @param array<string,mixed> $data */
     private static function result(array $data): CallToolResult
     {

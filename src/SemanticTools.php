@@ -140,6 +140,27 @@ final class SemanticTools
     }
 
     /** @return array<string, mixed> */
+    public function diModuleDeclarations(
+        string $module,
+        ?string $applicationContext = null,
+        ?string $contextPath = null,
+        int $limit = 50,
+        int $offset = 0,
+    ): array {
+        $params = [
+            'module' => $module,
+            'contextPath' => $contextPath,
+            'limit' => $limit,
+            'offset' => $offset,
+        ];
+        if ($applicationContext !== null) {
+            $params['applicationContext'] = $applicationContext;
+        }
+
+        return $this->query('bear/di/moduleDeclarations', $params, 'contextScopedDiAopInventory');
+    }
+
+    /** @return array<string, mixed> */
     public function appContextList(?string $contextPath = null, int $limit = 50, int $offset = 0): array
     {
         return $this->query('bear/app/contexts', [

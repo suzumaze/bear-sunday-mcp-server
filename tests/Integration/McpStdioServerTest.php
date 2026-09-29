@@ -145,8 +145,9 @@ final class McpStdioServerTest extends TestCase
             'bear_contract_compare',
             'bear_contract_coverage',
             'bear_di_binding_lookup',
-                'bear_di_bindings',
-                'bear_di_module_tree_read',
+            'bear_di_bindings',
+            'bear_di_module_declarations',
+            'bear_di_module_tree_read',
             'bear_project_diagnostics',
             'bear_project_info',
             'bear_resource_attribute_index',
@@ -292,6 +293,7 @@ final class McpStdioServerTest extends TestCase
         );
 
         self::assertSame(['applicationContext'], $toolsByName['bear_di_binding_lookup']['inputSchema']['required']);
+        self::assertSame(['module'], $toolsByName['bear_di_module_declarations']['inputSchema']['required']);
         self::assertArrayNotHasKey(
             'default',
             $toolsByName['bear_di_binding_lookup']['inputSchema']['properties']['applicationContext'],
@@ -318,6 +320,15 @@ final class McpStdioServerTest extends TestCase
             'name' => 'bear_di_module_tree_read', 'arguments' => ['applicationContext' => 'prod-html-app'],
         ]);
         self::assertSame('bear/di/moduleGraph', $tree['result']['structuredContent']['data']['method']);
+        $moduleDeclarations = $this->request('tools/call', [
+            'name' => 'bear_di_module_declarations',
+            'arguments' => ['module' => 'Acme\\Module\\InspectModule', 'applicationContext' => 'inspect-app'],
+        ]);
+        self::assertFalse($moduleDeclarations['result']['isError']);
+        self::assertSame(
+            'bear/di/moduleDeclarations',
+            $moduleDeclarations['result']['structuredContent']['data']['method'],
+        );
 
         self::assertSame(['applicationContext'], $toolsByName['bear_aop_applications']['inputSchema']['required']);
         $aop = $this->request('tools/call', [
@@ -340,6 +351,14 @@ final class McpStdioServerTest extends TestCase
         self::assertSame(
             ['limit' => 25, 'offset' => 10, 'type' => 'App\\ClockInterface'],
             $bindings['result']['structuredContent']['data']['params'],
+        );
+        self::assertStringNotContainsString(
+            'targetExpression',
+            json_encode($bindings, JSON_THROW_ON_ERROR),
+        );
+        self::assertStringNotContainsString(
+            'constructorArguments',
+            json_encode($bindings, JSON_THROW_ON_ERROR),
         );
 
         $pointcuts = $this->request('tools/call', [

@@ -49,6 +49,7 @@ final class RealMcpEndToEndTest extends TestCase
                 'bear_di_binding_lookup',
                 'bear_di_bindings',
                 'bear_di_module_tree_read',
+                'bear_di_module_declarations',
                 'bear_project_diagnostics',
                 'bear_project_info',
                 'bear_resource_attribute_index',
