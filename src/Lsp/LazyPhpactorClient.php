@@ -30,9 +30,13 @@ final class LazyPhpactorClient implements SemanticLspClient
 
         try {
             return $this->client->request($method, $params);
+        } catch (LspTimeoutException | LspRpcException $exception) {
+            // The stream stays in sync: a late answer is skipped by its request id, and an RPC
+            // error is a complete response. Keep the warm process; a restart would repeat a cold
+            // start that may itself never finish within the timeout.
+            throw $exception;
         } catch (LspException $exception) {
-            // A timed-out or dead server may leave the LSP stream out of sync.
-            // Discard it so the next MCP call can start a fresh Phpactor process.
+            // The process died or its stream is unreadable. Start a fresh one on the next call.
             $this->close();
             throw $exception;
         }

@@ -79,7 +79,7 @@ for task-oriented workflows.
 - An MCP host that supports stdio servers
 
 The standard installation bundles Phpactor 2026.07.22.0 and
-`suzumaze/bear-phpactor-extension` in the `^0.3.1` range. If you override `--phpactor`
+`suzumaze/bear-phpactor-extension` in the `^0.3.2` range. If you override `--phpactor`
 with an older compatible installation, each MCP tool checks that its backing semantic
 request is advertised; an unavailable request returns `unsupported` without being sent.
 
@@ -131,6 +131,12 @@ is passed directly to `proc_open` as an argument array; shell command strings
 and appended arguments are rejected.
 
 The process normally appears to wait silently because MCP messages use stdin and stdout.
+
+`--timeout=SECONDS` (default 20, at most 60) bounds each Phpactor request. A timeout or a
+rejected request keeps the running Phpactor, so a large project can finish its first
+indexing across later calls; a Phpactor that exits is restarted on the next call. The
+adapter stops Phpactor when it receives SIGTERM if the PHP `pcntl` extension is available;
+a SIGKILL cannot be intercepted and may leave the child running.
 
 ## Configure Codex
 
@@ -413,8 +419,11 @@ are not runtime winners. Instance values are never returned.
 `bear_di_module_tree_read` reads a bounded workspace Module source map when no context is supplied,
 including direct binding/interceptor counts and declaration navigation. With a context it keeps the
 existing context graph view. It does not expand vendor Modules, infer dynamic edges, or evaluate precedence.
-`bear_di_module_declarations` pages bindings and pointcuts independently with the same
-`offset`; advance by `limit` between pages, not by the combined number of returned items.
+`bear_di_module_declarations` returns bindings and pointcuts as separate lists; either may stop
+early at the page size budget. To read both completely, pass `bindingsOffset` and
+`pointcutsOffset` and advance each by the number of items that list returned while it is truncated.
+An engine that does not support these offsets would ignore them and repeat the first page, so the
+tool returns `unsupported` with `semantic_parameter_unsupported` instead.
 
 `bear_attribute_catalog` lists available PHP attribute definitions, including unused ones,
 with package origin, allowed targets, constructor parameter signatures and source docblocks.
@@ -434,7 +443,7 @@ are not proof of absence when unknowns remain.
 
 These tools require an engine advertising their corresponding requests:
 `bear/app/contexts`, `bear/di/bindingLookup`, `bear/di/moduleGraph`,
-`bear/attribute/catalog`, and `bear/aop/applications`. The bundled extension v0.3.1 provides
+`bear/attribute/catalog`, and `bear/aop/applications`. The bundled extension v0.3.2 provides
 these requests. An older or otherwise incompatible engine returns `unsupported` instead of
 fabricating a result. The matching extension checkout is tested with:
 

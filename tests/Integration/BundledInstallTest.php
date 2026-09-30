@@ -44,7 +44,7 @@ final class BundledInstallTest extends TestCase
             self::assertContains('contractCoverage', $project['data']['capabilities']);
             self::assertContains('diBindingInventory', $project['data']['capabilities']);
             self::assertContains('aopPointcutInventory', $project['data']['capabilities']);
-            self::assertSame('v0.3.1', $project['data']['versions']['suzumaze/bear-phpactor-extension']);
+            self::assertSame('v0.3.2', $project['data']['versions']['suzumaze/bear-phpactor-extension']);
 
             $coverage = $client->callTool('bear_contract_coverage', ['limit' => 1])->structuredContent;
             self::assertIsArray($coverage);

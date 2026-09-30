@@ -335,6 +335,16 @@ final class McpStdioServerTest extends TestCase
             'bear/di/moduleDeclarations',
             $moduleDeclarations['result']['structuredContent']['data']['method'],
         );
+        self::assertArrayNotHasKey(
+            'bindingsOffset',
+            $moduleDeclarations['result']['structuredContent']['data']['params'],
+        );
+        $pagedDeclarations = $this->request('tools/call', [
+            'name' => 'bear_di_module_declarations',
+            'arguments' => ['module' => 'Acme\\Module\\InspectModule', 'bindingsOffset' => 29, 'pointcutsOffset' => 0],
+        ]);
+        self::assertSame(29, $pagedDeclarations['result']['structuredContent']['data']['params']['bindingsOffset']);
+        self::assertSame(0, $pagedDeclarations['result']['structuredContent']['data']['params']['pointcutsOffset']);
 
         self::assertSame(['applicationContext'], $toolsByName['bear_aop_applications']['inputSchema']['required']);
         $aop = $this->request('tools/call', [

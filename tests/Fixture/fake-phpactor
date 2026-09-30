@@ -245,6 +245,30 @@ while (($message = readMessage()) !== null) {
         default => null,
     };
 
+    // Echo per-list offsets like an engine that supports them.
+    if ($method === 'bear/di/moduleDeclarations' && is_array($result)) {
+        $params = $message['params'] ?? [];
+        $offset = $params['offset'] ?? 0;
+        $result['data']['bindings'] = ['offset' => $params['bindingsOffset'] ?? $offset];
+        $result['data']['pointcuts'] = ['offset' => $params['pointcutsOffset'] ?? $offset];
+    }
+
+    // Test-only methods for process reuse: a late answer, an RPC error, and the process id.
+    if ($method === 'test/slow') {
+        usleep((int) ($message['params']['microseconds'] ?? 300000));
+    }
+    if ($method === 'test/error') {
+        sendMessage([
+            'jsonrpc' => '2.0',
+            'id' => $message['id'],
+            'error' => ['code' => -32603, 'message' => 'rejected'],
+        ]);
+        continue;
+    }
+    if ($method === 'test/pid') {
+        $result = getmypid();
+    }
+
     if ($method === 'bear/resource/list' && $sendRepeatedNotifications) {
         for ($index = 0; $index < 3; $index++) {
             usleep(70000);

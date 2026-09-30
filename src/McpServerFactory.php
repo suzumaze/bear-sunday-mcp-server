@@ -223,7 +223,9 @@ final class McpServerFactory
                 . 'Without applicationContext this is only a saved-source view. With a context, '
                 . 'source-graph membership is added; it does not establish a runtime winner. '
                 . 'not_observed_in_workspace_graph does not prove exclusion. Bindings and pointcuts '
-                . 'are paged independently with the same offset; advance offset by limit per page. '
+                . 'are separate lists, and either may stop early at the page size budget. To read both '
+                . 'completely, pass bindingsOffset and pointcutsOffset and advance each by the number '
+                . 'of items that list returned while it is truncated. '
                 . 'Use bear_di_binding_lookup for context binding selections. Values are not returned, '
                 . 'and vendor Modules or dynamic edges are not expanded.',
             annotations: $annotations,
@@ -234,6 +236,14 @@ final class McpServerFactory
                 'contextPath' => self::pathSchema('Optional workspace-relative project context path.'),
                 'limit' => self::limitSchema('Maximum declarations per category page.', self::PROJECT_REPORT_MAX_ITEMS),
                 'offset' => self::offsetSchema(),
+                'bindingsOffset' => [
+                    ...self::offsetSchema(),
+                    'description' => 'Offset of the bindings list; defaults to offset.',
+                ],
+                'pointcutsOffset' => [
+                    ...self::offsetSchema(),
+                    'description' => 'Offset of the pointcuts list; defaults to offset.',
+                ],
             ], ['module']),
             outputSchema: self::envelopeSchema(),
         );

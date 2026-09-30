@@ -231,7 +231,8 @@ final class PhpactorLanguageServer implements SemanticLspClient
         $frame = $this->codec->encode($message);
         $offset = 0;
         while ($offset < strlen($frame)) {
-            $written = fwrite($this->pipes[0], substr($frame, $offset));
+            // A closed pipe is reported by the exception below, not as a PHP notice.
+            $written = @fwrite($this->pipes[0], substr($frame, $offset));
             if ($written === false || $written === 0) {
                 throw new LspException('Could not write to Phpactor');
             }

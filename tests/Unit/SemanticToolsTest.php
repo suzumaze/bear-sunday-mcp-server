@@ -163,6 +163,39 @@ final class SemanticToolsTest extends TestCase
         self::assertSame(['bear/project/info'], array_column($client->requests, 'method'));
     }
 
+    public function testModuleDeclarationListOffsetsFailClosedWhenTheEngineIgnoresThem(): void
+    {
+        $tools = static function (bool $honorsListOffsets): SemanticTools {
+            return new SemanticTools(new InMemoryLspClient(
+                static function (string $method, array $params) use ($honorsListOffsets): array {
+                    if ($method === 'bear/project/info') {
+                        $result = self::projectInfoResult();
+                        $result['data']['requests'][] = 'bear/di/moduleDeclarations';
+
+                        return $result;
+                    }
+                    $offset = $params['offset'];
+                    $bindings = $honorsListOffsets ? $params['bindingsOffset'] ?? $offset : $offset;
+                    $pointcuts = $honorsListOffsets ? $params['pointcutsOffset'] ?? $offset : $offset;
+
+                    return self::ok([
+                        'bindings' => ['offset' => $bindings],
+                        'pointcuts' => ['offset' => $pointcuts],
+                    ]);
+                },
+            ));
+        };
+
+        $older = $tools(false)->diModuleDeclarations('App\\Module\\AppModule', bindingsOffset: 29, pointcutsOffset: 0);
+        self::assertSame('unsupported', $older['status']);
+        self::assertSame('semantic_parameter_unsupported', $older['error']['code']);
+        self::assertSame('ok', $tools(false)->diModuleDeclarations('App\\Module\\AppModule', offset: 10)['status']);
+
+        $current = $tools(true)->diModuleDeclarations('App\\Module\\AppModule', bindingsOffset: 29, pointcutsOffset: 0);
+        self::assertSame('ok', $current['status']);
+        self::assertSame(29, $current['data']['bindings']['offset']);
+    }
+
     public function testNewInspectionToolsFailClosedOnOlderEngines(): void
     {
         $client = new InMemoryLspClient(static fn (): array => self::projectInfoResult());

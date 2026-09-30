@@ -4,6 +4,32 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.12.2] - 2026-09-30
+
+### Added
+
+- Accept `bindingsOffset` and `pointcutsOffset` in `bear_di_module_declarations`. Each list can
+  stop early at the page size budget, so advancing both by `limit` could skip declarations.
+  The values are forwarded only when given, and an engine that ignores them returns
+  `unsupported` (`semantic_parameter_unsupported`) instead of repeating the first page.
+
+### Fixed
+
+- Keep the running Phpactor after a request timeout or a rejected request. Restarting on every
+  timeout could prevent a large project from ever finishing its first response. A Phpactor
+  that exits or whose stream becomes unreadable is still replaced on the next call.
+- Stop reporting a write to an exited Phpactor as a PHP notice; the failure is still returned.
+- Make the use-case section numbers unique.
+
+### Changed
+
+- Bundle `suzumaze/bear-phpactor-extension` 0.3.2, which keeps remaining source uncertainty
+  visible and supports per-list Module declaration offsets.
+
+### Documentation
+
+- Document `--timeout`, restart behavior, and the `pcntl` requirement for SIGTERM cleanup.
+
 ## [0.12.1] - 2026-09-29
 
 ### Fixed
@@ -238,7 +264,8 @@ All notable changes to this project will be documented in this file.
 - Bounded LSP framing, fixed workspace/process configuration, structured failure results, and
   fake and real stdio integration coverage.
 
-[Unreleased]: https://github.com/suzumaze/bear-sunday-mcp-server/compare/v0.12.1...HEAD
+[Unreleased]: https://github.com/suzumaze/bear-sunday-mcp-server/compare/v0.12.2...HEAD
+[0.12.2]: https://github.com/suzumaze/bear-sunday-mcp-server/compare/v0.12.1...v0.12.2
 [0.12.1]: https://github.com/suzumaze/bear-sunday-mcp-server/compare/v0.12.0...v0.12.1
 [0.12.0]: https://github.com/suzumaze/bear-sunday-mcp-server/compare/v0.11.0...v0.12.0
 [0.11.0]: https://github.com/suzumaze/bear-sunday-mcp-server/compare/v0.10.2...v0.11.0
