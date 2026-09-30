@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.12.2] - 2026-09-30
+
 ### Added
 
 - Accept `bindingsOffset` and `pointcutsOffset` in `bear_di_module_declarations`. Each list can
@@ -18,6 +20,11 @@ All notable changes to this project will be documented in this file.
   that exits or whose stream becomes unreadable is still replaced on the next call.
 - Stop reporting a write to an exited Phpactor as a PHP notice; the failure is still returned.
 - Make the use-case section numbers unique.
+
+### Changed
+
+- Bundle `suzumaze/bear-phpactor-extension` 0.3.2, which keeps remaining source uncertainty
+  visible and supports per-list Module declaration offsets.
 
 ### Documentation
 
@@ -257,7 +264,8 @@ All notable changes to this project will be documented in this file.
 - Bounded LSP framing, fixed workspace/process configuration, structured failure results, and
   fake and real stdio integration coverage.
 
-[Unreleased]: https://github.com/suzumaze/bear-sunday-mcp-server/compare/v0.12.1...HEAD
+[Unreleased]: https://github.com/suzumaze/bear-sunday-mcp-server/compare/v0.12.2...HEAD
+[0.12.2]: https://github.com/suzumaze/bear-sunday-mcp-server/compare/v0.12.1...v0.12.2
 [0.12.1]: https://github.com/suzumaze/bear-sunday-mcp-server/compare/v0.12.0...v0.12.1
 [0.12.0]: https://github.com/suzumaze/bear-sunday-mcp-server/compare/v0.11.0...v0.12.0
 [0.11.0]: https://github.com/suzumaze/bear-sunday-mcp-server/compare/v0.10.2...v0.11.0

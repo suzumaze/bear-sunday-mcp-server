@@ -79,7 +79,7 @@ for task-oriented workflows.
 - An MCP host that supports stdio servers
 
 The standard installation bundles Phpactor 2026.07.22.0 and
-`suzumaze/bear-phpactor-extension` in the `^0.3.1` range. If you override `--phpactor`
+`suzumaze/bear-phpactor-extension` in the `^0.3.2` range. If you override `--phpactor`
 with an older compatible installation, each MCP tool checks that its backing semantic
 request is advertised; an unavailable request returns `unsupported` without being sent.
 
@@ -443,7 +443,7 @@ are not proof of absence when unknowns remain.
 
 These tools require an engine advertising their corresponding requests:
 `bear/app/contexts`, `bear/di/bindingLookup`, `bear/di/moduleGraph`,
-`bear/attribute/catalog`, and `bear/aop/applications`. The bundled extension v0.3.1 provides
+`bear/attribute/catalog`, and `bear/aop/applications`. The bundled extension v0.3.2 provides
 these requests. An older or otherwise incompatible engine returns `unsupported` instead of
 fabricating a result. The matching extension checkout is tested with:
 
