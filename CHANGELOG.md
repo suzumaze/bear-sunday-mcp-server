@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.12.3] - 2026-10-02
+
+### Changed
+
+- Bundle `suzumaze/bear-phpactor-extension` 0.3.3, which recognizes the Ray.Di 2.23.1
+  `AssistedInjectMatcher` source. On Ray.Di 2.23.1, `bear_aop_applications` no longer marks every
+  Resource method with two unresolved `AssistedInjectModule` pointcuts or lists methods without
+  interceptors.
+
+### Documentation
+
+- Mention `semantic_parameter_unsupported` for `bindingsOffset`/`pointcutsOffset` in the Japanese
+  tool reference and the bundled skill.
+
 ## [0.12.2] - 2026-09-30
 
 ### Added
@@ -264,7 +278,8 @@ All notable changes to this project will be documented in this file.
 - Bounded LSP framing, fixed workspace/process configuration, structured failure results, and
   fake and real stdio integration coverage.
 
-[Unreleased]: https://github.com/suzumaze/bear-sunday-mcp-server/compare/v0.12.2...HEAD
+[Unreleased]: https://github.com/suzumaze/bear-sunday-mcp-server/compare/v0.12.3...HEAD
+[0.12.3]: https://github.com/suzumaze/bear-sunday-mcp-server/compare/v0.12.2...v0.12.3
 [0.12.2]: https://github.com/suzumaze/bear-sunday-mcp-server/compare/v0.12.1...v0.12.2
 [0.12.1]: https://github.com/suzumaze/bear-sunday-mcp-server/compare/v0.12.0...v0.12.1
 [0.12.0]: https://github.com/suzumaze/bear-sunday-mcp-server/compare/v0.11.0...v0.12.0

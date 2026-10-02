@@ -37,7 +37,7 @@ flowchart TB
         D1 -.-> D2
     end
 
-    M5 --> R1["core v0.3.2 / MCP v0.12.2<br/>一括インストール"]
+    M5 --> R1["core v0.3.3 / MCP v0.12.3<br/>一括インストール"]
     R1 --> S1["bear-semantic Skill同梱<br/>context・DI・AOP workflow追加"]
 ```
 
@@ -45,11 +45,11 @@ flowchart TB
 
 | component | version | 状態 |
 |---|---|---|
-| `suzumaze/bear-phpactor-extension` | `v0.3.2` | sourceから求めるModule関係・束縛経路・属性カタログ・AOP適用先 |
-| `suzumaze/bear-sunday-mcp-server` | `v0.12.2` | Phpactor・BEAR拡張v0.3.2を同梱した32 read-only tools |
-| MCP tool inventory | `v0.12.2`で32 tools | 日本語・英語manual整備済み |
+| `suzumaze/bear-phpactor-extension` | `v0.3.3` | sourceから求めるModule関係・束縛経路・属性カタログ・AOP適用先 |
+| `suzumaze/bear-sunday-mcp-server` | `v0.12.3` | Phpactor・BEAR拡張v0.3.3を同梱した32 read-only tools |
+| MCP tool inventory | `v0.12.3`で32 tools | 日本語・英語manual整備済み |
 | Contract coverage UI | 任意のMCP Apps view | read-only、structured/text fallbackを維持 |
-| `bear-semantic` agent Skill | `v0.12.2`に同梱 | project、contract導入、context・DI・AOP workflowを含む |
+| `bear-semantic` agent Skill | `v0.12.3`に同梱 | project、contract導入、context・DI・AOP workflowを含む |
 
 ## Grepから進歩した点
 
