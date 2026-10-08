@@ -98,8 +98,9 @@ or hardcode installed-package defaults.
 
 Treat `lsp_workspace_symbols` as a Phpactor index query for class, function, and constant records.
 It does not search methods, its index freshness is unknown, and an empty result is inconclusive.
-Use `lsp_document_symbols` for a known file and fall back to source search for methods or saved
-files that may not yet be indexed.
+A class added since Phpactor last indexed the workspace can be missing even from an `ok` result
+(`coverage.mayOmitNewFiles`). Use `lsp_document_symbols` for a known file and fall back to source
+search for methods or saved files that may not yet be indexed.
 
 ## Respect the boundary
 
