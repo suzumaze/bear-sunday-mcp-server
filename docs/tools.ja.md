@@ -89,7 +89,7 @@ Resource自体が無い場合は`partial`もありません。
 （`ok`、`not_found`、失敗のいずれでも同じです）。
 
 保存済みdocumentの外を指す位置は`invalid_input`で拒否され、メッセージは存在しない行（最終行つき）か、
-行末を超えたcharacter（その行のUTF-16長つき）のどちらが原因かを示します。数値はいずれも0-basedです。
+行末を超えたcharacter（その行のUTF-16長つき）のどちらが原因かを示します。メッセージの行とcharacterは0-basedで、長さはUTF-16 code unit数です。
 
 ## 安全境界
 

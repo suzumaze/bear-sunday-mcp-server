@@ -354,7 +354,8 @@ Because even an `ok` result can lack a newly added class, `coverage.mayOmitNewFi
 
 A position that is outside the saved document is rejected with `invalid_input`, and the message
 says which part is wrong: a line that does not exist (with the last line), or a character past the
-end of its line (with the line's UTF-16 length). Both numbers are zero-based.
+end of its line (with the line's UTF-16 length). Line and character positions in the message are
+zero-based; the length is a count of UTF-16 code units.
 
 ## Safety model
 
