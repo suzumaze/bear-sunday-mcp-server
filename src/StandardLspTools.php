@@ -466,7 +466,7 @@ final class StandardLspTools
         }
         if ($character > $utf16Length) {
             return sprintf(
-                'Character %d is past the end of line %d, which is %d UTF-16 code units long; '
+                'Character %d is past the end of line %d (UTF-16 length: %d); '
                 . 'the end of the line is character %d (characters are zero-based UTF-16 offsets).',
                 $character,
                 $line,

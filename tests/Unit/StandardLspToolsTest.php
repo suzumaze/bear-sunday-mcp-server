@@ -391,7 +391,7 @@ final class StandardLspToolsTest extends TestCase
         self::assertSame('invalid_input', $pastLineEnd['status']);
         self::assertSame('invalid_document', $pastLineEnd['error']['code']);
         self::assertSame(
-            'Character 4 is past the end of line 0, which is 3 UTF-16 code units long; '
+            'Character 4 is past the end of line 0 (UTF-16 length: 3); '
             . 'the end of the line is character 3 (characters are zero-based UTF-16 offsets).',
             $pastLineEnd['error']['message'],
         );
