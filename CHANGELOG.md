@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Changed
+
+- Position tools (`lsp_hover`, `lsp_definition`, `lsp_references`, `lsp_completion`, and the
+  other `lsp_*` tools that take `line` and `character`) now say why a position is rejected. A line
+  that does not exist reports the last line; a character past the end of its line reports the
+  line's UTF-16 length. Previously every case returned "Position is outside the saved document."
+  The status stays `invalid_input` and `error.code` stays `invalid_document`.
+- `lsp_workspace_symbols.data.coverage` gains `mayOmitNewFiles` (always `true`) and `newFileHint`
+  on `ok`, `not_found`, and failure results. On a copy of BEAR.Kata, a class created after
+  Phpactor had indexed the workspace did not appear in `lsp_workspace_symbols` within 120 seconds,
+  while `lsp_document_symbols` on the file returned it at once. Existing coverage fields and
+  `provenance.freshness` are unchanged.
+
 ## [0.12.3] - 2026-10-02
 
 ### Changed

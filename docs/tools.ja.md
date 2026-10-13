@@ -84,7 +84,12 @@ Resource自体が無い場合は`partial`もありません。
 
 `lsp_workspace_symbols`は`data.coverage`に対象record種別、method非対応、index freshness、空結果が
 決定的でないことを返します。既知fileのmemberは`lsp_document_symbols`、method名やindex未反映の
-可能性がある新規fileはsource検索で確認します。
+可能性がある新規fileはsource検索で確認します。`ok`の結果にも新規追加したclassが含まれない
+ことがあるため、`coverage.mayOmitNewFiles`は常に`true`で、`coverage.newFileHint`が回避策を示します
+（`ok`、`not_found`、失敗のいずれでも同じです）。
+
+保存済みdocumentの外を指す位置は`invalid_input`で拒否され、メッセージは存在しない行（最終行つき）か、
+行末を超えたcharacter（その行のUTF-16長つき）のどちらが原因かを示します。メッセージの行とcharacterは0-basedで、長さはUTF-16 code unit数です。
 
 ## 安全境界
 

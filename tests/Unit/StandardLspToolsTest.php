@@ -284,13 +284,11 @@ final class StandardLspToolsTest extends TestCase
         self::assertSame(1, $workspaceSymbols['data']['total']);
         self::assertSame('User', $workspaceSymbols['data']['symbols'][0]['name']);
         self::assertSame('src/Resource/App/User.php', $workspaceSymbols['data']['symbols'][0]['path']);
-        self::assertSame([
-            'source' => 'phpactor_workspace_index',
-            'recordTypes' => ['class', 'function', 'constant'],
-            'includesMethods' => false,
-            'indexFreshness' => 'unknown',
-            'emptyResultIsDefinitive' => false,
-        ], $workspaceSymbols['data']['coverage']);
+        self::assertSame('phpactor_workspace_index', $workspaceSymbols['data']['coverage']['source']);
+        self::assertSame(['class', 'function', 'constant'], $workspaceSymbols['data']['coverage']['recordTypes']);
+        self::assertFalse($workspaceSymbols['data']['coverage']['includesMethods']);
+        self::assertSame('unknown', $workspaceSymbols['data']['coverage']['indexFreshness']);
+        self::assertFalse($workspaceSymbols['data']['coverage']['emptyResultIsDefinitive']);
         self::assertSame('unknown', $workspaceSymbols['provenance'][0]['freshness']);
         self::assertSame(
             ['query' => 'User'],
@@ -372,6 +370,62 @@ final class StandardLspToolsTest extends TestCase
 
         self::assertSame('ok', $tools->hover('unicode.txt', 0, 2)['status']);
         self::assertSame('invalid_input', $tools->hover('unicode.txt', 0, 4)['status']);
+    }
+
+    public function testNamesWhichPartOfAPositionIsOutOfRange(): void
+    {
+        $client = new InMemoryLspClient(static fn (): array => [
+            'contents' => ['kind' => 'plaintext', 'value' => 'unicode'],
+        ]);
+        $tools = new StandardLspTools($client, Workspace::fromPath($this->fixture));
+
+        // unicode.txt is "😀x\n": line 0 is 3 UTF-16 code units long and line 1 is empty.
+        self::assertSame('ok', $tools->hover('unicode.txt', 0, 3)['status'], 'end of line is a valid position');
+        self::assertSame(
+            'ok',
+            $tools->hover('unicode.txt', 1, 0)['status'],
+            'the empty line after a final newline exists',
+        );
+
+        $pastLineEnd = $tools->hover('unicode.txt', 0, 4);
+        self::assertSame('invalid_input', $pastLineEnd['status']);
+        self::assertSame('invalid_document', $pastLineEnd['error']['code']);
+        self::assertSame(
+            'Character 4 is past the end of line 0 (UTF-16 length: 3); '
+            . 'the end of the line is character 3 (characters are zero-based UTF-16 offsets).',
+            $pastLineEnd['error']['message'],
+        );
+
+        $pastLastLine = $tools->hover('unicode.txt', 2, 0);
+        self::assertSame('invalid_input', $pastLastLine['status']);
+        self::assertSame(
+            'Line 2 does not exist; the last line of the saved document is 1 (lines are zero-based).',
+            $pastLastLine['error']['message'],
+        );
+    }
+
+    public function testWorkspaceSymbolCoverageWarnsThatNewFilesMayBeMissing(): void
+    {
+        $found = $this->tools->workspaceSymbols('User');
+        $missing = (new StandardLspTools(
+            new InMemoryLspClient(static fn (): array => []),
+            Workspace::fromPath($this->fixture),
+        ))->workspaceSymbols('Missing');
+        $failed = (new StandardLspTools(
+            new InMemoryLspClient(static function (): never {
+                throw new LspRpcException(-32603);
+            }),
+            Workspace::fromPath($this->fixture),
+        ))->workspaceSymbols('Dashboard');
+
+        foreach (['ok' => $found, 'not_found' => $missing, 'engine_unavailable' => $failed] as $status => $result) {
+            self::assertSame($status, $result['status']);
+            $coverage = $result['data']['coverage'];
+            self::assertTrue($coverage['mayOmitNewFiles'], $status);
+            self::assertStringContainsString('lsp_document_symbols', $coverage['newFileHint'], $status);
+            // Restarting was tried once and did not add an unopened file, so the hint must not promise it.
+            self::assertStringNotContainsString('restart', strtolower($coverage['newFileHint']), $status);
+        }
     }
 
     public function testRetriesOneTransientInternalLspError(): void

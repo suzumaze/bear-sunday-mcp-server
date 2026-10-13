@@ -349,6 +349,13 @@ function, and constant index records are included; methods are not. Its provenan
 `freshness: "unknown"` because a saved workspace file does not prove that Phpactor has
 indexed a newly created file. Treat `not_found` as inconclusive and use
 `lsp_document_symbols` for a known file or source search for unsupported member discovery.
+Because even an `ok` result can lack a newly added class, `coverage.mayOmitNewFiles` is always
+`true` and `coverage.newFileHint` names the workaround, on `ok`, `not_found`, and failure alike.
+
+A position that is outside the saved document is rejected with `invalid_input`, and the message
+says which part is wrong: a line that does not exist (with the last line), or a character past the
+end of its line (with the line's UTF-16 length). Line and character positions in the message are
+zero-based; the length is a count of UTF-16 code units.
 
 ## Safety model
 

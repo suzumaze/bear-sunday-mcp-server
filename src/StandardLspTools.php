@@ -337,8 +337,9 @@ final class StandardLspTools
         array $extra = [],
     ): array {
         $document = $this->workspace->readDocument($path);
-        if (!$this->validPosition($document->contents, $line, $character)) {
-            throw new WorkspaceFileException('invalid_input', 'Position is outside the saved document.');
+        $positionError = $this->positionError($document->contents, $line, $character);
+        if ($positionError !== null) {
+            throw new WorkspaceFileException('invalid_input', $positionError);
         }
 
         $raw = $this->requestDocument($method, $document, [
@@ -434,26 +435,47 @@ final class StandardLspTools
         }
     }
 
-    private function validPosition(string $contents, int $line, int $character): bool
+    /** Returns why the position is not inside the document, or null when it is valid. */
+    private function positionError(string $contents, int $line, int $character): ?string
     {
         if ($line < 0 || $character < 0) {
-            return false;
+            return 'Line and character must be zero-based non-negative integers.';
         }
         $lines = preg_split('/\r\n|\r|\n/', $contents);
-        if ($lines === false || !array_key_exists($line, $lines)) {
-            return false;
+        if ($lines === false) {
+            return 'The saved document could not be split into lines, so the position cannot be checked.';
+        }
+        if (!array_key_exists($line, $lines)) {
+            return sprintf(
+                'Line %d does not exist; the last line of the saved document is %d (lines are zero-based).',
+                $line,
+                count($lines) - 1,
+            );
         }
 
         $characters = preg_split('//u', $lines[$line], -1, PREG_SPLIT_NO_EMPTY);
         if ($characters === false) {
-            return false;
+            return sprintf(
+                'Line %d of the saved document is not valid UTF-8, so a character position cannot be checked.',
+                $line,
+            );
         }
         $utf16Length = 0;
         foreach ($characters as $value) {
             $utf16Length += strlen($value) === 4 ? 2 : 1;
         }
+        if ($character > $utf16Length) {
+            return sprintf(
+                'Character %d is past the end of line %d (UTF-16 length: %d); '
+                . 'the end of the line is character %d (characters are zero-based UTF-16 offsets).',
+                $character,
+                $line,
+                $utf16Length,
+                $utf16Length,
+            );
+        }
 
-        return $character <= $utf16Length;
+        return null;
     }
 
     /** @return list<array<string, mixed>>|null */
@@ -991,6 +1013,10 @@ final class StandardLspTools
                 'includesMethods' => false,
                 'indexFreshness' => 'unknown',
                 'emptyResultIsDefinitive' => false,
+                'mayOmitNewFiles' => true,
+                'newFileHint' => 'Files added since Phpactor last indexed the workspace may be missing, '
+                    . 'even from an ok result. '
+                    . 'For a known file, lsp_document_symbols with its path reads it directly.',
             ],
         ];
     }
