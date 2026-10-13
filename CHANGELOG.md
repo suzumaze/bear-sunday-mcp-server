@@ -4,9 +4,17 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.12.4] - 2026-10-13
+
 ### Changed
 
-- Position tools (`lsp_hover`, `lsp_definition`, `lsp_references`, `lsp_completion`, and the
+- Bundle `suzumaze/bear-phpactor-extension` 0.3.4. `bear_app_context_list` now lists the
+  production contexts of an application whose entry points pass the context to a bootstrap
+  closure or class (`(require 'bootstrap/…')('prod-…', …)`, `(new Bootstrap())('…')`, a closure
+  variable) instead of only the contexts in demo scripts and tests; on BEAR.Kata it goes from 5 to
+  9 contexts and its one unresolved site disappears. A source file that is still being typed no
+  longer makes the whole listing fail.
+- Position tools (`lsp_hover`, `lsp_definition`, `lsp_references`, `lsp_completion`, and the (`lsp_hover`, `lsp_definition`, `lsp_references`, `lsp_completion`, and the
   other `lsp_*` tools that take `line` and `character`) now say why a position is rejected. A line
   that does not exist reports the last line; a character past the end of its line reports the
   line's UTF-16 length. Previously every case returned "Position is outside the saved document."
@@ -291,7 +299,8 @@ All notable changes to this project will be documented in this file.
 - Bounded LSP framing, fixed workspace/process configuration, structured failure results, and
   fake and real stdio integration coverage.
 
-[Unreleased]: https://github.com/suzumaze/bear-sunday-mcp-server/compare/v0.12.3...HEAD
+[Unreleased]: https://github.com/suzumaze/bear-sunday-mcp-server/compare/v0.12.4...HEAD
+[0.12.4]: https://github.com/suzumaze/bear-sunday-mcp-server/compare/v0.12.3...v0.12.4
 [0.12.3]: https://github.com/suzumaze/bear-sunday-mcp-server/compare/v0.12.2...v0.12.3
 [0.12.2]: https://github.com/suzumaze/bear-sunday-mcp-server/compare/v0.12.1...v0.12.2
 [0.12.1]: https://github.com/suzumaze/bear-sunday-mcp-server/compare/v0.12.0...v0.12.1

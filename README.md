@@ -79,7 +79,7 @@ for task-oriented workflows.
 - An MCP host that supports stdio servers
 
 The standard installation bundles Phpactor 2026.07.22.0 and
-`suzumaze/bear-phpactor-extension` in the `^0.3.3` range. If you override `--phpactor`
+`suzumaze/bear-phpactor-extension` in the `^0.3.4` range. If you override `--phpactor`
 with an older compatible installation, each MCP tool checks that its backing semantic
 request is advertised; an unavailable request returns `unsupported` without being sent.
 
@@ -417,7 +417,10 @@ MIT
 ### Context, DI, and AOP inspection
 
 `bear_app_context_list` discovers saved entry-point context candidates and their source
-locations. It does not choose a context. Pass an explicit `applicationContext` to
+locations. It does not choose a context. A context handed to a bootstrap closure or class,
+such as `(require 'bootstrap/…')('prod-…', …)` or `(new Bootstrap())('…')`, is found when the call
+can be named from source; a call it cannot follow stays in `unresolved`, and
+`coverage.forwarderForms` lists the forms followed. Pass an explicit `applicationContext` to
 `bear_di_binding_lookup` to inspect source-selected bindings and local retained/discarded
 choices with declaration and module-import evidence. Filter by `type`, `name`,
 `overridesOnly` or `resourcesOnly`. Inspect unknowns and truncation; provisional selections
@@ -450,7 +453,7 @@ are not proof of absence when unknowns remain.
 
 These tools require an engine advertising their corresponding requests:
 `bear/app/contexts`, `bear/di/bindingLookup`, `bear/di/moduleGraph`,
-`bear/attribute/catalog`, and `bear/aop/applications`. The bundled extension v0.3.3 provides
+`bear/attribute/catalog`, and `bear/aop/applications`. The bundled extension v0.3.4 provides
 these requests. An older or otherwise incompatible engine returns `unsupported` instead of
 fabricating a result. The matching extension checkout is tested with:
 
