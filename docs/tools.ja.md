@@ -111,7 +111,7 @@ workspace rootとPhpactor commandはserver起動時に固定されます。tool 
 
 「このcontextでこの型はどこから来るか」「このResource methodにどのinterceptorが候補として並ぶか」のような
 質問には、`bear_di_binding_lookup`または`bear_aop_applications`を使い、`applicationContext`を明示します。
-context名が分からなければ、まず`bear_app_context_list`で起動コード上の候補と出典を調べます。候補が複数ある場合、
+context名が分からなければ、まず`bear_app_context_list`で起動コード上の候補と出典を調べます。`bootstrap/`が返す無名関数や`Bootstrap`クラスにcontextを渡す入口（例：`(require 'bootstrap/…')('prod-…', …)`）も、ソースから呼び出しを特定できれば候補に含まれます。追えなかった呼び出しは`unresolved`に残り、追える形は`coverage.forwarderForms`に示されます。候補が複数ある場合、
 利用者の意図に合うcontextを選びます。Module群の関係を概観する必要があるときだけ`bear_di_module_tree_read`を使います。
 専用のModule閲覧画面は前提にせず、結果の`path`/`line`とprovenanceから宣言元を開いて確認します。
 
