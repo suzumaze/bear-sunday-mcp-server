@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+- AOP reports accept `detail: "shared"` for page-local shared chains with per-method references.
+
 ### Changed
 
 - Resource schema discovery now shares method attribute selection across description, lookup,

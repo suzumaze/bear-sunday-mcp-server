@@ -177,8 +177,9 @@ final class McpServerFactory
                 'contextPath' => self::pathSchema('Optional workspace-relative project context path.'),
                 'limit' => self::limitSchema('Maximum methods per page.', self::PROJECT_REPORT_MAX_ITEMS),
                 'offset' => self::offsetSchema(),
-                'detail' => ['type' => 'string', 'enum' => ['compact', 'full'], 'default' => 'compact',
-                    'description' => 'Compact omits matcher definitions and module traversal paths.'],
+                'detail' => ['type' => 'string', 'enum' => ['compact', 'full', 'shared'], 'default' => 'compact',
+                    'description' => 'Compact omits matchers and module traversal paths; '
+                        . 'shared also deduplicates chains via chainId.'],
                 'includeUnknowns' => ['type' => 'boolean', 'default' => false,
                     'description' => 'Include unresolved details; counts and summaries are always returned.'],
             ], ['applicationContext']),
