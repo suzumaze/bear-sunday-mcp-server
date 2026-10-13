@@ -6,6 +6,11 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
+- Resource schema discovery now shares method attribute selection across description, lookup,
+  and contract comparison. Lookup accepts `method`; description covers request and response
+  schemas and distinguishes explicit attributes, adjacent-file BC fallback, and convention-only
+  discovery. These source facts do not prove runtime validation or resolve configured directories.
+
 - AOP applications now default to compact output: module traversal paths, matcher definitions,
   and unresolved details are omitted explicitly. Use `detail: "full"` and
   `includeUnknowns: true` for the previous detail level. Counts, chain order, and provisional

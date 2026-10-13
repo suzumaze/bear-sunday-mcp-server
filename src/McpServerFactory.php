@@ -409,9 +409,11 @@ final class McpServerFactory
                 'kind' => [
                     'type' => 'string',
                     'enum' => ['request', 'response'],
-                    'description' => 'Schema kind. Resource convention lookup currently supports response schemas.',
+                    'description' => 'Schema kind. Method attributes take precedence over convention discovery.',
                 ],
                 'contextPath' => self::pathSchema('Optional workspace-relative context path.'),
+                'method' => ['type' => 'string', 'maxLength' => 255,
+                    'description' => 'Optional exact method, e.g. onGet; omitted selection may be ambiguous.'],
             ], ['resourceUri']),
             outputSchema: self::envelopeSchema(),
         );

@@ -337,11 +337,13 @@ final class SemanticTools
         string $resourceUri,
         string $kind = 'response',
         ?string $contextPath = null,
+        ?string $method = null,
     ): array {
         return $this->query('bear/schema/describeForResource', [
             'uri' => $resourceUri,
             'kind' => $kind,
             'contextPath' => $contextPath,
+            ...($method === null ? [] : ['method' => $method]),
         ]);
     }
 

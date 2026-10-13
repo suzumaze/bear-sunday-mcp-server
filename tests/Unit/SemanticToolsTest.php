@@ -14,6 +14,15 @@ use Suzumaze\BearSundayMcp\Tests\Support\InMemoryLspClient;
 #[CoversClass(SemanticTools::class)]
 final class SemanticToolsTest extends TestCase
 {
+    public function testSchemaMethodIsForwarded(): void
+    {
+        $client = new InMemoryLspClient(static function (string $method, array $params): array {
+            return $method === 'bear/project/info' ? self::projectInfoResult() : self::ok($params);
+        });
+        $result = (new SemanticTools($client))->schemaLookup('app://self/example', 'request', method: 'onGet');
+        self::assertSame('onGet', $result['data']['method']);
+    }
+
     public function testAopOutputOptionsAreForwarded(): void
     {
         $client = new InMemoryLspClient(static function (string $method, array $params): array {
