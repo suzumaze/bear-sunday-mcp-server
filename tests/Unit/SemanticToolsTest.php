@@ -14,6 +14,23 @@ use Suzumaze\BearSundayMcp\Tests\Support\InMemoryLspClient;
 #[CoversClass(SemanticTools::class)]
 final class SemanticToolsTest extends TestCase
 {
+    public function testAopOutputOptionsAreForwarded(): void
+    {
+        $client = new InMemoryLspClient(static function (string $method, array $params): array {
+            if ($method === 'bear/project/info') {
+                $info = self::projectInfoResult();
+                $info['data']['requests'][] = 'bear/aop/applications';
+
+                return $info;
+            }
+
+            return self::ok($params);
+        });
+        $result = (new SemanticTools($client))->aopApplications('app', detail: 'full', includeUnknowns: true);
+        self::assertSame('full', $result['data']['detail']);
+        self::assertTrue($result['data']['includeUnknowns']);
+    }
+
     public function testRetriesDiscoveryAfterATransientFailure(): void
     {
         $infoCalls = 0;

@@ -74,6 +74,8 @@ final readonly class ProjectReportTools
         ?string $contextPath = null,
         int $limit = 50,
         int $offset = 0,
+        string $detail = 'compact',
+        bool $includeUnknowns = false,
     ): CallToolResult {
         return self::result($this->tools->aopApplications(
             $applicationContext,
@@ -84,6 +86,8 @@ final readonly class ProjectReportTools
             $contextPath,
             $limit,
             $offset,
+            $detail,
+            $includeUnknowns,
         ));
     }
 

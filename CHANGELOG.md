@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Changed
+
+- AOP applications now default to compact output: module traversal paths, matcher definitions,
+  and unresolved details are omitted explicitly. Use `detail: "full"` and
+  `includeUnknowns: true` for the previous detail level. Counts, chain order, and provisional
+  status are retained. `nextOffset` and `truncatedBy` explain pagination.
+
+## [Unreleased]
+
 ## [0.12.4] - 2026-10-13
 
 ### Changed

@@ -229,6 +229,8 @@ final class SemanticTools
         ?string $contextPath = null,
         int $limit = 50,
         int $offset = 0,
+        string $detail = 'compact',
+        bool $includeUnknowns = false,
     ): array {
         return $this->query('bear/aop/applications', [
             'applicationContext' => $applicationContext,
@@ -239,6 +241,8 @@ final class SemanticTools
             'contextPath' => $contextPath,
             'limit' => $limit,
             'offset' => $offset,
+            'detail' => $detail,
+            'includeUnknowns' => $includeUnknowns,
         ]);
     }
 
