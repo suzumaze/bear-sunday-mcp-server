@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+- Resource descriptions, schema lookup, contract comparison, coverage and diagnostics accept
+  an optional `applicationContext` for source-derived schema directory selection.
+
 - AOP reports accept `detail: "shared"` for page-local shared chains with per-method references.
 
 ### Changed

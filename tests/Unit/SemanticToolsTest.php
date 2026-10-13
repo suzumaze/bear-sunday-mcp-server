@@ -23,6 +23,25 @@ final class SemanticToolsTest extends TestCase
         self::assertSame('onGet', $result['data']['method']);
     }
 
+    public function testSchemaContextIsForwardedAcrossRelatedTools(): void
+    {
+        $client = new InMemoryLspClient(static function (string $method, array $params): array {
+            return $method === 'bear/project/info' ? self::projectInfoResult() : self::ok($params);
+        });
+        $tools = new SemanticTools($client);
+        foreach (
+            [
+            $tools->resourceDescribe('app://self/example', applicationContext: 'prod-app'),
+            $tools->contractCompare('app://self/example', applicationContext: 'prod-app'),
+            $tools->schemaLookup('app://self/example', applicationContext: 'prod-app'),
+            $tools->projectDiagnostics(applicationContext: 'prod-app'),
+            $tools->contractCoverage(applicationContext: 'prod-app'),
+            ] as $result
+        ) {
+            self::assertSame('prod-app', $result['data']['applicationContext']);
+        }
+    }
+
     public function testAopOutputOptionsAreForwarded(): void
     {
         $client = new InMemoryLspClient(static function (string $method, array $params): array {

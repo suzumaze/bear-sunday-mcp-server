@@ -14,9 +14,12 @@ final readonly class ProjectReportTools
     {
     }
 
-    public function projectDiagnostics(int $limit = 100, int $offset = 0): CallToolResult
-    {
-        return self::result($this->tools->projectDiagnostics($limit, $offset));
+    public function projectDiagnostics(
+        int $limit = 100,
+        int $offset = 0,
+        ?string $applicationContext = null,
+    ): CallToolResult {
+        return self::result($this->tools->projectDiagnostics($limit, $offset, $applicationContext));
     }
 
     public function contractCoverage(
@@ -24,8 +27,9 @@ final readonly class ProjectReportTools
         int $offset = 0,
         bool $gapsOnly = false,
         ?string $scheme = null,
+        ?string $applicationContext = null,
     ): CallToolResult {
-        return self::result($this->tools->contractCoverage($limit, $offset, $gapsOnly, $scheme));
+        return self::result($this->tools->contractCoverage($limit, $offset, $gapsOnly, $scheme, $applicationContext));
     }
 
     public function diBindings(?string $type = null, int $limit = 50, int $offset = 0): CallToolResult
