@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.12.5] - 2026-10-15
+
+- Bundle `suzumaze/bear-phpactor-extension` 0.3.5 with schema consensus recovery,
+  shared directory evidence, Twig diagnostic fixes, canonical URIs and bounded SQL suggestions.
+
 - Resource descriptions, schema lookup, contract comparison, coverage and diagnostics accept
   an optional `applicationContext` for source-derived schema directory selection.
 
@@ -14,14 +19,17 @@ All notable changes to this project will be documented in this file.
 - Resource schema discovery now shares method attribute selection across description, lookup,
   and contract comparison. Lookup accepts `method`; description covers request and response
   schemas and distinguishes explicit attributes, adjacent-file BC fallback, and convention-only
-  discovery. These source facts do not prove runtime validation or resolve configured directories.
+  discovery. Directory selection follows source-composed configuration; these facts do not prove runtime validation.
 
 - AOP applications now default to compact output: module traversal paths, matcher definitions,
   and unresolved details are omitted explicitly. Use `detail: "full"` and
   `includeUnknowns: true` for the previous detail level. Counts, chain order, and provisional
   status are retained. `nextOffset` and `truncatedBy` explain pagination.
 
-## [Unreleased]
+### Known limitations
+
+- Project diagnostics may exceed the configured timeout under concurrent CPU load;
+  retry when load subsides or increase `--timeout`.
 
 ## [0.12.4] - 2026-10-13
 
