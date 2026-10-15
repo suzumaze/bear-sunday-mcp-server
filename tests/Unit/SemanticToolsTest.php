@@ -14,6 +14,51 @@ use Suzumaze\BearSundayMcp\Tests\Support\InMemoryLspClient;
 #[CoversClass(SemanticTools::class)]
 final class SemanticToolsTest extends TestCase
 {
+    public function testSchemaMethodIsForwarded(): void
+    {
+        $client = new InMemoryLspClient(static function (string $method, array $params): array {
+            return $method === 'bear/project/info' ? self::projectInfoResult() : self::ok($params);
+        });
+        $result = (new SemanticTools($client))->schemaLookup('app://self/example', 'request', method: 'onGet');
+        self::assertSame('onGet', $result['data']['method']);
+    }
+
+    public function testSchemaContextIsForwardedAcrossRelatedTools(): void
+    {
+        $client = new InMemoryLspClient(static function (string $method, array $params): array {
+            return $method === 'bear/project/info' ? self::projectInfoResult() : self::ok($params);
+        });
+        $tools = new SemanticTools($client);
+        foreach (
+            [
+            $tools->resourceDescribe('app://self/example', applicationContext: 'prod-app'),
+            $tools->contractCompare('app://self/example', applicationContext: 'prod-app'),
+            $tools->schemaLookup('app://self/example', applicationContext: 'prod-app'),
+            $tools->projectDiagnostics(applicationContext: 'prod-app'),
+            $tools->contractCoverage(applicationContext: 'prod-app'),
+            ] as $result
+        ) {
+            self::assertSame('prod-app', $result['data']['applicationContext']);
+        }
+    }
+
+    public function testAopOutputOptionsAreForwarded(): void
+    {
+        $client = new InMemoryLspClient(static function (string $method, array $params): array {
+            if ($method === 'bear/project/info') {
+                $info = self::projectInfoResult();
+                $info['data']['requests'][] = 'bear/aop/applications';
+
+                return $info;
+            }
+
+            return self::ok($params);
+        });
+        $result = (new SemanticTools($client))->aopApplications('app', detail: 'full', includeUnknowns: true);
+        self::assertSame('full', $result['data']['detail']);
+        self::assertTrue($result['data']['includeUnknowns']);
+    }
+
     public function testRetriesDiscoveryAfterATransientFailure(): void
     {
         $infoCalls = 0;

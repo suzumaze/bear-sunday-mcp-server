@@ -49,11 +49,15 @@ final class SemanticTools
     }
 
     /** @return array<string, mixed> */
-    public function projectDiagnostics(int $limit = 100, int $offset = 0): array
-    {
+    public function projectDiagnostics(
+        int $limit = 100,
+        int $offset = 0,
+        ?string $applicationContext = null,
+    ): array {
         return $this->query('bear/project/diagnostics', [
             'limit' => $limit,
             'offset' => $offset,
+            ...($applicationContext === null ? [] : ['applicationContext' => $applicationContext]),
         ]);
     }
 
@@ -63,11 +67,13 @@ final class SemanticTools
         int $offset = 0,
         bool $gapsOnly = false,
         ?string $scheme = null,
+        ?string $applicationContext = null,
     ): array {
         $params = [
             'limit' => $limit,
             'offset' => $offset,
             'gapsOnly' => $gapsOnly,
+            ...($applicationContext === null ? [] : ['applicationContext' => $applicationContext]),
         ];
         if ($scheme !== null) {
             $params['scheme'] = $scheme;
@@ -229,6 +235,8 @@ final class SemanticTools
         ?string $contextPath = null,
         int $limit = 50,
         int $offset = 0,
+        string $detail = 'compact',
+        bool $includeUnknowns = false,
     ): array {
         return $this->query('bear/aop/applications', [
             'applicationContext' => $applicationContext,
@@ -239,6 +247,8 @@ final class SemanticTools
             'contextPath' => $contextPath,
             'limit' => $limit,
             'offset' => $offset,
+            'detail' => $detail,
+            'includeUnknowns' => $includeUnknowns,
         ]);
     }
 
@@ -279,10 +289,12 @@ final class SemanticTools
         string $uri,
         ?string $contextPath = null,
         int $incomingLimit = 50,
+        ?string $applicationContext = null,
     ): array {
         return $this->query('bear/resource/describe', [
             'uri' => $uri,
             'contextPath' => $contextPath,
+            ...($applicationContext === null ? [] : ['applicationContext' => $applicationContext]),
             'incomingLimit' => $incomingLimit,
         ]);
     }
@@ -318,6 +330,7 @@ final class SemanticTools
         string $schemaKind = 'response',
         ?string $descriptorId = null,
         ?string $contextPath = null,
+        ?string $applicationContext = null,
     ): array {
         return $this->query('bear/contract/compare', [
             'uri' => $resourceUri,
@@ -325,6 +338,7 @@ final class SemanticTools
             'schemaKind' => $schemaKind,
             'descriptorId' => $descriptorId,
             'contextPath' => $contextPath,
+            ...($applicationContext === null ? [] : ['applicationContext' => $applicationContext]),
         ]);
     }
 
@@ -333,11 +347,15 @@ final class SemanticTools
         string $resourceUri,
         string $kind = 'response',
         ?string $contextPath = null,
+        ?string $method = null,
+        ?string $applicationContext = null,
     ): array {
         return $this->query('bear/schema/describeForResource', [
             'uri' => $resourceUri,
             'kind' => $kind,
             'contextPath' => $contextPath,
+            ...($applicationContext === null ? [] : ['applicationContext' => $applicationContext]),
+            ...($method === null ? [] : ['method' => $method]),
         ]);
     }
 

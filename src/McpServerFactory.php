@@ -72,6 +72,7 @@ final class McpServerFactory
                 . 'offset, truncated, resourceScanTruncated, and skippedChecks before interpreting the items.',
             annotations: $annotations,
             inputSchema: self::objectSchema([
+                'applicationContext' => self::applicationContextSchema(),
                 'limit' => self::limitSchema(
                     'Maximum number of diagnostic items per page (up to 200; byte budget may return fewer).',
                     200,
@@ -92,6 +93,7 @@ final class McpServerFactory
                 . 'to retrieve adoption candidates, and offset to continue a bounded page.',
             annotations: $annotations,
             inputSchema: self::objectSchema([
+                'applicationContext' => self::applicationContextSchema(),
                 'limit' => self::limitSchema(
                     'Maximum number of Resource method coverage items per page (byte budget may return fewer).',
                     self::PROJECT_REPORT_MAX_ITEMS,
@@ -177,6 +179,11 @@ final class McpServerFactory
                 'contextPath' => self::pathSchema('Optional workspace-relative project context path.'),
                 'limit' => self::limitSchema('Maximum methods per page.', self::PROJECT_REPORT_MAX_ITEMS),
                 'offset' => self::offsetSchema(),
+                'detail' => ['type' => 'string', 'enum' => ['compact', 'full', 'shared'], 'default' => 'compact',
+                    'description' => 'Compact omits matchers and module traversal paths; '
+                        . 'shared also deduplicates chains via chainId.'],
+                'includeUnknowns' => ['type' => 'boolean', 'default' => false,
+                    'description' => 'Include unresolved details; counts and summaries are always returned.'],
             ], ['applicationContext']),
             outputSchema: self::envelopeSchema(),
         );
@@ -325,6 +332,7 @@ final class McpServerFactory
             description: 'Resolve a Resource URI and return methods, Link/Embed relations, templates, and schemas.',
             annotations: $annotations,
             inputSchema: self::objectSchema([
+                'applicationContext' => self::applicationContextSchema(),
                 'uri' => self::uriSchema(),
                 'contextPath' => self::pathSchema('Optional workspace-relative context path.'),
                 'incomingLimit' => [
@@ -381,6 +389,7 @@ final class McpServerFactory
                 . 'This does not claim type, meaning, or behavioral compatibility.',
             annotations: $annotations,
             inputSchema: self::objectSchema([
+                'applicationContext' => self::applicationContextSchema(),
                 'resourceUri' => self::uriSchema(),
                 'method' => self::identifierSchema('Exact Resource method name such as onGet or onPost.'),
                 'schemaKind' => [
@@ -401,13 +410,16 @@ final class McpServerFactory
                 . 'raw JSON is never returned.',
             annotations: $annotations,
             inputSchema: self::objectSchema([
+                'applicationContext' => self::applicationContextSchema(),
                 'resourceUri' => self::uriSchema(),
                 'kind' => [
                     'type' => 'string',
                     'enum' => ['request', 'response'],
-                    'description' => 'Schema kind. Resource convention lookup currently supports response schemas.',
+                    'description' => 'Schema kind. Method attributes take precedence over convention discovery.',
                 ],
                 'contextPath' => self::pathSchema('Optional workspace-relative context path.'),
+                'method' => ['type' => 'string', 'maxLength' => 255,
+                    'description' => 'Optional exact method, e.g. onGet; omitted selection may be ambiguous.'],
             ], ['resourceUri']),
             outputSchema: self::envelopeSchema(),
         );

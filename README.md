@@ -79,7 +79,7 @@ for task-oriented workflows.
 - An MCP host that supports stdio servers
 
 The standard installation bundles Phpactor 2026.07.22.0 and
-`suzumaze/bear-phpactor-extension` in the `^0.3.4` range. If you override `--phpactor`
+`suzumaze/bear-phpactor-extension` in the `^0.3.5` range. If you override `--phpactor`
 with an older compatible installation, each MCP tool checks that its backing semantic
 request is advertised; an unavailable request returns `unsupported` without being sent.
 
@@ -451,9 +451,22 @@ ordering model; it does not prove runtime execution or successful weaving. Provi
 matchers, incomplete hierarchies and trait methods can remain unresolved. Filtered empty results
 are not proof of absence when unknowns remain.
 
+For repeated AOP chains, use `detail: "shared"`: each method's `chainId` refers to
+an entry in the same page's `chains` dictionary. `compact` remains the default and
+`full` retains matcher/provenance details. `includeUnknowns` independently controls
+unresolved details. Follow `nextOffset` while the report is truncated.
+
+Schema lookup, Resource description, contract comparison, contract coverage and
+project diagnostics accept an optional `applicationContext`. Explicit schema filenames
+use source-composed directory bindings. Without a context, competing configurations
+stay candidates; unresolved settings do not silently select conventional files.
+Read `directorySelection` and diagnostic `skippedChecks` before interpreting absence.
+SQL misses similarly report `coverage.suggestionScan` so a bounded search is not
+mistaken for exhaustive absence.
+
 These tools require an engine advertising their corresponding requests:
 `bear/app/contexts`, `bear/di/bindingLookup`, `bear/di/moduleGraph`,
-`bear/attribute/catalog`, and `bear/aop/applications`. The bundled extension v0.3.4 provides
+`bear/attribute/catalog`, and `bear/aop/applications`. The bundled extension v0.3.5 provides
 these requests. An older or otherwise incompatible engine returns `unsupported` instead of
 fabricating a result. The matching extension checkout is tested with:
 

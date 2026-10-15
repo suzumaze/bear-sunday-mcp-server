@@ -347,6 +347,10 @@ final class McpStdioServerTest extends TestCase
         self::assertSame(0, $pagedDeclarations['result']['structuredContent']['data']['params']['pointcutsOffset']);
 
         self::assertSame(['applicationContext'], $toolsByName['bear_aop_applications']['inputSchema']['required']);
+        self::assertContains(
+            'shared',
+            $toolsByName['bear_aop_applications']['inputSchema']['properties']['detail']['enum'],
+        );
         $aop = $this->request('tools/call', [
             'name' => 'bear_aop_applications',
             'arguments' => ['applicationContext' => 'dev-html-app', 'attribute' => 'App\\Auth'],
