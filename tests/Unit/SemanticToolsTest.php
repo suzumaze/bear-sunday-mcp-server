@@ -36,6 +36,29 @@ final class SemanticToolsTest extends TestCase
         }
     }
 
+    public function testRoutePathOptionsRequireEngineSupport(): void
+    {
+        foreach ([true, false] as $supports) {
+            $client = new InMemoryLspClient(static function (string $method, array $params) use ($supports): array {
+                if ($method === 'bear/project/info') {
+                    return self::projectInfoResult();
+                }
+                $result = self::ok($params);
+                if ($supports) {
+                    $result['coverage']['routing']['input'] = 'path';
+                }
+
+                return $result;
+            });
+            $result = (new SemanticTools($client))->routeLookup('/latest', input: 'path', httpMethod: 'GET');
+            self::assertSame($supports ? 'ok' : 'unsupported', $result['status']);
+            if ($supports) {
+                self::assertSame('path', $result['data']['input']);
+                self::assertSame('GET', $result['data']['httpMethod']);
+            }
+        }
+    }
+
     public function testSchemaMethodIsForwarded(): void
     {
         $client = new InMemoryLspClient(static function (string $method, array $params): array {

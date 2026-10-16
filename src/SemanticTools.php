@@ -374,12 +374,30 @@ final class SemanticTools
     }
 
     /** @return array<string, mixed> */
-    public function routeLookup(string $route, ?string $contextPath = null): array
-    {
-        return $this->query('bear/route/resolve', [
+    public function routeLookup(
+        string $route,
+        ?string $contextPath = null,
+        string $input = 'name',
+        ?string $httpMethod = null,
+    ): array {
+        $result = $this->query('bear/route/resolve', [
             'route' => $route,
             'contextPath' => $contextPath,
+            ...($input === 'name' ? [] : ['input' => $input]),
+            ...($httpMethod === null ? [] : ['httpMethod' => $httpMethod]),
         ]);
+        if (
+            $input === 'path' && in_array($result['status'] ?? null, ['ok', 'not_found', 'ambiguous'], true)
+            && ($result['coverage']['routing']['input'] ?? null) !== 'path'
+        ) {
+            return self::failure(
+                'unsupported',
+                'semantic_parameter_unsupported',
+                'The BEAR extension does not support URL path lookup; upgrade the extension.',
+            );
+        }
+
+        return $result;
     }
 
     /** @return array<string, mixed> */

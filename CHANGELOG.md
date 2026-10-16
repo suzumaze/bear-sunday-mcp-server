@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+- Route lookup accepts `input: "path"` with optional `httpMethod` for static exact path declarations.
+  Route-name lookup is unchanged. Runtime rewriting and unsupported route syntax remain explicit uncertainties.
+
 - Attribute index accepts opt-in `provenanceDetail: "summary"`, preserving evidence counts and freshness.
 
 ## [0.12.5] - 2026-10-15

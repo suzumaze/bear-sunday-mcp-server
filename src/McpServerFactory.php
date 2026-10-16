@@ -429,10 +429,15 @@ final class McpServerFactory
             [$tools, 'routeLookup'],
             name: 'bear_route_lookup',
             title: 'Resolve a BEAR route',
-            description: 'Resolve an explicit Aura Router route name to its Page Resource; HTTP paths are not guessed.',
+            description: 'Resolve a route name, or use input:path for static exact URL-path declarations. '
+                . 'canonicalUri is derived from the class; runtime URI rewriting is not evaluated.',
             annotations: $annotations,
             inputSchema: self::objectSchema([
-                'route' => self::identifierSchema('Explicit Aura Router route name.'),
+                'route' => self::identifierSchema('Route name, or URL path without query/host with input:path.'),
+                'input' => ['type' => 'string', 'enum' => ['name', 'path']],
+                'httpMethod' => [
+                    'type' => 'string', 'enum' => ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'],
+                    'description' => 'Optional path-mode filter; omitted preserves all declared method candidates.'],
                 'contextPath' => self::pathSchema('Optional workspace-relative context path.'),
             ], ['route']),
             outputSchema: self::envelopeSchema(),
