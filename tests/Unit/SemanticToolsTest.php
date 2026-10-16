@@ -14,6 +14,77 @@ use Suzumaze\BearSundayMcp\Tests\Support\InMemoryLspClient;
 #[CoversClass(SemanticTools::class)]
 final class SemanticToolsTest extends TestCase
 {
+    public function testAttributeSummaryIsForwardedAndOldEnginesAreRejected(): void
+    {
+        foreach ([true, false] as $supports) {
+            $client = new InMemoryLspClient(static function (string $method, array $params) use ($supports): array {
+                if ($method === 'bear/project/info') {
+                    return self::projectInfoResult();
+                }
+                $result = self::ok($params);
+                if ($supports) {
+                    $result['coverage']['provenance']['detail'] = 'summary';
+                }
+
+                return $result;
+            });
+            $result = (new SemanticTools($client))->resourceAttributeIndex(provenanceDetail: 'summary');
+            self::assertSame($supports ? 'ok' : 'unsupported', $result['status']);
+            if ($supports) {
+                self::assertSame('summary', $result['data']['provenanceDetail']);
+            }
+        }
+    }
+
+    public function testRoutePathOptionsRequireEngineSupport(): void
+    {
+        foreach ([true, false] as $supports) {
+            $client = new InMemoryLspClient(static function (string $method, array $params) use ($supports): array {
+                if ($method === 'bear/project/info') {
+                    return self::projectInfoResult();
+                }
+                $result = self::ok($params);
+                if ($supports) {
+                    $result['coverage']['routing']['input'] = 'path';
+                }
+
+                return $result;
+            });
+            $result = (new SemanticTools($client))->routeLookup('/latest', input: 'path', httpMethod: 'GET');
+            self::assertSame($supports ? 'ok' : 'unsupported', $result['status']);
+            if ($supports) {
+                self::assertSame('path', $result['data']['input']);
+                self::assertSame('GET', $result['data']['httpMethod']);
+            }
+        }
+    }
+
+    public function testTemplateDependenciesRequireEngineSupport(): void
+    {
+        foreach ([true, false] as $supports) {
+            $client = new InMemoryLspClient(static function (string $method, array $params) use ($supports): array {
+                if ($method === 'bear/project/info') {
+                    return self::projectInfoResult();
+                }
+                $result = self::ok($params);
+                if ($supports) {
+                    $result['data']['dependencies'] = ['available' => true];
+                }
+
+                return $result;
+            });
+            $result = (new SemanticTools($client))->templateForResource(
+                'page://self/example',
+                'twig',
+                includeDependencies: true,
+            );
+            self::assertSame($supports ? 'ok' : 'unsupported', $result['status']);
+            if ($supports) {
+                self::assertTrue($result['data']['includeDependencies']);
+            }
+        }
+    }
+
     public function testSchemaMethodIsForwarded(): void
     {
         $client = new InMemoryLspClient(static function (string $method, array $params): array {

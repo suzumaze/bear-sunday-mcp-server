@@ -378,6 +378,8 @@ final class McpServerFactory
                 ],
                 'limit' => self::limitSchema('Maximum number of Resources to inspect.'),
                 'offset' => self::offsetSchema(),
+                'provenanceDetail' => ['type' => 'string', 'enum' => ['full', 'summary'],
+                    'description' => 'Full evidence by default; summary omits entries and retains counts/freshness.'],
             ]),
             outputSchema: self::envelopeSchema(),
         );
@@ -427,10 +429,15 @@ final class McpServerFactory
             [$tools, 'routeLookup'],
             name: 'bear_route_lookup',
             title: 'Resolve a BEAR route',
-            description: 'Resolve an explicit Aura Router route name to its Page Resource; HTTP paths are not guessed.',
+            description: 'Resolve a route name, or use input:path for static exact URL-path declarations. '
+                . 'canonicalUri is derived from the class; runtime URI rewriting is not evaluated.',
             annotations: $annotations,
             inputSchema: self::objectSchema([
-                'route' => self::identifierSchema('Explicit Aura Router route name.'),
+                'route' => self::identifierSchema('Route name, or URL path without query/host with input:path.'),
+                'input' => ['type' => 'string', 'enum' => ['name', 'path']],
+                'httpMethod' => [
+                    'type' => 'string', 'enum' => ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'],
+                    'description' => 'Optional path-mode filter; omitted preserves all declared method candidates.'],
                 'contextPath' => self::pathSchema('Optional workspace-relative context path.'),
             ], ['route']),
             outputSchema: self::envelopeSchema(),
@@ -472,6 +479,9 @@ final class McpServerFactory
             inputSchema: self::objectSchema([
                 'resourceUri' => self::uriSchema(),
                 'engine' => self::templateEngineSchema(),
+                'includeDependencies' => ['type' => 'boolean',
+                    'description' => 'Opt in to a bounded Twig source dependency graph, including local conditions '
+                        . 'and separate Resource calls. This is not a runtime render trace.'],
                 'contextPath' => self::pathSchema('Optional workspace-relative context path.'),
             ], ['resourceUri', 'engine']),
             outputSchema: self::envelopeSchema(),

@@ -120,3 +120,26 @@ context名が分からなければ、まず`bear_app_context_list`で起動コ�
 `source_selected`は実行時の確定ではなく、未知条件が残る場合は`provisional`です。AOPの一致候補もPHPを実行せずに
 Ray.Aopのattribute source modelから求めるため、実際のpointcut評価やweavingを観測した結果ではありません。
 設定値は返しません。各結果のunknown、unresolved、total、truncatedとsource位置を確認してください。
+
+### URLパスとResourceの識別
+
+`bear_route_lookup` の既定はルート名検索です。URLパスからは
+`{"route":"/latest","input":"path","httpMethod":"GET"}` と指定します。
+`aura.route.php` と `var/conf/aura.route.php` の静的な完全一致パスを対象とし、メソッド省略時は複数候補を保持します。
+パターン・条件分岐・ルート設定変更は `coverage.routing.unresolved` に残ります。
+`canonicalUri` はクラス規約から導く識別子、`routeUri` はルート名由来です。
+`resource.uri` は解決に使った識別子で、`resolvedVia: "heuristic"` は候補探索によるものです。
+bootstrapの実行時URI書き換えやルート優先順位は評価しません。
+
+属性一覧は `provenanceDetail: "summary"` で出典を短縮できます（既定 `full`）。
+`coverage.provenance` に、この応答に集めた出典の件数・鮮度・省略件数を返します。
+
+### テンプレート依存候補
+
+`bear_template_for_resource` に `includeDependencies: true` を指定すると、Twigの静的な
+include・extends・embed・use・import・fromと関数呼び出しから依存候補を返します。
+`dependencies.edges` の条件情報はそのソース内のものです。呼び出し元の条件や
+継承・マクロの実行条件を評価しないため、無条件の表示を保証しません。
+`dependencies.resources` は `resource(...)` 呼び出しで、Resourceの実行や展開はしません。
+動的な参照、未発見、循環、探索上限は結果に明示します。`complete` は対応構文の探索範囲内の
+完全性であり、実行時に描画される全テンプレートを保証しません。Qiqの依存グラフは未対応です。

@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.12.6] - 2026-10-16
+
+- Bundle `suzumaze/bear-phpactor-extension` 0.3.6 with Twig dependency graphs, exact URL-path
+  declaration lookup, and compact attribute provenance.
+
+- Resource template lookup accepts `includeDependencies: true` for a bounded Twig dependency graph,
+  local conditional contexts, separate Resource calls, cycles and unresolved references.
+
+- Route lookup accepts `input: "path"` with optional `httpMethod` for static exact path declarations.
+  Route-name lookup is unchanged. Runtime rewriting and unsupported route syntax remain explicit uncertainties.
+
+- Attribute index accepts opt-in `provenanceDetail: "summary"`, preserving evidence counts and freshness.
+
 ## [0.12.5] - 2026-10-15
 
 - Bundle `suzumaze/bear-phpactor-extension` 0.3.5 with schema consensus recovery,

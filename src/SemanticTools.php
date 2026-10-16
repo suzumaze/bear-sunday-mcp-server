@@ -314,13 +314,27 @@ final class SemanticTools
         string $prefix = '',
         int $limit = 50,
         int $offset = 0,
+        string $provenanceDetail = 'full',
     ): array {
-        return $this->query('bear/resource/attributeIndex', [
+        $result = $this->query('bear/resource/attributeIndex', [
             'scheme' => $scheme,
             'prefix' => $prefix,
             'limit' => $limit,
             'offset' => $offset,
+            ...($provenanceDetail === 'full' ? [] : ['provenanceDetail' => $provenanceDetail]),
         ]);
+        if (
+            $provenanceDetail === 'summary' && ($result['status'] ?? null) === 'ok'
+            && ($result['coverage']['provenance']['detail'] ?? null) !== 'summary'
+        ) {
+            return self::failure(
+                'unsupported',
+                'semantic_parameter_unsupported',
+                'The BEAR extension does not support provenance summaries; upgrade the extension.',
+            );
+        }
+
+        return $result;
     }
 
     /** @return array<string, mixed> */
@@ -360,12 +374,30 @@ final class SemanticTools
     }
 
     /** @return array<string, mixed> */
-    public function routeLookup(string $route, ?string $contextPath = null): array
-    {
-        return $this->query('bear/route/resolve', [
+    public function routeLookup(
+        string $route,
+        ?string $contextPath = null,
+        string $input = 'name',
+        ?string $httpMethod = null,
+    ): array {
+        $result = $this->query('bear/route/resolve', [
             'route' => $route,
             'contextPath' => $contextPath,
+            ...($input === 'name' ? [] : ['input' => $input]),
+            ...($httpMethod === null ? [] : ['httpMethod' => $httpMethod]),
         ]);
+        if (
+            $input === 'path' && in_array($result['status'] ?? null, ['ok', 'not_found', 'ambiguous'], true)
+            && ($result['coverage']['routing']['input'] ?? null) !== 'path'
+        ) {
+            return self::failure(
+                'unsupported',
+                'semantic_parameter_unsupported',
+                'The BEAR extension does not support URL path lookup; upgrade the extension.',
+            );
+        }
+
+        return $result;
     }
 
     /** @return array<string, mixed> */
@@ -392,12 +424,23 @@ final class SemanticTools
         string $resourceUri,
         string $engine,
         ?string $contextPath = null,
+        bool $includeDependencies = false,
     ): array {
-        return $this->query('bear/template/forResource', [
+        $result = $this->query('bear/template/forResource', [
             'uri' => $resourceUri,
             'engine' => $engine,
             'contextPath' => $contextPath,
+            ...($includeDependencies ? ['includeDependencies' => true] : []),
         ]);
+        if ($includeDependencies && ($result['status'] ?? null) === 'ok' && !isset($result['data']['dependencies'])) {
+            return self::failure(
+                'unsupported',
+                'semantic_parameter_unsupported',
+                'The BEAR extension does not support template dependencies; upgrade the extension.',
+            );
+        }
+
+        return $result;
     }
 
     /** @return array<string, mixed> */
