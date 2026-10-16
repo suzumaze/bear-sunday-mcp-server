@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+- Resource template lookup accepts `includeDependencies: true` for a bounded Twig dependency graph,
+  local conditional contexts, separate Resource calls, cycles and unresolved references.
+
 - Route lookup accepts `input: "path"` with optional `httpMethod` for static exact path declarations.
   Route-name lookup is unchanged. Runtime rewriting and unsupported route syntax remain explicit uncertainties.
 

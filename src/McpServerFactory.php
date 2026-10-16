@@ -479,6 +479,9 @@ final class McpServerFactory
             inputSchema: self::objectSchema([
                 'resourceUri' => self::uriSchema(),
                 'engine' => self::templateEngineSchema(),
+                'includeDependencies' => ['type' => 'boolean',
+                    'description' => 'Opt in to a bounded Twig source dependency graph, including local conditions '
+                        . 'and separate Resource calls. This is not a runtime render trace.'],
                 'contextPath' => self::pathSchema('Optional workspace-relative context path.'),
             ], ['resourceUri', 'engine']),
             outputSchema: self::envelopeSchema(),

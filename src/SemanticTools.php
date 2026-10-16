@@ -424,12 +424,23 @@ final class SemanticTools
         string $resourceUri,
         string $engine,
         ?string $contextPath = null,
+        bool $includeDependencies = false,
     ): array {
-        return $this->query('bear/template/forResource', [
+        $result = $this->query('bear/template/forResource', [
             'uri' => $resourceUri,
             'engine' => $engine,
             'contextPath' => $contextPath,
+            ...($includeDependencies ? ['includeDependencies' => true] : []),
         ]);
+        if ($includeDependencies && ($result['status'] ?? null) === 'ok' && !isset($result['data']['dependencies'])) {
+            return self::failure(
+                'unsupported',
+                'semantic_parameter_unsupported',
+                'The BEAR extension does not support template dependencies; upgrade the extension.',
+            );
+        }
+
+        return $result;
     }
 
     /** @return array<string, mixed> */

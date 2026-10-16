@@ -59,6 +59,32 @@ final class SemanticToolsTest extends TestCase
         }
     }
 
+    public function testTemplateDependenciesRequireEngineSupport(): void
+    {
+        foreach ([true, false] as $supports) {
+            $client = new InMemoryLspClient(static function (string $method, array $params) use ($supports): array {
+                if ($method === 'bear/project/info') {
+                    return self::projectInfoResult();
+                }
+                $result = self::ok($params);
+                if ($supports) {
+                    $result['data']['dependencies'] = ['available' => true];
+                }
+
+                return $result;
+            });
+            $result = (new SemanticTools($client))->templateForResource(
+                'page://self/example',
+                'twig',
+                includeDependencies: true,
+            );
+            self::assertSame($supports ? 'ok' : 'unsupported', $result['status']);
+            if ($supports) {
+                self::assertTrue($result['data']['includeDependencies']);
+            }
+        }
+    }
+
     public function testSchemaMethodIsForwarded(): void
     {
         $client = new InMemoryLspClient(static function (string $method, array $params): array {
