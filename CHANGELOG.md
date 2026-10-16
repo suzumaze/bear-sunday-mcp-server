@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+- Attribute index accepts opt-in `provenanceDetail: "summary"`, preserving evidence counts and freshness.
+
 ## [0.12.5] - 2026-10-15
 
 - Bundle `suzumaze/bear-phpactor-extension` 0.3.5 with schema consensus recovery,

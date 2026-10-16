@@ -14,6 +14,28 @@ use Suzumaze\BearSundayMcp\Tests\Support\InMemoryLspClient;
 #[CoversClass(SemanticTools::class)]
 final class SemanticToolsTest extends TestCase
 {
+    public function testAttributeSummaryIsForwardedAndOldEnginesAreRejected(): void
+    {
+        foreach ([true, false] as $supports) {
+            $client = new InMemoryLspClient(static function (string $method, array $params) use ($supports): array {
+                if ($method === 'bear/project/info') {
+                    return self::projectInfoResult();
+                }
+                $result = self::ok($params);
+                if ($supports) {
+                    $result['coverage']['provenance']['detail'] = 'summary';
+                }
+
+                return $result;
+            });
+            $result = (new SemanticTools($client))->resourceAttributeIndex(provenanceDetail: 'summary');
+            self::assertSame($supports ? 'ok' : 'unsupported', $result['status']);
+            if ($supports) {
+                self::assertSame('summary', $result['data']['provenanceDetail']);
+            }
+        }
+    }
+
     public function testSchemaMethodIsForwarded(): void
     {
         $client = new InMemoryLspClient(static function (string $method, array $params): array {

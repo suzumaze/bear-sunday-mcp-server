@@ -314,13 +314,27 @@ final class SemanticTools
         string $prefix = '',
         int $limit = 50,
         int $offset = 0,
+        string $provenanceDetail = 'full',
     ): array {
-        return $this->query('bear/resource/attributeIndex', [
+        $result = $this->query('bear/resource/attributeIndex', [
             'scheme' => $scheme,
             'prefix' => $prefix,
             'limit' => $limit,
             'offset' => $offset,
+            ...($provenanceDetail === 'full' ? [] : ['provenanceDetail' => $provenanceDetail]),
         ]);
+        if (
+            $provenanceDetail === 'summary' && ($result['status'] ?? null) === 'ok'
+            && ($result['coverage']['provenance']['detail'] ?? null) !== 'summary'
+        ) {
+            return self::failure(
+                'unsupported',
+                'semantic_parameter_unsupported',
+                'The BEAR extension does not support provenance summaries; upgrade the extension.',
+            );
+        }
+
+        return $result;
     }
 
     /** @return array<string, mixed> */

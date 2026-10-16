@@ -378,6 +378,8 @@ final class McpServerFactory
                 ],
                 'limit' => self::limitSchema('Maximum number of Resources to inspect.'),
                 'offset' => self::offsetSchema(),
+                'provenanceDetail' => ['type' => 'string', 'enum' => ['full', 'summary'],
+                    'description' => 'Full evidence by default; summary omits entries and retains counts/freshness.'],
             ]),
             outputSchema: self::envelopeSchema(),
         );
