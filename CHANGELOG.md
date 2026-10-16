@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.12.6] - 2026-10-16
+
+- Bundle `suzumaze/bear-phpactor-extension` 0.3.6 with Twig dependency graphs, exact URL-path
+  declaration lookup, and compact attribute provenance.
+
 - Resource template lookup accepts `includeDependencies: true` for a bounded Twig dependency graph,
   local conditional contexts, separate Resource calls, cycles and unresolved references.
 
