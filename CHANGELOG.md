@@ -20,6 +20,10 @@ All notable changes to this project will be documented in this file.
   `.claude/worktrees/` (agent git worktrees) before the limit applies, and reports them in
   `coverage.excludedPathPrefixes` and `coverage.excludedTotal`. The Phpactor index is unchanged.
 
+- A dropped worktree copy whose path also exists in the workspace, and whose file names the symbol, is
+  reported at the workspace path with `source: "worktree_copy"` and no range, and counted in
+  `coverage.mappedFromWorktreesTotal`. The index can hold only the worktree copies of a class.
+
 ## [0.12.6] - 2026-10-16
 
 - Bundle `suzumaze/bear-phpactor-extension` 0.3.6 with Twig dependency graphs, exact URL-path

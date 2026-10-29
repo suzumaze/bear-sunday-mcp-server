@@ -241,9 +241,12 @@ final class StandardLspTools
             static fn (array $symbol): bool => !self::isExcludedSymbolPath($symbol['path']),
         ));
         $excluded = count($normalized['symbols']) - count($symbols);
+        $mapped = $this->workspaceFilesOfWorktreeCopies($normalized['symbols'], $symbols);
+        $symbols = [...$symbols, ...$mapped];
         if ($symbols === []) {
             return $this->envelope('not_found', $this->workspaceSymbolData([], 0, false, $excluded), $provenance);
         }
+        $this->sortAndDeduplicateSymbols($symbols);
 
         $total = count($symbols);
 
@@ -254,6 +257,7 @@ final class StandardLspTools
                 $total,
                 $normalized['truncated'] || $total > $limit,
                 $excluded,
+                count($mapped),
             ),
             $provenance,
         );
@@ -832,6 +836,55 @@ final class StandardLspTools
         return $symbol;
     }
 
+    /**
+     * A worktree copy often points at a file the workspace also has, while Phpactor's index lacks
+     * the workspace's own copy. Report the workspace file instead, without a range: the copy's
+     * position need not match it.
+     *
+     * @param list<array<string, mixed>> $all
+     * @param list<array<string, mixed>> $kept
+     * @return list<array<string, mixed>>
+     */
+    private function workspaceFilesOfWorktreeCopies(array $all, array $kept): array
+    {
+        $key = static fn (array $symbol): string => $symbol['path'] . "\0" . $symbol['name'] . "\0" . $symbol['kind'];
+        $seen = array_fill_keys(array_map($key, $kept), true);
+        $mapped = [];
+        foreach ($all as $symbol) {
+            if (preg_match('#^\.claude/worktrees/[^/]+/(.+)$#', $symbol['path'], $match) !== 1) {
+                continue;
+            }
+            $path = $match[1];
+            if (
+                self::isExcludedSymbolPath($path)
+                || $this->workspace->relativeExistingFile($this->workspace->root . '/' . $path) !== $path
+            ) {
+                continue;
+            }
+            $candidate = ['name' => $symbol['name'], 'kind' => $symbol['kind'], 'path' => $path];
+            if (isset($seen[$key($candidate)])) {
+                continue;
+            }
+            try {
+                $contents = $this->workspace->readDocument($path)->contents;
+            } catch (WorkspaceFileException) {
+                continue;
+            }
+            $shortName = substr((string) strrchr('\\' . $symbol['name'], '\\'), 1);
+            if (!str_contains($contents, $shortName)) {
+                continue;
+            }
+            if (array_key_exists('containerName', $symbol)) {
+                $candidate['containerName'] = $symbol['containerName'];
+            }
+            $candidate['source'] = 'worktree_copy';
+            $seen[$key($candidate)] = true;
+            $mapped[] = $candidate;
+        }
+
+        return $mapped;
+    }
+
     private static function isExcludedSymbolPath(string $path): bool
     {
         foreach (self::EXCLUDED_SYMBOL_PATH_PREFIXES as $prefix) {
@@ -1023,8 +1076,13 @@ final class StandardLspTools
      * @param list<array<string, mixed>> $symbols
      * @return array<string, mixed>
      */
-    private function workspaceSymbolData(array $symbols, int $total, bool $truncated, int $excluded = 0): array
-    {
+    private function workspaceSymbolData(
+        array $symbols,
+        int $total,
+        bool $truncated,
+        int $excluded = 0,
+        int $mappedFromWorktrees = 0,
+    ): array {
         return [
             'symbols' => $symbols,
             'total' => $total,
@@ -1038,6 +1096,7 @@ final class StandardLspTools
                 'mayOmitNewFiles' => true,
                 'excludedPathPrefixes' => self::EXCLUDED_SYMBOL_PATH_PREFIXES,
                 'excludedTotal' => $excluded,
+                'mappedFromWorktreesTotal' => $mappedFromWorktrees,
                 'newFileHint' => 'Files added since Phpactor last indexed the workspace may be missing, '
                     . 'even from an ok result. '
                     . 'For a known file, lsp_document_symbols with its path reads it directly. '

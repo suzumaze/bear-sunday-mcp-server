@@ -91,6 +91,10 @@ Resource自体が無い場合は`partial`もありません。
 `var/tmp/`（BEARがDI・AOP用に生成するclass）と`.claude/worktrees/`（エージェントが作るgit worktree）の
 結果は、本物のclassを埋もれさせる複製なので、件数の上限を当てる前に除きます。除いた接頭辞は
 `coverage.excludedPathPrefixes`、除いた件数は`coverage.excludedTotal`に出ます。Phpactorの索引と設定は変えません。
+除いたworktreeの複製と同じパスのファイルがworkspaceにもあり、そのファイルにsymbol名が書かれていれば、
+workspace側のパスの結果として返します。印は`source: "worktree_copy"`で、rangeは付けません（複製の位置が
+workspace側と一致するとは限らないため）。Phpactorの索引にclassの複製しか入っていないことがあるので、
+そうしたclassも見つけられるようにするためです。件数は`coverage.mappedFromWorktreesTotal`に出ます。
 
 保存済みdocumentの外を指す位置は`invalid_input`（エラーコード`invalid_position`）で拒否され、メッセージは存在しない行（最終行つき）か、
 行末を超えたcharacter（その行のUTF-16長つき）のどちらが原因かを示します。メッセージの行とcharacterは0-basedで、長さはUTF-16 code unit数です。

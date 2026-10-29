@@ -357,6 +357,11 @@ Results under `var/tmp/` (classes BEAR generates for DI and AOP) and `.claude/wo
 worktrees that agents create) are dropped before the limit applies, because they are copies that
 crowd out the real class. `coverage.excludedPathPrefixes` lists the prefixes and
 `coverage.excludedTotal` counts the dropped results. The Phpactor index and its settings are not changed.
+When a dropped worktree copy points at a file the workspace also has (and that file names the
+symbol), the result is reported at the workspace path instead, marked `source: "worktree_copy"` and
+without a range, because the copy's position need not match the workspace file. Phpactor's index can
+hold only the worktree copies of a class, so this keeps such classes findable.
+`coverage.mappedFromWorktreesTotal` counts these results.
 
 A position that is outside the saved document is rejected with `invalid_input` and the error code
 `invalid_position`, and the message
