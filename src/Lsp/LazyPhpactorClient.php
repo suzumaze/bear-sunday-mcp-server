@@ -20,6 +20,26 @@ final class LazyPhpactorClient implements SemanticLspClient
     ) {
     }
 
+    /**
+     * Start Phpactor before the first tool call. Right after initialize it lists every file in the
+     * workspace before it answers anything; on a large application that took about 25 seconds, which
+     * otherwise lands on the first call. Startup must not fail over this: on any error the first
+     * request starts Phpactor again and reports the error as before.
+     */
+    public function warmUp(float $initializeTimeout): void
+    {
+        try {
+            $this->client ??= PhpactorLanguageServer::start(
+                $this->workspace,
+                $this->commandPrefix,
+                $this->timeout,
+                min($initializeTimeout, $this->timeout),
+            );
+        } catch (LspException) {
+            // Left unstarted; the first request tries again.
+        }
+    }
+
     public function request(string $method, array $params): mixed
     {
         $this->client ??= PhpactorLanguageServer::start(

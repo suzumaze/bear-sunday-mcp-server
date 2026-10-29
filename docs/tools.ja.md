@@ -99,7 +99,9 @@ Phpactorの既定の除外に加えて、`var/tmp/`、`.claude/worktrees/`、git
 この除外リストは、利用者自身のPhpactor設定にある`indexer.exclude_patterns`を置き換えます。同梱のPhpactorだけでなく、
 明示的に指定した外部のPhpactorにも適用します。
 
-`timeout`のメッセージは、server起動後の最初の呼び出しがPhpactorの起動も含むため、大きなworkspaceでは
+serverは自身の起動と同時にPhpactorを起動します（待つのは最長10秒）。そこで起動できなかった場合は、最初のLSP呼び出しが
+Phpactorを起動し、エラーを返します。Phpactorは起動直後、workspaceの全ファイルを数え終えるまで何にも答えません。
+約34万ファイルのアプリでは約25秒かかりました。`timeout`のメッセージは、起動直後の呼び出しは大きなworkspaceでは
 上限を超えることがあり、もう一度呼べばたいてい通ることを伝えます。
 
 保存済みdocumentの外を指す位置は`invalid_input`（エラーコード`invalid_position`）で拒否され、メッセージは存在しない行（最終行つき）か、

@@ -42,6 +42,7 @@ final class PhpactorLanguageServer implements SemanticLspClient
         Workspace $workspace,
         array $commandPrefix,
         float $timeout = 20.0,
+        ?float $initializeTimeout = null,
     ): self {
         if ($timeout <= 0 || $timeout > 60) {
             throw new \InvalidArgumentException('LSP timeout must be between 0 and 60 seconds');
@@ -83,7 +84,7 @@ final class PhpactorLanguageServer implements SemanticLspClient
                     'name' => 'bear-sunday-mcp-server',
                     'version' => Version::CURRENT,
                 ],
-            ]);
+            ], $initializeTimeout);
             if (!is_array($initialize)) {
                 throw new LspException('Phpactor returned an invalid initialize result');
             }

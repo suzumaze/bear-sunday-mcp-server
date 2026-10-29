@@ -16,9 +16,10 @@ final class StandardLspTools
     private const MAX_HOVER_BYTES = 65_536;
     private const MAX_COMPLETION_FIELD_BYTES = 8_192;
     private const MAX_SYMBOL_DEPTH = 20;
-    public const TIMEOUT_MESSAGE = 'Phpactor did not respond before the timeout. The first call after this server '
-        . 'starts also starts Phpactor and can exceed the timeout on a large workspace; calling the tool again '
-        . 'usually succeeds. If it keeps happening, raise --timeout (at most 60 seconds).';
+    public const TIMEOUT_MESSAGE = 'Phpactor did not respond before the timeout. Phpactor starts with this server and '
+        . 'lists every workspace file before it answers; on a large workspace a call made soon after startup '
+        . 'can exceed the timeout, and calling the tool again usually succeeds. '
+        . 'If it keeps happening, raise --timeout (at most 60 seconds).';
 
     /**
      * Copies that crowd out the real class: BEAR's generated DI/AOP classes and agent git worktrees.
