@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+- Lock symfony/yaml (used by the bundled Phpactor) to 5.4.54, which fixes
+  [CVE-2026-109413](https://symfony.com/cve-2026-109413): deeply nested YAML could crash the process.
+  The vulnerable 5.4.53 was in earlier releases too.
+
 ## [0.12.7] - 2026-10-29
 
 - **The first start after upgrading builds a new Phpactor index from scratch.** On a large application this
