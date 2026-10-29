@@ -17,6 +17,12 @@ final class StandardLspTools
     private const MAX_COMPLETION_FIELD_BYTES = 8_192;
     private const MAX_SYMBOL_DEPTH = 20;
 
+    /**
+     * Copies that crowd out the real class: BEAR's generated DI/AOP classes and agent git worktrees.
+     * Filtered from results rather than the index, so existing indexes and user Phpactor settings stay intact.
+     */
+    private const EXCLUDED_SYMBOL_PATH_PREFIXES = ['var/tmp/', '.claude/worktrees/'];
+
     public function __construct(
         private readonly SemanticLspClient $client,
         private readonly Workspace $workspace,
@@ -230,9 +236,13 @@ final class StandardLspTools
 
             return $failure;
         }
-        $symbols = $normalized['symbols'];
+        $symbols = array_values(array_filter(
+            $normalized['symbols'],
+            static fn (array $symbol): bool => !self::isExcludedSymbolPath($symbol['path']),
+        ));
+        $excluded = count($normalized['symbols']) - count($symbols);
         if ($symbols === []) {
-            return $this->envelope('not_found', $this->workspaceSymbolData([], 0, false), $provenance);
+            return $this->envelope('not_found', $this->workspaceSymbolData([], 0, false, $excluded), $provenance);
         }
 
         $total = count($symbols);
@@ -243,6 +253,7 @@ final class StandardLspTools
                 array_slice($symbols, 0, $limit),
                 $total,
                 $normalized['truncated'] || $total > $limit,
+                $excluded,
             ),
             $provenance,
         );
@@ -821,6 +832,17 @@ final class StandardLspTools
         return $symbol;
     }
 
+    private static function isExcludedSymbolPath(string $path): bool
+    {
+        foreach (self::EXCLUDED_SYMBOL_PATH_PREFIXES as $prefix) {
+            if (str_starts_with($path, $prefix)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     /** @param list<array<string, mixed>> $symbols */
     private function sortAndDeduplicateSymbols(array &$symbols): void
     {
@@ -1001,7 +1023,7 @@ final class StandardLspTools
      * @param list<array<string, mixed>> $symbols
      * @return array<string, mixed>
      */
-    private function workspaceSymbolData(array $symbols, int $total, bool $truncated): array
+    private function workspaceSymbolData(array $symbols, int $total, bool $truncated, int $excluded = 0): array
     {
         return [
             'symbols' => $symbols,
@@ -1014,6 +1036,8 @@ final class StandardLspTools
                 'indexFreshness' => 'unknown',
                 'emptyResultIsDefinitive' => false,
                 'mayOmitNewFiles' => true,
+                'excludedPathPrefixes' => self::EXCLUDED_SYMBOL_PATH_PREFIXES,
+                'excludedTotal' => $excluded,
                 'newFileHint' => 'Files added since Phpactor last indexed the workspace may be missing, '
                     . 'even from an ok result. '
                     . 'For a known file, lsp_document_symbols with its path reads it directly. '

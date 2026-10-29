@@ -16,6 +16,10 @@ All notable changes to this project will be documented in this file.
 - The `lsp_workspace_symbols` new-file hint says how to find a class's path from its namespace and the
   `psr4Roots` of `bear_project_info`.
 
+- `lsp_workspace_symbols` drops results under `var/tmp/` (BEAR's generated DI/AOP classes) and
+  `.claude/worktrees/` (agent git worktrees) before the limit applies, and reports them in
+  `coverage.excludedPathPrefixes` and `coverage.excludedTotal`. The Phpactor index is unchanged.
+
 ## [0.12.6] - 2026-10-16
 
 - Bundle `suzumaze/bear-phpactor-extension` 0.3.6 with Twig dependency graphs, exact URL-path

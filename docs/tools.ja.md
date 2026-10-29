@@ -88,6 +88,9 @@ Resource自体が無い場合は`partial`もありません。
 ことがあるため、`coverage.mayOmitNewFiles`は常に`true`で、`coverage.newFileHint`が回避策を示します
 （`ok`、`not_found`、失敗のいずれでも同じです）。案内には、classのパスの探し方（名前空間を
 `bear_project_info`の`psr4Roots`に当てはめる）も含まれます。
+`var/tmp/`（BEARがDI・AOP用に生成するclass）と`.claude/worktrees/`（エージェントが作るgit worktree）の
+結果は、本物のclassを埋もれさせる複製なので、件数の上限を当てる前に除きます。除いた接頭辞は
+`coverage.excludedPathPrefixes`、除いた件数は`coverage.excludedTotal`に出ます。Phpactorの索引と設定は変えません。
 
 保存済みdocumentの外を指す位置は`invalid_input`（エラーコード`invalid_position`）で拒否され、メッセージは存在しない行（最終行つき）か、
 行末を超えたcharacter（その行のUTF-16長つき）のどちらが原因かを示します。メッセージの行とcharacterは0-basedで、長さはUTF-16 code unit数です。

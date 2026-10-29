@@ -416,6 +416,40 @@ final class StandardLspToolsTest extends TestCase
         self::assertStringContainsString('worktree', $result['error']['message']);
     }
 
+    public function testWorkspaceSymbolsDropGeneratedClassesAndWorktreeCopies(): void
+    {
+        $symbol = fn (string $name, string $path): array => [
+            'name' => $name,
+            'kind' => 5,
+            'location' => [
+                'uri' => FileUri::fromPath($this->fixture . '/' . $path),
+                'range' => self::range(0, 0, 0, 1),
+            ],
+        ];
+        $generated = $symbol('UserGeneratedProxy', 'var/tmp/app/di/UserGeneratedProxy.php');
+        $worktree = $symbol('User', '.claude/worktrees/w1/src/Resource/App/User.php');
+        $real = $symbol('User', 'src/Resource/App/User.php');
+
+        $mixed = (new StandardLspTools(
+            new InMemoryLspClient(static fn (): array => [$generated, $worktree, $real]),
+            Workspace::fromPath($this->fixture),
+        ))->workspaceSymbols('User', 1);
+        self::assertSame('ok', $mixed['status']);
+        self::assertSame(['src/Resource/App/User.php'], array_column($mixed['data']['symbols'], 'path'));
+        // The limit applies after filtering, so a copy cannot take the only slot.
+        self::assertSame(1, $mixed['data']['total']);
+        self::assertFalse($mixed['data']['truncated']);
+        self::assertSame(2, $mixed['data']['coverage']['excludedTotal']);
+        self::assertSame(['var/tmp/', '.claude/worktrees/'], $mixed['data']['coverage']['excludedPathPrefixes']);
+
+        $onlyCopies = (new StandardLspTools(
+            new InMemoryLspClient(static fn (): array => [$generated, $worktree]),
+            Workspace::fromPath($this->fixture),
+        ))->workspaceSymbols('User');
+        self::assertSame('not_found', $onlyCopies['status']);
+        self::assertSame(2, $onlyCopies['data']['coverage']['excludedTotal']);
+    }
+
     public function testWorkspaceSymbolCoverageWarnsThatNewFilesMayBeMissing(): void
     {
         $found = $this->tools->workspaceSymbols('User');
