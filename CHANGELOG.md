@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.12.7] - 2026-10-29
+
+- **The first start after upgrading builds a new Phpactor index from scratch.** On a large application this
+  took about four minutes; until it finishes, `lsp_workspace_symbols` can miss classes (as
+  `coverage.mayOmitNewFiles` already states).
+
 - `bear_project_info` reports this server's own name and version in `data.mcpServer`, so a client can
   confirm which build it is connected to after a reconnect.
 
@@ -18,12 +24,13 @@ All notable changes to this project will be documented in this file.
 
 - `lsp_workspace_symbols` drops results under `var/tmp/` (BEAR's generated DI/AOP classes) and
   `.claude/worktrees/` (agent git worktrees) before the limit applies, and reports them in
-  `coverage.excludedPathPrefixes` and `coverage.excludedTotal`. The Phpactor index is unchanged.
+  `coverage.excludedPathPrefixes` and `coverage.excludedTotal`.
 
 - Phpactor now runs with its own index directory (`bear-sunday-mcp-index`) that excludes `var/tmp/`,
   `.claude/worktrees/` and every git worktree recorded inside the workspace. Phpactor keeps one file
   path per class name, so worktree copies overwrote the workspace's own entries. The first start
-  rebuilds the index; an `indexer.exclude_patterns` list in your own Phpactor configuration is replaced.
+  rebuilds the index; an `indexer.exclude_patterns` list in your own Phpactor configuration is replaced,
+  also for an external Phpactor selected with `--phpactor`.
 
 - A `timeout` message says the first call after startup also starts Phpactor, so calling again usually
   succeeds, and that `--timeout` can be raised up to 60 seconds.
