@@ -357,12 +357,13 @@ Results under `var/tmp/` (classes BEAR generates for DI and AOP) and `.claude/wo
 worktrees that agents create) are dropped before the limit applies, because they are copies that
 crowd out the real class. `coverage.excludedPathPrefixes` lists the prefixes and
 `coverage.excludedTotal` counts the dropped results. The Phpactor index and its settings are not changed.
-When a dropped worktree copy points at a file the workspace also has (and that file names the
-symbol), the result is reported at the workspace path instead, marked `source: "worktree_copy"` and
-without a range, because the copy's position need not match the workspace file. Phpactor's index can
-hold only the worktree copies of a class, so this keeps such classes findable.
-`coverage.mappedFromWorktreesTotal` counts these results. A copy whose file the workspace lacks is not
-returned; `coverage.worktreeOnlyTotal` counts such symbols and `coverage.worktreeOnlyHint` says so.
+Phpactor's index is also kept away from those copies. Phpactor stores one file path per class name,
+so a git worktree inside the workspace (another branch's copy of the same classes) would overwrite
+the workspace's own entries. The server therefore starts Phpactor with its own index directory
+(`bear-sunday-mcp-index` in Phpactor's cache directory) and excludes `var/tmp/`, `.claude/worktrees/`,
+and every worktree that git records inside the workspace (read from `.git/worktrees/`, without running
+git), in addition to Phpactor's default exclusions. The first start builds this index from scratch.
+This list replaces an `indexer.exclude_patterns` list set in your own Phpactor configuration.
 
 A `timeout` result's message notes that the first call after the server starts also starts Phpactor and
 can exceed the timeout on a large workspace, so calling again usually succeeds.

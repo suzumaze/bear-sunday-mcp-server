@@ -20,11 +20,10 @@ All notable changes to this project will be documented in this file.
   `.claude/worktrees/` (agent git worktrees) before the limit applies, and reports them in
   `coverage.excludedPathPrefixes` and `coverage.excludedTotal`. The Phpactor index is unchanged.
 
-- A dropped worktree copy whose path also exists in the workspace, and whose file names the symbol, is
-  reported at the workspace path with `source: "worktree_copy"` and no range, and counted in
-  `coverage.mappedFromWorktreesTotal`. The index can hold only the worktree copies of a class.
-  Symbols found only in worktree files the workspace lacks are counted in `coverage.worktreeOnlyTotal`
-  and named in `coverage.worktreeOnlyHint`.
+- Phpactor now runs with its own index directory (`bear-sunday-mcp-index`) that excludes `var/tmp/`,
+  `.claude/worktrees/` and every git worktree recorded inside the workspace. Phpactor keeps one file
+  path per class name, so worktree copies overwrote the workspace's own entries. The first start
+  rebuilds the index; an `indexer.exclude_patterns` list in your own Phpactor configuration is replaced.
 
 - A `timeout` message says the first call after startup also starts Phpactor, so calling again usually
   succeeds, and that `--timeout` can be raised up to 60 seconds.

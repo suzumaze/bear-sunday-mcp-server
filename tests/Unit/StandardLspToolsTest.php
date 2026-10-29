@@ -442,58 +442,12 @@ final class StandardLspToolsTest extends TestCase
         self::assertSame(2, $mixed['data']['coverage']['excludedTotal']);
         self::assertSame(['var/tmp/', '.claude/worktrees/'], $mixed['data']['coverage']['excludedPathPrefixes']);
 
-        self::assertSame(0, $mixed['data']['coverage']['mappedFromWorktreesTotal']);
-        self::assertSame(0, $mixed['data']['coverage']['worktreeOnlyTotal']);
-        self::assertArrayNotHasKey('worktreeOnlyHint', $mixed['data']['coverage']);
-
-        $generatedOnly = (new StandardLspTools(
-            new InMemoryLspClient(static fn (): array => [$generated]),
+        $onlyCopies = (new StandardLspTools(
+            new InMemoryLspClient(static fn (): array => [$generated, $worktree]),
             Workspace::fromPath($this->fixture),
         ))->workspaceSymbols('User');
-        self::assertSame('not_found', $generatedOnly['status']);
-        self::assertSame(1, $generatedOnly['data']['coverage']['excludedTotal']);
-    }
-
-    public function testWorktreeCopiesPointAtTheWorkspaceFileWhenTheIndexLacksIt(): void
-    {
-        $symbol = fn (string $name, string $path): array => [
-            'name' => $name,
-            'kind' => 5,
-            'containerName' => 'Acme\\Demo\\Resource\\App',
-            'location' => [
-                'uri' => FileUri::fromPath($this->fixture . '/' . $path),
-                'range' => self::range(4, 6, 4, 10),
-            ],
-        ];
-        // Seen on a real app: the index held only worktree copies of a class, never the workspace file.
-        $copies = [
-            $symbol('User', '.claude/worktrees/w1/src/Resource/App/User.php'),
-            $symbol('User', '.claude/worktrees/w2/src/Resource/App/User.php'),
-            $symbol('OnlyInWorktree', '.claude/worktrees/w1/src/OnlyInWorktree.php'),
-        ];
-        $result = (new StandardLspTools(
-            new InMemoryLspClient(static fn (): array => $copies),
-            Workspace::fromPath($this->fixture),
-        ))->workspaceSymbols('User');
-
-        self::assertSame('ok', $result['status']);
-        // One entry per workspace file, without a range (the copy's position need not match it),
-        // and nothing for a class that only exists in a worktree.
-        self::assertSame([[
-            'name' => 'User',
-            'kind' => 5,
-            'path' => 'src/Resource/App/User.php',
-            'containerName' => 'Acme\\Demo\\Resource\\App',
-            'source' => 'worktree_copy',
-        ]], $result['data']['symbols']);
-        self::assertSame(3, $result['data']['coverage']['excludedTotal']);
-        self::assertSame(1, $result['data']['coverage']['mappedFromWorktreesTotal']);
-        // The worktree-only class is not invented in the workspace, but its existence is stated.
-        self::assertSame(1, $result['data']['coverage']['worktreeOnlyTotal']);
-        self::assertStringStartsWith(
-            '1 matching symbol(s) exist only',
-            $result['data']['coverage']['worktreeOnlyHint'],
-        );
+        self::assertSame('not_found', $onlyCopies['status']);
+        self::assertSame(2, $onlyCopies['data']['coverage']['excludedTotal']);
     }
 
     public function testWorkspaceSymbolCoverageWarnsThatNewFilesMayBeMissing(): void

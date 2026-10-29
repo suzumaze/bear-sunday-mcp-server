@@ -49,6 +49,7 @@ final class PhpactorLanguageServer implements SemanticLspClient
 
         $extraConfig = [
             'language_server_configuration.auto_config' => false,
+            ...IndexScope::configuration($workspace->root),
             ...BundledPhpactorConfiguration::forCommand($commandPrefix),
         ];
         $command = [
