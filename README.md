@@ -357,6 +357,17 @@ Results under `var/tmp/` (classes BEAR generates for DI and AOP) and `.claude/wo
 worktrees that agents create) are dropped before the limit applies, because they are copies that
 crowd out the real class. `coverage.excludedPathPrefixes` lists the prefixes and
 `coverage.excludedTotal` counts the dropped results. The Phpactor index and its settings are not changed.
+Phpactor's index is also kept away from those copies. Phpactor stores one file path per class name,
+so a git worktree inside the workspace (another branch's copy of the same classes) would overwrite
+the workspace's own entries. The server therefore starts Phpactor with its own index directory
+(`bear-sunday-mcp-index` in Phpactor's cache directory) and excludes `var/tmp/`, `.claude/worktrees/`,
+and every worktree that git records inside the workspace (read from `.git/worktrees/`, without running
+git), in addition to Phpactor's default exclusions. The first start builds this index from scratch.
+This list replaces an `indexer.exclude_patterns` list set in your own Phpactor configuration, and it
+applies to an explicitly selected external Phpactor as well as the bundled one.
+
+A `timeout` result's message notes that the first call after the server starts also starts Phpactor and
+can exceed the timeout on a large workspace, so calling again usually succeeds.
 
 A position that is outside the saved document is rejected with `invalid_input` and the error code
 `invalid_position`, and the message

@@ -91,6 +91,16 @@ Resource自体が無い場合は`partial`もありません。
 `var/tmp/`（BEARがDI・AOP用に生成するclass）と`.claude/worktrees/`（エージェントが作るgit worktree）の
 結果は、本物のclassを埋もれさせる複製なので、件数の上限を当てる前に除きます。除いた接頭辞は
 `coverage.excludedPathPrefixes`、除いた件数は`coverage.excludedTotal`に出ます。Phpactorの索引と設定は変えません。
+Phpactorの索引にも、これらの複製を入れません。Phpactorの索引はclass名ごとにファイルのパスを1つしか持たないため、
+workspace内のgit worktree（別ブランチの同じclass）があると、workspace自身の記録が上書きされます。そこでserverは、
+専用の索引ディレクトリ（Phpactorのcacheディレクトリ内の`bear-sunday-mcp-index`）でPhpactorを起動し、
+Phpactorの既定の除外に加えて、`var/tmp/`、`.claude/worktrees/`、gitがworkspace内に記録しているすべてのworktree
+（gitを実行せず`.git/worktrees/`を読んで求めます）を除外します。最初の起動では索引を一から作ります。
+この除外リストは、利用者自身のPhpactor設定にある`indexer.exclude_patterns`を置き換えます。同梱のPhpactorだけでなく、
+明示的に指定した外部のPhpactorにも適用します。
+
+`timeout`のメッセージは、server起動後の最初の呼び出しがPhpactorの起動も含むため、大きなworkspaceでは
+上限を超えることがあり、もう一度呼べばたいてい通ることを伝えます。
 
 保存済みdocumentの外を指す位置は`invalid_input`（エラーコード`invalid_position`）で拒否され、メッセージは存在しない行（最終行つき）か、
 行末を超えたcharacter（その行のUTF-16長つき）のどちらが原因かを示します。メッセージの行とcharacterは0-basedで、長さはUTF-16 code unit数です。

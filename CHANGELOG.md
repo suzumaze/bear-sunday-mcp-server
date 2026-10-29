@@ -20,6 +20,14 @@ All notable changes to this project will be documented in this file.
   `.claude/worktrees/` (agent git worktrees) before the limit applies, and reports them in
   `coverage.excludedPathPrefixes` and `coverage.excludedTotal`. The Phpactor index is unchanged.
 
+- Phpactor now runs with its own index directory (`bear-sunday-mcp-index`) that excludes `var/tmp/`,
+  `.claude/worktrees/` and every git worktree recorded inside the workspace. Phpactor keeps one file
+  path per class name, so worktree copies overwrote the workspace's own entries. The first start
+  rebuilds the index; an `indexer.exclude_patterns` list in your own Phpactor configuration is replaced.
+
+- A `timeout` message says the first call after startup also starts Phpactor, so calling again usually
+  succeeds, and that `--timeout` can be raised up to 60 seconds.
+
 ## [0.12.6] - 2026-10-16
 
 - Bundle `suzumaze/bear-phpactor-extension` 0.3.6 with Twig dependency graphs, exact URL-path
