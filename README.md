@@ -353,6 +353,10 @@ Because even an `ok` result can lack a newly added class, `coverage.mayOmitNewFi
 `true` and `coverage.newFileHint` names the workaround, on `ok`, `not_found`, and failure alike.
 The hint also says how to find the path of a class: map its namespace through the `psr4Roots`
 that `bear_project_info` returns.
+Results under `var/tmp/` (classes BEAR generates for DI and AOP) and `.claude/worktrees/` (git
+worktrees that agents create) are dropped before the limit applies, because they are copies that
+crowd out the real class. `coverage.excludedPathPrefixes` lists the prefixes and
+`coverage.excludedTotal` counts the dropped results. The Phpactor index and its settings are not changed.
 
 A position that is outside the saved document is rejected with `invalid_input` and the error code
 `invalid_position`, and the message
