@@ -37,7 +37,12 @@ final class Workspace
 
         $absolute = realpath($this->root . '/' . $normalized);
         if ($absolute === false || !is_file($absolute)) {
-            throw new WorkspaceFileException('not_found', 'Document does not exist.');
+            throw new WorkspaceFileException(
+                'not_found',
+                'Document does not exist under the workspace ' . $this->root . '. '
+                . 'Paths resolve against the workspace this server was started with, '
+                . 'not against a git worktree or another checkout.',
+            );
         }
         $relative = $this->relativeExistingFile($absolute);
         if ($relative === null) {

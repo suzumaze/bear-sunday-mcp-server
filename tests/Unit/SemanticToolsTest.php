@@ -10,10 +10,23 @@ use Suzumaze\BearSundayMcp\Lsp\LspRpcException;
 use Suzumaze\BearSundayMcp\Lsp\LspTimeoutException;
 use Suzumaze\BearSundayMcp\SemanticTools;
 use Suzumaze\BearSundayMcp\Tests\Support\InMemoryLspClient;
+use Suzumaze\BearSundayMcp\Version;
 
 #[CoversClass(SemanticTools::class)]
 final class SemanticToolsTest extends TestCase
 {
+    public function testProjectInfoReportsTheServerVersion(): void
+    {
+        $client = new InMemoryLspClient(static fn (): array => self::projectInfoResult());
+        $result = (new SemanticTools($client))->projectInfo();
+
+        self::assertSame('ok', $result['status']);
+        self::assertSame(
+            ['name' => 'bear-sunday-mcp-server', 'version' => Version::CURRENT],
+            $result['data']['mcpServer'],
+        );
+    }
+
     public function testAttributeSummaryIsForwardedAndOldEnginesAreRejected(): void
     {
         foreach ([true, false] as $supports) {
@@ -334,7 +347,10 @@ final class SemanticToolsTest extends TestCase
         });
         $tools = new SemanticTools($client);
 
-        self::assertSame(self::projectInfoResult(), $tools->projectInfo());
+        // The engine's facts pass through unchanged; the server only adds its own version.
+        $info = $tools->projectInfo();
+        unset($info['data']['mcpServer']);
+        self::assertSame(self::projectInfoResult(), $info);
         self::assertSame(
             self::ok([
                 'method' => 'bear/resource/list',

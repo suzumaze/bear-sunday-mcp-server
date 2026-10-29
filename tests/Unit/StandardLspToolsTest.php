@@ -389,7 +389,7 @@ final class StandardLspToolsTest extends TestCase
 
         $pastLineEnd = $tools->hover('unicode.txt', 0, 4);
         self::assertSame('invalid_input', $pastLineEnd['status']);
-        self::assertSame('invalid_document', $pastLineEnd['error']['code']);
+        self::assertSame('invalid_position', $pastLineEnd['error']['code']);
         self::assertSame(
             'Character 4 is past the end of line 0 (UTF-16 length: 3); '
             . 'the end of the line is character 3 (characters are zero-based UTF-16 offsets).',
@@ -398,10 +398,22 @@ final class StandardLspToolsTest extends TestCase
 
         $pastLastLine = $tools->hover('unicode.txt', 2, 0);
         self::assertSame('invalid_input', $pastLastLine['status']);
+        self::assertSame('invalid_position', $pastLastLine['error']['code']);
         self::assertSame(
             'Line 2 does not exist; the last line of the saved document is 1 (lines are zero-based).',
             $pastLastLine['error']['message'],
         );
+    }
+
+    public function testMissingDocumentNamesTheWorkspaceItWasResolvedAgainst(): void
+    {
+        $result = $this->tools->documentSymbols('src/DoesNotExist.php');
+
+        self::assertSame('not_found', $result['status']);
+        self::assertSame('invalid_document', $result['error']['code']);
+        // A client working in a git worktree must be able to see that the path was not looked up there.
+        self::assertStringContainsString((string) realpath($this->fixture), $result['error']['message']);
+        self::assertStringContainsString('worktree', $result['error']['message']);
     }
 
     public function testWorkspaceSymbolCoverageWarnsThatNewFilesMayBeMissing(): void
@@ -423,6 +435,8 @@ final class StandardLspToolsTest extends TestCase
             $coverage = $result['data']['coverage'];
             self::assertTrue($coverage['mayOmitNewFiles'], $status);
             self::assertStringContainsString('lsp_document_symbols', $coverage['newFileHint'], $status);
+            // The hint is read when the path is unknown, so it must say how to find one.
+            self::assertStringContainsString('psr4Roots', $coverage['newFileHint'], $status);
             // Restarting was tried once and did not add an unopened file, so the hint must not promise it.
             self::assertStringNotContainsString('restart', strtolower($coverage['newFileHint']), $status);
         }
