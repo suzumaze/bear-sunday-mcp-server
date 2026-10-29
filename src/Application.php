@@ -30,6 +30,8 @@ final class Application
                 exit(143);
             });
         }
+        // Claude Code gives a server 30 seconds to start by default; never spend most of it here.
+        $client->warmUp(10.0);
         try {
             return McpServerFactory::create(
                 new SemanticTools($client),

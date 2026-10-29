@@ -366,8 +366,11 @@ git), in addition to Phpactor's default exclusions. The first start builds this 
 This list replaces an `indexer.exclude_patterns` list set in your own Phpactor configuration, and it
 applies to an explicitly selected external Phpactor as well as the bundled one.
 
-A `timeout` result's message notes that the first call after the server starts also starts Phpactor and
-can exceed the timeout on a large workspace, so calling again usually succeeds.
+The server starts Phpactor as soon as it starts itself, waiting at most 10 seconds for it; if Phpactor
+cannot start then, the first LSP call starts it and reports the error. Right after it starts, Phpactor
+lists every workspace file before it answers anything, which took about 25 seconds on an application with
+about 340,000 files. A `timeout` result's message notes that a call made soon after startup can exceed the
+timeout on a large workspace, so calling again usually succeeds.
 
 A position that is outside the saved document is rejected with `invalid_input` and the error code
 `invalid_position`, and the message

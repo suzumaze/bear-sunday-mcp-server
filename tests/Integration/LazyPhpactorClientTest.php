@@ -76,11 +76,46 @@ final class LazyPhpactorClientTest extends TestCase
         }
     }
 
-    private function client(float $timeout): LazyPhpactorClient
+    public function testWarmUpStartsPhpactorBeforeTheFirstRequest(): void
+    {
+        $client = $this->client(2);
+        try {
+            $client->warmUp(2);
+            $children = $this->childPids();
+
+            $pid = $client->request('test/pid', []);
+            self::assertContains($pid, $children);
+        } finally {
+            $client->close();
+        }
+    }
+
+    public function testFailedWarmUpLeavesTheErrorToTheFirstRequest(): void
+    {
+        $client = $this->client(2, __DIR__ . '/../Fixture/missing-phpactor');
+        try {
+            $client->warmUp(2);
+
+            $this->expectException(LspException::class);
+            $client->request('test/pid', []);
+        } finally {
+            $client->close();
+        }
+    }
+
+    /** @return list<int> */
+    private function childPids(): array
+    {
+        exec('pgrep -P ' . getmypid(), $lines);
+
+        return array_map('intval', $lines);
+    }
+
+    private function client(float $timeout, string $command = __DIR__ . '/../Fixture/fake-phpactor'): LazyPhpactorClient
     {
         return new LazyPhpactorClient(
             Workspace::fromPath(__DIR__ . '/../Fixture/workspace'),
-            [__DIR__ . '/../Fixture/fake-phpactor'],
+            [$command],
             $timeout,
         );
     }

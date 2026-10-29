@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+- Phpactor now starts together with the server instead of on the first LSP call. Right after it starts,
+  Phpactor lists every file in the workspace before it answers anything; on an application with about
+  340,000 files this took about 25 seconds and landed on the first call. That wait now passes while the
+  session gets going, so a first call made later returns at once (0.9 seconds measured, against 23–25).
+  A call made sooner still waits for the rest. The server waits at most 10 seconds for Phpactor at
+  startup, and if Phpactor cannot start, the first call reports the error as before.
+  The cost: every session now starts Phpactor and lists the files, and after an upgrade builds the
+  index, even when no LSP tool is used.
+
 - Lock symfony/yaml (used by the bundled Phpactor) to 5.4.54, which fixes
   [CVE-2026-109413](https://symfony.com/cve-2026-109413): deeply nested YAML could crash the process.
   The vulnerable 5.4.53 was in earlier releases too.
