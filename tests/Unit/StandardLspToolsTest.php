@@ -443,6 +443,8 @@ final class StandardLspToolsTest extends TestCase
         self::assertSame(['var/tmp/', '.claude/worktrees/'], $mixed['data']['coverage']['excludedPathPrefixes']);
 
         self::assertSame(0, $mixed['data']['coverage']['mappedFromWorktreesTotal']);
+        self::assertSame(0, $mixed['data']['coverage']['worktreeOnlyTotal']);
+        self::assertArrayNotHasKey('worktreeOnlyHint', $mixed['data']['coverage']);
 
         $generatedOnly = (new StandardLspTools(
             new InMemoryLspClient(static fn (): array => [$generated]),
@@ -486,6 +488,12 @@ final class StandardLspToolsTest extends TestCase
         ]], $result['data']['symbols']);
         self::assertSame(3, $result['data']['coverage']['excludedTotal']);
         self::assertSame(1, $result['data']['coverage']['mappedFromWorktreesTotal']);
+        // The worktree-only class is not invented in the workspace, but its existence is stated.
+        self::assertSame(1, $result['data']['coverage']['worktreeOnlyTotal']);
+        self::assertStringStartsWith(
+            '1 matching symbol(s) exist only',
+            $result['data']['coverage']['worktreeOnlyHint'],
+        );
     }
 
     public function testWorkspaceSymbolCoverageWarnsThatNewFilesMayBeMissing(): void

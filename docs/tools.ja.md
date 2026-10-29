@@ -94,7 +94,11 @@ Resource自体が無い場合は`partial`もありません。
 除いたworktreeの複製と同じパスのファイルがworkspaceにもあり、そのファイルにsymbol名が書かれていれば、
 workspace側のパスの結果として返します。印は`source: "worktree_copy"`で、rangeは付けません（複製の位置が
 workspace側と一致するとは限らないため）。Phpactorの索引にclassの複製しか入っていないことがあるので、
-そうしたclassも見つけられるようにするためです。件数は`coverage.mappedFromWorktreesTotal`に出ます。
+そうしたclassも見つけられるようにするためです。件数は`coverage.mappedFromWorktreesTotal`に出ます。workspaceに無いファイルの複製は返しません。その件数は
+`coverage.worktreeOnlyTotal`に出て、`coverage.worktreeOnlyHint`がそのことを一言で伝えます。
+
+`timeout`のメッセージは、server起動後の最初の呼び出しがPhpactorの起動も含むため、大きなworkspaceでは
+上限を超えることがあり、もう一度呼べばたいてい通ることを伝えます。
 
 保存済みdocumentの外を指す位置は`invalid_input`（エラーコード`invalid_position`）で拒否され、メッセージは存在しない行（最終行つき）か、
 行末を超えたcharacter（その行のUTF-16長つき）のどちらが原因かを示します。メッセージの行とcharacterは0-basedで、長さはUTF-16 code unit数です。

@@ -361,7 +361,11 @@ When a dropped worktree copy points at a file the workspace also has (and that f
 symbol), the result is reported at the workspace path instead, marked `source: "worktree_copy"` and
 without a range, because the copy's position need not match the workspace file. Phpactor's index can
 hold only the worktree copies of a class, so this keeps such classes findable.
-`coverage.mappedFromWorktreesTotal` counts these results.
+`coverage.mappedFromWorktreesTotal` counts these results. A copy whose file the workspace lacks is not
+returned; `coverage.worktreeOnlyTotal` counts such symbols and `coverage.worktreeOnlyHint` says so.
+
+A `timeout` result's message notes that the first call after the server starts also starts Phpactor and
+can exceed the timeout on a large workspace, so calling again usually succeeds.
 
 A position that is outside the saved document is rejected with `invalid_input` and the error code
 `invalid_position`, and the message

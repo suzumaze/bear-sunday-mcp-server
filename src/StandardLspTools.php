@@ -16,6 +16,9 @@ final class StandardLspTools
     private const MAX_HOVER_BYTES = 65_536;
     private const MAX_COMPLETION_FIELD_BYTES = 8_192;
     private const MAX_SYMBOL_DEPTH = 20;
+    public const TIMEOUT_MESSAGE = 'Phpactor did not respond before the timeout. The first call after this server '
+        . 'starts also starts Phpactor and can exceed the timeout on a large workspace; calling the tool again '
+        . 'usually succeeds. If it keeps happening, raise --timeout (at most 60 seconds).';
 
     /**
      * Copies that crowd out the real class: BEAR's generated DI/AOP classes and agent git worktrees.
@@ -241,10 +244,15 @@ final class StandardLspTools
             static fn (array $symbol): bool => !self::isExcludedSymbolPath($symbol['path']),
         ));
         $excluded = count($normalized['symbols']) - count($symbols);
-        $mapped = $this->workspaceFilesOfWorktreeCopies($normalized['symbols'], $symbols);
+        $worktreeOnly = 0;
+        $mapped = $this->workspaceFilesOfWorktreeCopies($normalized['symbols'], $symbols, $worktreeOnly);
         $symbols = [...$symbols, ...$mapped];
         if ($symbols === []) {
-            return $this->envelope('not_found', $this->workspaceSymbolData([], 0, false, $excluded), $provenance);
+            return $this->envelope(
+                'not_found',
+                $this->workspaceSymbolData([], 0, false, $excluded, 0, $worktreeOnly),
+                $provenance,
+            );
         }
         $this->sortAndDeduplicateSymbols($symbols);
 
@@ -258,6 +266,7 @@ final class StandardLspTools
                 $normalized['truncated'] || $total > $limit,
                 $excluded,
                 count($mapped),
+                $worktreeOnly,
             ),
             $provenance,
         );
@@ -843,22 +852,25 @@ final class StandardLspTools
      *
      * @param list<array<string, mixed>> $all
      * @param list<array<string, mixed>> $kept
+     * @param int $worktreeOnly Set to the number of symbols whose file exists only in a worktree.
      * @return list<array<string, mixed>>
      */
-    private function workspaceFilesOfWorktreeCopies(array $all, array $kept): array
+    private function workspaceFilesOfWorktreeCopies(array $all, array $kept, int &$worktreeOnly = 0): array
     {
         $key = static fn (array $symbol): string => $symbol['path'] . "\0" . $symbol['name'] . "\0" . $symbol['kind'];
         $seen = array_fill_keys(array_map($key, $kept), true);
         $mapped = [];
+        $onlyInWorktrees = [];
         foreach ($all as $symbol) {
             if (preg_match('#^\.claude/worktrees/[^/]+/(.+)$#', $symbol['path'], $match) !== 1) {
                 continue;
             }
             $path = $match[1];
-            if (
-                self::isExcludedSymbolPath($path)
-                || $this->workspace->relativeExistingFile($this->workspace->root . '/' . $path) !== $path
-            ) {
+            if (self::isExcludedSymbolPath($path)) {
+                continue;
+            }
+            if ($this->workspace->relativeExistingFile($this->workspace->root . '/' . $path) !== $path) {
+                $onlyInWorktrees[$path . "\0" . $symbol['name'] . "\0" . $symbol['kind']] = true;
                 continue;
             }
             $candidate = ['name' => $symbol['name'], 'kind' => $symbol['kind'], 'path' => $path];
@@ -881,6 +893,7 @@ final class StandardLspTools
             $seen[$key($candidate)] = true;
             $mapped[] = $candidate;
         }
+        $worktreeOnly = count($onlyInWorktrees);
 
         return $mapped;
     }
@@ -1082,7 +1095,14 @@ final class StandardLspTools
         bool $truncated,
         int $excluded = 0,
         int $mappedFromWorktrees = 0,
+        int $worktreeOnly = 0,
     ): array {
+        $worktreeOnlyHint = $worktreeOnly === 0 ? [] : ['worktreeOnlyHint' => sprintf(
+            '%d matching symbol(s) exist only in files under .claude/worktrees/ that this workspace lacks; '
+            . 'they are not returned. Search the worktree source if that copy is wanted.',
+            $worktreeOnly,
+        )];
+
         return [
             'symbols' => $symbols,
             'total' => $total,
@@ -1097,6 +1117,8 @@ final class StandardLspTools
                 'excludedPathPrefixes' => self::EXCLUDED_SYMBOL_PATH_PREFIXES,
                 'excludedTotal' => $excluded,
                 'mappedFromWorktreesTotal' => $mappedFromWorktrees,
+                'worktreeOnlyTotal' => $worktreeOnly,
+                ...$worktreeOnlyHint,
                 'newFileHint' => 'Files added since Phpactor last indexed the workspace may be missing, '
                     . 'even from an ok result. '
                     . 'For a known file, lsp_document_symbols with its path reads it directly. '
@@ -1113,7 +1135,7 @@ final class StandardLspTools
             return self::failure($exception->status, $exception->errorCode, $exception->getMessage());
         }
         if ($exception instanceof LspTimeoutException) {
-            return self::failure('timeout', 'lsp_timeout', 'Phpactor did not respond before the timeout.');
+            return self::failure('timeout', 'lsp_timeout', self::TIMEOUT_MESSAGE);
         }
         if ($exception instanceof LspRpcException && $exception->rpcCode === -32601) {
             return self::failure(

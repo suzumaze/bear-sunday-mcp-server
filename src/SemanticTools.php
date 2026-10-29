@@ -543,7 +543,7 @@ final class SemanticTools
 
             return $this->validateEnvelope($result);
         } catch (LspTimeoutException) {
-            return self::failure('timeout', 'lsp_timeout', 'Phpactor did not respond before the timeout.');
+            return self::failure('timeout', 'lsp_timeout', StandardLspTools::TIMEOUT_MESSAGE);
         } catch (LspRpcException $exception) {
             if ($exception->rpcCode === -32601) {
                 return self::failure(

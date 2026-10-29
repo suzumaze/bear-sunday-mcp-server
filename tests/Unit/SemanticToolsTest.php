@@ -666,6 +666,8 @@ final class SemanticToolsTest extends TestCase
         self::assertSame('timeout', $result['status']);
         self::assertSame('lsp_timeout', $result['error']['code']);
         self::assertStringNotContainsString('sensitive', $result['error']['message']);
+        // A first call that times out while Phpactor starts must not read as a broken tool.
+        self::assertStringContainsString('calling the tool again', $result['error']['message']);
     }
 
     public function testRejectsAnInvalidLspEnvelope(): void

@@ -23,6 +23,11 @@ All notable changes to this project will be documented in this file.
 - A dropped worktree copy whose path also exists in the workspace, and whose file names the symbol, is
   reported at the workspace path with `source: "worktree_copy"` and no range, and counted in
   `coverage.mappedFromWorktreesTotal`. The index can hold only the worktree copies of a class.
+  Symbols found only in worktree files the workspace lacks are counted in `coverage.worktreeOnlyTotal`
+  and named in `coverage.worktreeOnlyHint`.
+
+- A `timeout` message says the first call after startup also starts Phpactor, so calling again usually
+  succeeds, and that `--timeout` can be raised up to 60 seconds.
 
 ## [0.12.6] - 2026-10-16
 
