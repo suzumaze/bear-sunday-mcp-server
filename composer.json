@@ -17,6 +17,7 @@
     },
     "require": {
         "php": "^8.2",
+        "cweagans/composer-patches": "^2.0",
         "mcp/sdk": "^0.8.1",
         "phpactor/language-server-protocol": "3.17.4",
         "phpactor/phpactor": "2026.07.22.0",
@@ -63,6 +64,16 @@
         "platform": {
             "php": "8.2.0"
         },
-        "sort-packages": true
+        "sort-packages": true,
+        "allow-plugins": {
+            "cweagans/composer-patches": true
+        }
+    },
+    "extra": {
+        "patches": {
+            "phpactor/phpactor": {
+                "Build each include/exclude glob regex once instead of per file": "patches/phpactor-compile-exclude-globs-once.patch"
+            }
+        }
     }
 }

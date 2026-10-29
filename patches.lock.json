@@ -1,0 +1,17 @@
+{
+    "_hash": "860a7a9ba188af374736a4291eb74b3b44fbfebb99a8a653ed5dd2c067e054f5",
+    "patches": {
+        "phpactor/phpactor": [
+            {
+                "package": "phpactor/phpactor",
+                "description": "Build each include/exclude glob regex once instead of per file",
+                "url": "patches/phpactor-compile-exclude-globs-once.patch",
+                "sha256": "2bb215075d13b76d4c45d24f79c4b6cb8c7188114665263031290953fcb34d5a",
+                "depth": 1,
+                "extra": {
+                    "provenance": "root"
+                }
+            }
+        ]
+    }
+}
