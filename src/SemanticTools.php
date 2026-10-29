@@ -43,6 +43,8 @@ final class SemanticTools
         $checked = $this->checkDiscovery($result);
         if (($checked['status'] ?? null) === 'ok') {
             $this->rememberDiscovery($checked);
+            // Lets a client confirm which server build it is connected to after a reconnect.
+            $checked['data']['mcpServer'] = ['name' => 'bear-sunday-mcp-server', 'version' => Version::CURRENT];
         }
 
         return $checked;

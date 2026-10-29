@@ -339,7 +339,7 @@ final class StandardLspTools
         $document = $this->workspace->readDocument($path);
         $positionError = $this->positionError($document->contents, $line, $character);
         if ($positionError !== null) {
-            throw new WorkspaceFileException('invalid_input', $positionError);
+            throw new WorkspaceFileException('invalid_input', $positionError, 'invalid_position');
         }
 
         $raw = $this->requestDocument($method, $document, [
@@ -1016,7 +1016,9 @@ final class StandardLspTools
                 'mayOmitNewFiles' => true,
                 'newFileHint' => 'Files added since Phpactor last indexed the workspace may be missing, '
                     . 'even from an ok result. '
-                    . 'For a known file, lsp_document_symbols with its path reads it directly.',
+                    . 'For a known file, lsp_document_symbols with its path reads it directly. '
+                    . 'To find the path of a class, map its namespace through the psr4Roots '
+                    . 'that bear_project_info returns.',
             ],
         ];
     }
@@ -1025,7 +1027,7 @@ final class StandardLspTools
     private function exceptionResult(\Throwable $exception): array
     {
         if ($exception instanceof WorkspaceFileException) {
-            return self::failure($exception->status, 'invalid_document', $exception->getMessage());
+            return self::failure($exception->status, $exception->errorCode, $exception->getMessage());
         }
         if ($exception instanceof LspTimeoutException) {
             return self::failure('timeout', 'lsp_timeout', 'Phpactor did not respond before the timeout.');

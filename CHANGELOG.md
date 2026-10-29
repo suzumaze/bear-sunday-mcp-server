@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+- `bear_project_info` reports this server's own name and version in `data.mcpServer`, so a client can
+  confirm which build it is connected to after a reconnect.
+
+- A position outside the saved document now carries the error code `invalid_position` instead of
+  `invalid_document`. The status stays `invalid_input`.
+
+- A missing document's message names the workspace root the path was resolved against, and says that
+  paths do not follow a git worktree or another checkout.
+
+- The `lsp_workspace_symbols` new-file hint says how to find a class's path from its namespace and the
+  `psr4Roots` of `bear_project_info`.
+
 ## [0.12.6] - 2026-10-16
 
 - Bundle `suzumaze/bear-phpactor-extension` 0.3.6 with Twig dependency graphs, exact URL-path

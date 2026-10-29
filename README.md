@@ -288,7 +288,7 @@ The complete Japanese reference is available in [MCPツール一覧](docs/tools.
 
 | MCP tool | BEAR Semantic API request | Purpose |
 |---|---|---|
-| `bear_project_info` | `bear/project/info` | Protocol, advertised requests, capabilities, package versions, PSR-4 roots, and Resource count |
+| `bear_project_info` | `bear/project/info` | Protocol, advertised requests, capabilities, package versions, PSR-4 roots, Resource count, and this server's own version (`data.mcpServer`) |
 | `bear_project_diagnostics` | `bear/project/diagnostics` | Paginated project-wide static inconsistencies, scan coverage, and skipped checks |
 | `bear_contract_coverage` | `bear/project/contractCoverage` | Paginated Resource-method contract adoption, gap selection, complete summary, and scan bounds |
 | `bear_di_bindings` | `bear/di/bindings` | Direct static Ray.Di bind-to declarations; no active context, precedence, or winning-binding claim |
@@ -351,11 +351,18 @@ indexed a newly created file. Treat `not_found` as inconclusive and use
 `lsp_document_symbols` for a known file or source search for unsupported member discovery.
 Because even an `ok` result can lack a newly added class, `coverage.mayOmitNewFiles` is always
 `true` and `coverage.newFileHint` names the workaround, on `ok`, `not_found`, and failure alike.
+The hint also says how to find the path of a class: map its namespace through the `psr4Roots`
+that `bear_project_info` returns.
 
-A position that is outside the saved document is rejected with `invalid_input`, and the message
+A position that is outside the saved document is rejected with `invalid_input` and the error code
+`invalid_position`, and the message
 says which part is wrong: a line that does not exist (with the last line), or a character past the
 end of its line (with the line's UTF-16 length). Line and character positions in the message are
 zero-based; the length is a count of UTF-16 code units.
+
+A path that does not exist is rejected with `not_found`, and the message names the workspace root it
+was resolved against. Paths always resolve against the workspace the server was started with, so a
+client working in a git worktree or another checkout reads that workspace, not its own copy.
 
 ## Safety model
 

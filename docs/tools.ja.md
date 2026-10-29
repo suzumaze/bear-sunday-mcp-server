@@ -14,7 +14,7 @@ BEAR.Sunday MCP Serverは、BEAR Semantic APIとPhpactorの標準LSPを
 
 | MCP tool | Semantic API request | 主な入力 | 得られる事実 |
 |---|---|---|---|
-| `bear_project_info` | `bear/project/info` | optionalなcontext path | protocol、request一覧、capability、package version、PSR-4 root、Resource数 |
+| `bear_project_info` | `bear/project/info` | optionalなcontext path | protocol、request一覧、capability、package version、PSR-4 root、Resource数、このMCPサーバー自身の版（`data.mcpServer`） |
 | `bear_project_diagnostics` | `bear/project/diagnostics` | limit、offset | project全体の静的に証明できる不整合、走査件数、pagination、skipされた検査 |
 | `bear_contract_coverage` | `bear/project/contractCoverage` | limit、offset、gapsOnly、scheme | Resource methodごとのrequest/response SchemaとALPSの導入状態、URI scheme選択、全体集計、走査範囲 |
 | `bear_di_bindings` | `bear/di/bindings` | type、limit、offset | 直接記述された静的なRay.Di `bind()->to()`宣言。active context、優先順位、最終bindingは主張しない |
@@ -86,10 +86,15 @@ Resource自体が無い場合は`partial`もありません。
 決定的でないことを返します。既知fileのmemberは`lsp_document_symbols`、method名やindex未反映の
 可能性がある新規fileはsource検索で確認します。`ok`の結果にも新規追加したclassが含まれない
 ことがあるため、`coverage.mayOmitNewFiles`は常に`true`で、`coverage.newFileHint`が回避策を示します
-（`ok`、`not_found`、失敗のいずれでも同じです）。
+（`ok`、`not_found`、失敗のいずれでも同じです）。案内には、classのパスの探し方（名前空間を
+`bear_project_info`の`psr4Roots`に当てはめる）も含まれます。
 
-保存済みdocumentの外を指す位置は`invalid_input`で拒否され、メッセージは存在しない行（最終行つき）か、
+保存済みdocumentの外を指す位置は`invalid_input`（エラーコード`invalid_position`）で拒否され、メッセージは存在しない行（最終行つき）か、
 行末を超えたcharacter（その行のUTF-16長つき）のどちらが原因かを示します。メッセージの行とcharacterは0-basedで、長さはUTF-16 code unit数です。
+
+存在しないpathは`not_found`で拒否され、メッセージは探した起点のworkspace rootを示します。pathは常に
+server起動時のworkspaceを起点に解決されます。git worktreeや別のcheckoutで作業していても、読むのは
+起動時のworkspaceのファイルです。
 
 ## 安全境界
 
