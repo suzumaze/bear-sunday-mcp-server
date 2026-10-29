@@ -363,7 +363,8 @@ the workspace's own entries. The server therefore starts Phpactor with its own i
 (`bear-sunday-mcp-index` in Phpactor's cache directory) and excludes `var/tmp/`, `.claude/worktrees/`,
 and every worktree that git records inside the workspace (read from `.git/worktrees/`, without running
 git), in addition to Phpactor's default exclusions. The first start builds this index from scratch.
-This list replaces an `indexer.exclude_patterns` list set in your own Phpactor configuration.
+This list replaces an `indexer.exclude_patterns` list set in your own Phpactor configuration, and it
+applies to an explicitly selected external Phpactor as well as the bundled one.
 
 A `timeout` result's message notes that the first call after the server starts also starts Phpactor and
 can exceed the timeout on a large workspace, so calling again usually succeeds.
