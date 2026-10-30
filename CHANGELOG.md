@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.12.9] - 2026-10-30
+
 - The bundled Phpactor is patched (`patches/`, applied by `cweagans/composer-patches` on install) so that
   its index file list builds each include/exclude glob's regular expression once instead of once per file
   and pattern. Which files are indexed does not change (same 5,520 files on BEAR.Kata). The startup file
