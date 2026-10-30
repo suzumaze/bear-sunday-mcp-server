@@ -77,6 +77,7 @@ for task-oriented workflows.
 - PHP 8.2 or newer
 - PHP extensions required by Phpactor: `mbstring`, `posix`, and `tokenizer`
 - An MCP host that supports stdio servers
+- Git (the install applies a small patch to the bundled Phpactor; see `patches/`)
 
 The standard installation bundles Phpactor 2026.07.22.0 and
 `suzumaze/bear-phpactor-extension` in the `^0.3.6` range. If you override `--phpactor`

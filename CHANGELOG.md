@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+- The bundled Phpactor is patched (`patches/`, applied by `cweagans/composer-patches` on install) so that
+  its index file list builds each include/exclude glob's regular expression once instead of once per file
+  and pattern. Which files are indexed does not change (same 5,520 files on BEAR.Kata). The startup file
+  scan got about twice as fast on BEAR.Kata; since 0.12.8 starts Phpactor with the server, this mainly
+  shortens a call made in the first seconds and the CPU spent at each session start. Installing now needs
+  Git, and fails if the patch no longer applies.
+
 ## [0.12.8] - 2026-10-29
 
 - Lock symfony/yaml (used by the bundled Phpactor) to 5.4.54, which fixes

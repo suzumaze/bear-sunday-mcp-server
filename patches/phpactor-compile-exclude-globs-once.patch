@@ -1,0 +1,39 @@
+--- a/lib/Filesystem/Domain/FileList.php
++++ b/lib/Filesystem/Domain/FileList.php
+@@ -133,16 +133,28 @@
+             return 0;
+         });
+ 
+-        return $this->filter(function (SplFileInfo $info) use ($inclusionMap): bool {
+-            foreach ($inclusionMap as $glob => $isIncluded) {
+-                $path = $info->getPathname();
++        // Glob::match() rebuilds the regex on every call; build each one once instead.
++        $matchers = [];
++        foreach ($inclusionMap as $glob => $isIncluded) {
++            $glob = (string) $glob;
++            $matchers[] = Glob::isDynamic($glob)
++                ? [Glob::getStaticPrefix($glob), Glob::toRegEx($glob), $isIncluded]
++                : [$glob, null, $isIncluded];
++        }
+ 
+-                // do not include the scheme in comparisons
+-                if ($schemePos = strpos($path, '://')) {
+-                    $path = substr($path, $schemePos + 3);
+-                }
++        return $this->filter(function (SplFileInfo $info) use ($matchers): bool {
++            $path = $info->getPathname();
+ 
+-                if (Glob::match($path, $glob)) {
++            // do not include the scheme in comparisons
++            if ($schemePos = strpos($path, '://')) {
++                $path = substr($path, $schemePos + 3);
++            }
++
++            foreach ($matchers as [$prefixOrPath, $regex, $isIncluded]) {
++                $matches = $regex === null
++                    ? $prefixOrPath === $path
++                    : str_starts_with($path, $prefixOrPath) && preg_match($regex, $path) === 1;
++                if ($matches) {
+                     return $isIncluded;
+                 }
+             }
