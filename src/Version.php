@@ -6,7 +6,7 @@ namespace Suzumaze\BearSundayMcp;
 
 final class Version
 {
-    public const CURRENT = '0.12.8';
+    public const CURRENT = '0.12.9';
 
     private function __construct()
     {
