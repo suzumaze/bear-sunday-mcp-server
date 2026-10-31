@@ -88,7 +88,10 @@ direct declaration list remains distinct from a context-specific binding selecti
 returned paths and lines to the relevant source; the Module map is optional and does not
 expand installed vendor Modules. `bear_di_binding_lookup` does follow supported source
 composition through dependencies and reports selected/discarded candidates with import paths.
-Unknown composition makes its selection provisional. Source-matched AOP results do not prove
+Unknown composition makes its selection provisional. A `branch_dependent` selection has no
+`target`; report every `selected.branches[].target` with its `when`, and point to
+`selected.condition` (path, line, environment variable names) instead of choosing one.
+Source-matched AOP results do not prove
 that weaving succeeded or the method ran. Preserve unknown and truncation counts; do not turn
 an empty filtered result into proof of absence. Instance values are not returned.
 

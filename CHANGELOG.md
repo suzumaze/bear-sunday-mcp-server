@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.12.10] - 2026-10-31
+
+- Bundles BEAR extension v0.3.7. `bear_di_binding_lookup` now reports a binding whose target is chosen
+  by a ternary with an unknown condition, such as `$provider === 'auth0' ? Auth0::class : Google::class`,
+  as `branch_dependent`: `selected` has no `target`, `selected.branches` lists both candidate targets
+  with the arm that selects each, and `selected.condition` gives the condition's path, line and the
+  environment variable names it reads (never their values). Previously such a binding was left out,
+  so an earlier binding for the same key was reported as the selection. The tool description, the
+  manuals and the bundled skill explain the new status and ask the AI to present every candidate.
+
 ## [0.12.9] - 2026-10-30
 
 - The bundled Phpactor is patched (`patches/`, applied by `cweagans/composer-patches` on install) so that

@@ -138,9 +138,14 @@ final class McpServerFactory
             name: 'bear_di_binding_lookup',
             title: 'Explain a context binding selection',
             description: 'Inspect source-derived binding selections, discarded declarations, and module import paths. '
-                . 'The applicationContext is required and never guessed. When coverage.hasUnknowns is true, '
-                . 'selections are provisional. Empty results do not prove runtime unboundness. '
-                . 'Instance values are never returned. This does not evaluate AOP applications.',
+                . 'The applicationContext is required and never guessed. Each item has a selectionStatus: '
+                . 'source_selected; provisional (coverage.hasUnknowns is true, so an unknown elsewhere may change '
+                . 'it); or branch_dependent, when the target is chosen by a condition the source cannot decide. '
+                . 'A branch_dependent selected has no target: selected.branches lists every candidate target with '
+                . 'when (condition_true or condition_false), and selected.condition gives the path, line, and the '
+                . 'environment variable names the condition reads. Report every candidate; do not pick one. '
+                . 'Empty results do not prove runtime unboundness. Instance values and environment values are '
+                . 'never returned. This does not evaluate AOP applications.',
             annotations: $annotations,
             inputSchema: self::objectSchema([
                 'applicationContext' => self::applicationContextSchema(),

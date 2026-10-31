@@ -21,7 +21,7 @@ BEAR.Sunday MCP Serverは、BEAR Semantic APIとPhpactorの標準LSPを
 | `bear_di_module_declarations` | `bear/di/moduleDeclarations` | exact module、optional applicationContext、limit、offset、bindingsOffset、pointcutsOffset | 1つのModuleの直接宣言とfile:line。context未指定はsource view、指定時もsource graph上のmembershipのみ。bindingsとpointcutsは別々のlistで、どちらも応答サイズの上限で早めに切れることがある。全件を読むときは、`truncated`のlistごとに、そのlistの返却件数だけ`bindingsOffset`・`pointcutsOffset`を進める。これらを無視する古い拡張では、同じページを返し続ける代わりに`unsupported`（`semantic_parameter_unsupported`）を返す |
 | `bear_aop_pointcuts` | `bear/aop/pointcuts` | interceptor、limit、offset | 静的なRay.Aop interceptor宣言とmatcher構文木。pointcut評価やruntime weavingは主張しない |
 | `bear_app_context_list` | `bear/app/contexts` | optional context path、limit、offset | 起動コードに宣言されたcontext候補とsource位置。実行時に使われたcontextを観測せず、自動選択もしない |
-| `bear_di_binding_lookup` | `bear/di/bindingLookup` | 必須applicationContext、optional type/name、limit、offset、filters | 明示したcontextについて、sourceから導いたbinding選択候補、衝突時の破棄宣言、Module経路、未確定情報。unknownがあればprovisional。vendorを含むcompositionをたどるが、実行時結果ではない |
+| `bear_di_binding_lookup` | `bear/di/bindingLookup` | 必須applicationContext、optional type/name、limit、offset、filters | 明示したcontextについて、sourceから導いたbinding選択候補、衝突時の破棄宣言、Module経路、未確定情報。unknownがあればprovisional、束縛先が条件で分かれるならbranch_dependent（両方の候補と条件の位置）。vendorを含むcompositionをたどるが、実行時結果ではない |
 | `bear_di_module_tree_read` | `bear/di/moduleGraph` | optional applicationContext | context未指定ではworkspace内Module map、指定時はそのcontextのsource graph。workspace外vendor Moduleは展開せず、優先順位も評価しない |
 | `bear_attribute_catalog` | `bear/attribute/catalog` | optional applicationContext、attribute、context path、limit、offset | Composer source mapから見つけたPHP attribute定義、target、constructor signature、docblock、source位置。context指定時はAOP condition参照も示すが、適用の証明ではない |
 | `bear_aop_applications` | `bear/aop/applications` | 必須applicationContext、optional Resource/interceptor/attribute/method、limit、offset | 明示contextにおけるResource methodとsource上で一致したinterceptor候補・順序。未解決pointcutを保持し、PHP実行やruntime weavingは観測しない |
@@ -137,7 +137,11 @@ context名が分からなければ、まず`bear_app_context_list`で起動コ�
 
 `bear_di_binding_lookup`はinstalled dependencyを含むsource compositionをたどれます。対して
 `bear_di_module_tree_read`のModule mapはworkspace内に限られます。どちらも保存済みsourceに基づく診断です。
-`source_selected`は実行時の確定ではなく、未知条件が残る場合は`provisional`です。AOPの一致候補もPHPを実行せずに
+`source_selected`は実行時の確定ではなく、未知条件が残る場合は`provisional`です。束縛先がsourceでは決まらない
+条件（例：環境変数を比べる三項演算子）で選ばれる場合は`branch_dependent`になり、`selected`に`target`はありません。
+代わりに`selected.branches`が候補ごとに`target`と`when`（`condition_true`／`condition_false`）を、
+`selected.condition`が条件の`path`・`line`と読んでいる環境変数名を返します。候補はどれか1つに決めず、すべて示します。
+AOPでは、このように束縛されたResourceを`resource_binding_branch`として未解決に入れます。AOPの一致候補もPHPを実行せずに
 Ray.Aopのattribute source modelから求めるため、実際のpointcut評価やweavingを観測した結果ではありません。
 設定値は返しません。各結果のunknown、unresolved、total、truncatedとsource位置を確認してください。
 
