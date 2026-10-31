@@ -173,7 +173,7 @@ application PHPは実行しません。
 まず`bear_app_context_list`で起動コード上の候補とsource位置を確認します。利用者が指定したcontextを
 `bear_di_binding_lookup`と`bear_aop_applications`に明示します。候補が複数なら自動で選ばず、どの構成を調べるか
 利用者に確認します。前者はbindingの選択・破棄候補と組み込み経路を、後者はResource methodごとのinterceptor候補と
-順番を返します。unknownがあるbindingは`provisional`となり、AOP側はunresolved pointcut数やunknown総数を確認します。
+順番を返します。unknownがあるbindingは`provisional`、束縛先が条件で分かれるbindingは両方の候補を持つ`branch_dependent`となり、AOP側はunresolved pointcut数やunknown総数を確認します。
 
 結果の`path`、`line`、provenanceから宣言元を開いて確認できます。全Moduleを一覧する専用画面は必要条件ではありません。
 `bear_di_module_tree_read`は関係の概観が必要なときの補助で、contextなしではworkspace内Module map、contextありでは

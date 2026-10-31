@@ -139,6 +139,18 @@ PHP;
             ])->structuredContent;
             self::assertSame('provisional', $unknown['data']['items'][0]['selectionStatus']);
             self::assertTrue($unknown['data']['coverage']['hasUnknowns']);
+            $branch = $client->callTool('bear_di_binding_lookup', [
+                'applicationContext' => 'branch-app',
+                'type' => 'Acme\\Shop\\Service\\ClockInterface',
+            ])->structuredContent;
+            $branchItem = $branch['data']['items'][0];
+            self::assertSame('branch_dependent', $branchItem['selectionStatus']);
+            self::assertArrayNotHasKey('target', $branchItem['selected']);
+            self::assertSame(
+                ['Acme\\Shop\\Service\\FrozenClock', 'Acme\\Shop\\Service\\NetworkClock'],
+                array_column($branchItem['selected']['branches'], 'target'),
+            );
+            self::assertSame(['ACME_CLOCK'], $branchItem['selected']['condition']['environment']);
             $scalar = $client->callTool('bear_di_binding_lookup', [
                 'applicationContext' => 'inspect-app', 'type' => '', 'name' => 'api-key',
             ])->structuredContent;

@@ -170,7 +170,9 @@ Start with `bear_app_context_list` to see context candidates declared in startup
 source locations. Pass the user-selected context explicitly to `bear_di_binding_lookup` and
 `bear_aop_applications`; when several candidates exist, do not choose one silently. Binding
 lookup reports source-derived selected and discarded candidates and their composition paths.
-A binding result is `provisional` when unknown conditions remain. AOP applications reports
+A binding result is `provisional` when unknown conditions remain, and `branch_dependent` with
+every candidate target and the condition's location when the target depends on a condition the
+source cannot decide. AOP applications reports
 interceptor candidates per Resource method and their order; inspect unresolved-pointcut and
 unknown counts.
 

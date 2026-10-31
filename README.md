@@ -80,7 +80,7 @@ for task-oriented workflows.
 - Git (the install applies a small patch to the bundled Phpactor; see `patches/`)
 
 The standard installation bundles Phpactor 2026.07.22.0 and
-`suzumaze/bear-phpactor-extension` in the `^0.3.6` range. If you override `--phpactor`
+`suzumaze/bear-phpactor-extension` in the `^0.3.7` range. If you override `--phpactor`
 with an older compatible installation, each MCP tool checks that its backing semantic
 request is advertised; an unavailable request returns `unsupported` without being sent.
 
@@ -450,7 +450,8 @@ can be named from source; a call it cannot follow stays in `unresolved`, and
 `bear_di_binding_lookup` to inspect source-selected bindings and local retained/discarded
 choices with declaration and module-import evidence. Filter by `type`, `name`,
 `overridesOnly` or `resourcesOnly`. Inspect unknowns and truncation; provisional selections
-are not runtime winners. Instance values are never returned.
+are not runtime winners. A `branch_dependent` selection lists every candidate target and the
+location of the condition that chooses between them. Instance values are never returned.
 
 `bear_di_module_tree_read` reads a bounded workspace Module source map when no context is supplied,
 including direct binding/interceptor counts and declaration navigation. With a context it keeps the
@@ -492,7 +493,7 @@ mistaken for exhaustive absence.
 
 These tools require an engine advertising their corresponding requests:
 `bear/app/contexts`, `bear/di/bindingLookup`, `bear/di/moduleGraph`,
-`bear/attribute/catalog`, and `bear/aop/applications`. The bundled extension v0.3.6 provides
+`bear/attribute/catalog`, and `bear/aop/applications`. The bundled extension v0.3.7 provides
 these requests. An older or otherwise incompatible engine returns `unsupported` instead of
 fabricating a result. The matching extension checkout is tested with:
 
