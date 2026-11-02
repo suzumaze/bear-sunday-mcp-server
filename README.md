@@ -88,6 +88,8 @@ The MCP SDK is fixed to the compatible `0.8.x` line because its public API is no
 
 ## Install
 
+日本語の導入手順は[はじめての導入](docs/getting-started.ja.md)にあります。
+
 Install the released server into a dedicated directory:
 
 ```console
