@@ -42,15 +42,16 @@ BEAR.Sunday MCP Serverは、BEAR Semantic APIとPhpactorの標準LSPを
 `bear_resource_describe`の`responseBody`は、methodごとにbodyの最上位キーの名前を返します。値の中身や型、
 入れ子のキーは返しません。対象は、`$this->body`にキーが文字列の配列を1回代入し、その後に
 `$this->body['key'] = …`でキーを足す書き方です。途中に、`else`のない`if`で`return $this;`して早めに抜ける
-分岐があってもかまいません。その場合、`names`は最後まで進んだときのキーで、抜ける分岐は`earlyExits`に
+分岐があってもかまいません（条件式でヘルパーを呼んだり、bodyに触れたりしないもの）。その場合、`names`は最後まで進んだときのキーで、抜ける分岐は`earlyExits`に
 行番号と、その時点のbody（分かる場合）を並べます。代入の右辺で`$this->getArticles()`のようなヘルパーを
 呼ぶのはかまいませんが、それ以外（ループや`else`のある分岐、ヘルパーの単独呼び出し、キーが変数）は
 `status: unsupported`と理由（`reason`）を返し、キーを推測しません。実際のアプリでは`unsupported`も多く出ます。
 
 `#[Embed]`の`rel`は、methodが動く前にbodyのキーとして入ります（`_self`は相手のbodyを写します）。
 その後に`$this->body = […]`と丸ごと代入すると、そのキーは消えます。`responseBody.embedReplacements`と、
-`bear_project_diagnostics`の`embed_body_replaced`がこれを知らせます。早めに抜ける分岐の中での代入は
-`embed_body_replaced_on_early_exit`になり、エラー時にわざと置き換えている場合がほとんどです。
+`bear_project_diagnostics`の`embed_body_replaced`がこれを知らせます。`return`か`throw`でメソッドを抜ける
+ブロック（`if`・`elseif`・`else`）の中での代入は`embed_body_replaced_on_early_exit`になり、エラー時に
+わざと置き換えている場合がほとんどです。閉包・アロー関数・無名クラスの中の代入は数えません。
 
 Resourceの参照・Link/Embed・Resource呼び出しの位置は、バイト位置に加えて1始まりの行番号（`line`）でも返ります。
 
