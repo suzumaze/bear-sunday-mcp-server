@@ -25,6 +25,8 @@ composer create-project --no-dev --prefer-dist \
 
 MCPサーバー本体と、コード解析エンジンのPhpactor、BEAR.Sunday用のPhpactor拡張が、まとめてこのディレクトリに入ります。
 
+`Could not authenticate against github.com`と出て止まる場合は、Composerの全体設定に、期限切れなどで使えないGitHubのトークンが残っています。`composer config --global --unset github-oauth.github.com`で消す（または新しいトークンに差し替える）と、もう一度実行して入ります。
+
 ## 2. Claude Codeに登録する
 
 調べたいアプリのディレクトリで登録します。`--scope local`は「このプロジェクトの、自分だけの設定」という意味で、リポジトリには何も書き込みません。
