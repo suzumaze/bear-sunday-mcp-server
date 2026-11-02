@@ -334,7 +334,11 @@ final class McpServerFactory
             [$tools, 'resourceDescribe'],
             name: 'bear_resource_describe',
             title: 'Describe a BEAR Resource',
-            description: 'Resolve a Resource URI and return methods, Link/Embed relations, templates, and schemas.',
+            description: 'Resolve a Resource URI and return methods, Link/Embed relations, templates, and schemas. '
+                . 'Each method has responseBody: when the method only assigns $this->body a literal-keyed array '
+                . 'and then sets literal keys, in straight-line code, names lists those top-level body keys; '
+                . 'otherwise status is unsupported with a reason. It does not cover values, nested keys, or '
+                . 'keys set inside branches or helpers. Relations and Resource calls carry a 1-based line.',
             annotations: $annotations,
             inputSchema: self::objectSchema([
                 'applicationContext' => self::applicationContextSchema(),

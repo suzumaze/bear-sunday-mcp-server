@@ -26,7 +26,7 @@ BEAR.Sunday MCP Serverは、BEAR Semantic APIとPhpactorの標準LSPを
 | `bear_attribute_catalog` | `bear/attribute/catalog` | optional applicationContext、attribute、context path、limit、offset | Composer source mapから見つけたPHP attribute定義、target、constructor signature、docblock、source位置。context指定時はAOP condition参照も示すが、適用の証明ではない |
 | `bear_aop_applications` | `bear/aop/applications` | 必須applicationContext、optional Resource/interceptor/attribute/method、limit、offset | 明示contextにおけるResource methodとsource上で一致したinterceptor候補・順序。未解決pointcutを保持し、PHP実行やruntime weavingは観測しない |
 | `bear_resource_list` | `bear/resource/list` | scheme、prefix、limit、offset | 正規化されたResource URI、FQN、workspace相対pathの決定的なページ一覧 |
-| `bear_resource_describe` | `bear/resource/describe` | Resource URI | public `on*` method、parameter、Link/Embed、template、schema |
+| `bear_resource_describe` | `bear/resource/describe` | Resource URI | public `on*` method、parameter、bodyの最上位キー（`responseBody`）、Link/Embed、template、schema |
 | `bear_resource_attributes` | `bear/resource/attributes` | Resource URI | allowlist済みclass/method属性と明示引数。省略されたconstructor defaultは展開しない |
 | `bear_resource_attribute_index` | `bear/resource/attributeIndex` | scheme、prefix、limit、offset | workspace内Resource属性のページ一覧、Resourceごとのstatus、explicit-only引数policy |
 | `bear_contract_compare` | `bear/contract/compare` | Resource URI、method、schema kind | Resource、JSON Schema、ALPS間の名前presence。型や意味の一致は主張しない |
@@ -38,6 +38,13 @@ BEAR.Sunday MCP Serverは、BEAR Semantic APIとPhpactorの標準LSPを
 | `bear_alps_descriptor_lookup` | `bear/alps/describeDescriptor` | descriptor ID | ALPS descriptor factsと明示されたlocal relationship |
 | `bear_resource_references` | `bear/resource/references` | Resource URI、limit | 同じcanonical Resourceへ解決されたstatic URI/Route参照とsource range |
 | `bear_resource_incoming_relations` | `bear/resource/incomingRelations` | Resource URI | 対象Resourceを指すLink/Embed relation |
+
+`bear_resource_describe`の`responseBody`は、methodごとにbodyの最上位キーを返します。対象は、分岐のないコードで
+`$this->body`にキーが文字列の配列を代入し、その後に`$this->body['key'] = …`でキーを足す書き方だけです。
+それ以外（`if`や`foreach`の中で入れる、ヘルパーメソッドで組み立てる、キーが変数）は`status: unsupported`と
+理由（`reason`）を返し、キーを推測しません。値の中身や、入れ子のキーは返しません。
+
+Resourceの参照・Link/Embed・Resource呼び出しの位置は、バイト位置に加えて1始まりの行番号（`line`）でも返ります。
 
 ## 標準LSP tools
 
