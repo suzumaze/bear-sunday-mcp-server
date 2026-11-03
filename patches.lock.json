@@ -1,5 +1,5 @@
 {
-    "_hash": "860a7a9ba188af374736a4291eb74b3b44fbfebb99a8a653ed5dd2c067e054f5",
+    "_hash": "24d83efedf02a79274e9570c598bb676a4efd5874edb303fcca7d9bd24d85c51",
     "patches": {
         "phpactor/phpactor": [
             {
@@ -7,6 +7,30 @@
                 "description": "Build each include/exclude glob regex once instead of per file",
                 "url": "patches/phpactor-compile-exclude-globs-once.patch",
                 "sha256": "2bb215075d13b76d4c45d24f79c4b6cb8c7188114665263031290953fcb34d5a",
+                "depth": 1,
+                "extra": {
+                    "provenance": "root"
+                }
+            }
+        ],
+        "phpactor/amp-fswatch": [
+            {
+                "package": "phpactor/amp-fswatch",
+                "description": "Run one poll loop per watcher when it is stopped and watched again",
+                "url": "patches/amp-fswatch-one-poll-loop-per-watcher.patch",
+                "sha256": "7db9a67cfd14a3c76ac6dcb4cddeb870b8c59583b8b3eff88ceee02e6b9a1f8e",
+                "depth": 1,
+                "extra": {
+                    "provenance": "root"
+                }
+            }
+        ],
+        "phpactor/language-server": [
+            {
+                "package": "phpactor/language-server",
+                "description": "Exit the STDIO server when its input closes",
+                "url": "patches/language-server-exit-when-stdio-closes.patch",
+                "sha256": "7218fb399e3ab6a37d8c15090568b4c8338ca2005a5467cb4c41b6b30c132e43",
                 "depth": 1,
                 "extra": {
                     "provenance": "root"

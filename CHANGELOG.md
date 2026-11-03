@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+- Two more patches for the bundled Phpactor stop it from piling up `find` processes over the workspace.
+  Phpactor restarts its file watcher on every reindex (every 300 seconds), and each restart during a
+  search left one more poll loop running for the life of the process; on a large application dozens of
+  full-tree `find` runs ended up running at once and the machine slowed down. The watcher now keeps one
+  loop (`patches/amp-fswatch-one-poll-loop-per-watcher.patch`). Phpactor also ignored its closed input,
+  so a server that was killed without shutting Phpactor down left it running, watcher included, until
+  someone killed it by hand; it now exits when its input closes
+  (`patches/language-server-exit-when-stdio-closes.patch`).
+
 ## [0.12.11] - 2026-11-03
 
 - Bundles BEAR extension v0.3.8. `bear_resource_describe` finds body key names in methods that
