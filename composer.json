@@ -73,6 +73,12 @@
         "patches": {
             "phpactor/phpactor": {
                 "Build each include/exclude glob regex once instead of per file": "patches/phpactor-compile-exclude-globs-once.patch"
+            },
+            "phpactor/amp-fswatch": {
+                "Run one poll loop per watcher when it is stopped and watched again": "patches/amp-fswatch-one-poll-loop-per-watcher.patch"
+            },
+            "phpactor/language-server": {
+                "Exit the STDIO server when its input closes": "patches/language-server-exit-when-stdio-closes.patch"
             }
         }
     }

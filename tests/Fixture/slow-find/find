@@ -1,0 +1,6 @@
+#!/bin/sh
+# Stands in for find(1): records when each search starts and ends, and takes long enough that the
+# watcher is stopped and started again while a search is still running.
+echo start >> "$SLOW_FIND_LOG"
+sleep 2
+echo end >> "$SLOW_FIND_LOG"

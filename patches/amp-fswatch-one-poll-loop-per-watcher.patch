@@ -1,0 +1,80 @@
+--- a/src/Watcher/Find/FindWatcher.php
++++ b/src/Watcher/Find/FindWatcher.php
+@@ -32,6 +32,12 @@
+ 
+     private string $lastUpdateFile;
+ 
++    /**
++     * Bumped by every watch() call. A loop started by an earlier call ends at its next check, so
++     * stopping and watching again (as Phpactor does on each reindex) leaves exactly one loop.
++     */
++    private int $generation = 0;
++
+     public function __construct(
+         WatcherConfig $config,
+         ?LoggerInterface $logger = null,
+@@ -54,17 +60,22 @@
+             ));
+ 
+             $this->updateDateReference();
++            $generation = ++$this->generation;
+             $this->running = true;
+ 
+             yield delay(10);
+ 
+-            \Amp\asyncCall(function () {
+-                while ($this->running) {
++            \Amp\asyncCall(function () use ($generation) {
++                while ($this->running && $generation === $this->generation) {
+                     $searches = [];
+                     foreach ($this->config->paths() as $path) {
+                         $searches[] = $this->search($path);
+                     }
+                     yield \Amp\Promise\all($searches);
++                    if ($generation !== $this->generation) {
++                        // A newer loop owns the reference file now; touching it would hide its changes.
++                        return;
++                    }
+                     $this->updateDateReference();
+                     yield new Delayed($this->config->pollInterval());
+                 }
+--- a/src/Watcher/PhpPollWatcher/PhpPollWatcher.php
++++ b/src/Watcher/PhpPollWatcher/PhpPollWatcher.php
+@@ -27,6 +27,12 @@
+ 
+     private bool $running;
+ 
++    /**
++     * Bumped by every watch() call. A loop started by an earlier call ends at its next check, so
++     * stopping and watching again (as Phpactor does on each reindex) leaves exactly one loop.
++     */
++    private int $generation = 0;
++
+     public function __construct(
+         WatcherConfig $config,
+         ?LoggerInterface $logger = null
+@@ -46,10 +52,11 @@
+             ));
+ 
+             $this->updateDateReference();
++            $generation = ++$this->generation;
+             $this->running = true;
+ 
+-            \Amp\asyncCall(function () {
+-                while ($this->running) {
++            \Amp\asyncCall(function () use ($generation) {
++                while ($this->running && $generation === $this->generation) {
+                     $start = microtime(true);
+                     $searches = [];
+ 
+@@ -58,6 +65,10 @@
+                     }
+ 
+                     yield \Amp\Promise\all($searches);
++                    if ($generation !== $this->generation) {
++                        // A newer loop owns the reference file now; touching it would hide its changes.
++                        return;
++                    }
+ 
+                     $this->logger->debug(sprintf(
+                         'pid: %s PHP watcher scanned paths "%s" in %s seconds',

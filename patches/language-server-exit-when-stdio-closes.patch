@@ -1,0 +1,15 @@
+--- a/lib/Core/Server/LanguageServer.php
++++ b/lib/Core/Server/LanguageServer.php
+@@ -216,6 +216,12 @@
+ 
+                 $this->dispatchRequest($transmitter, $dispatcher, $connection, $request);
+             };
++
++            // The client closed STDIO without sending exit, for example because it was killed. Nothing
++            // can reach this server any more, and its file watcher would keep it running forever.
++            if ($this->streamProvider instanceof ResourceStreamProvider) {
++                throw new ShutdownServer('STDIO input closed, exiting the server');
++            }
+         });
+     }
+ 
