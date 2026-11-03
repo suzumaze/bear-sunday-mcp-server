@@ -334,7 +334,14 @@ final class McpServerFactory
             [$tools, 'resourceDescribe'],
             name: 'bear_resource_describe',
             title: 'Describe a BEAR Resource',
-            description: 'Resolve a Resource URI and return methods, Link/Embed relations, templates, and schemas.',
+            description: 'Resolve a Resource URI and return methods, Link/Embed relations, templates, and schemas. '
+                . 'Each method has responseBody with the top-level body key names (not values or types) when the '
+                . 'source proves them: one literal-keyed $this->body = [...] assignment, later literal key '
+                . 'additions, and early-exit guards (if without else ending in return $this), which are listed '
+                . 'in earlyExits; names are for the path that reaches the end. Other control flow, helper calls '
+                . 'as statements and dynamic keys give status unsupported with a reason; many real methods are '
+                . 'unsupported. #[Embed] keys are added before the method runs; embedReplacements lists full '
+                . 'body assignments that drop them. Relations and Resource calls carry a 1-based line.',
             annotations: $annotations,
             inputSchema: self::objectSchema([
                 'applicationContext' => self::applicationContextSchema(),

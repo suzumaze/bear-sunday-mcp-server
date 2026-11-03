@@ -4,6 +4,21 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.12.11] - 2026-11-03
+
+- Bundles BEAR extension v0.3.8. `bear_resource_describe` finds body key names in methods that
+  return early: an `if` without `else` whose block ends in `return $this;` or `return;` no longer
+  makes the method `unsupported`, `names` describe the path that reaches the end, and
+  `responseBody.earlyExits` lists each guard with its line. `bear_contract_compare` covers these
+  methods too. The names are still only top-level keys; value types are not reported.
+- A full `$this->body = ...` assignment in a method with `#[Embed]` drops the embedded keys.
+  `bear_resource_describe` lists it as `responseBody.embedReplacements`, and `bear_project_diagnostics`
+  reports it as `embed_body_replaced`, or `embed_body_replaced_on_early_exit` inside a block that
+  leaves the method with `return` or `throw`.
+- Resource references, incoming relations, and the relations and Resource calls in a description
+  carry a 1-based `line`. Their provenance lists each file once without a byte range, so the answers
+  are shorter. The tool description, the Japanese manual and the bundled skill explain all of this.
+
 ## [0.12.10] - 2026-10-31
 
 - Bundles BEAR extension v0.3.7. `bear_di_binding_lookup` now reports a binding whose target is chosen

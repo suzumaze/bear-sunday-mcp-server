@@ -258,6 +258,11 @@ final class RealMcpEndToEndTest extends TestCase
                 ['src/Resource/App/Dashboard.php', 'src/Resource/App/Dashboard.php'],
                 array_column($references['data']['references'], 'path'),
             );
+            self::assertSame([13, 14], array_column($references['data']['references'], 'line'));
+            self::assertSame(
+                ['src/Resource/App/Dashboard.php', 'src/Resource/App/User.php'],
+                array_column(array_slice($references['provenance'], 1), 'path'),
+            );
 
             $relations = $client->callTool('bear_resource_incoming_relations', [
                 'resourceUri' => 'app://self/user',
@@ -271,6 +276,7 @@ final class RealMcpEndToEndTest extends TestCase
                 ['app://self/dashboard', 'app://self/dashboard'],
                 array_column($relations['data']['items'], 'sourceUri'),
             );
+            self::assertSame([13, 14], array_column($relations['data']['items'], 'line'));
 
             $position = [
                 'path' => 'src/Resource/App/Dashboard.php',

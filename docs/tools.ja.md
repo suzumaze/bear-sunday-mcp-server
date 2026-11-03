@@ -26,7 +26,7 @@ BEAR.Sunday MCP Serverは、BEAR Semantic APIとPhpactorの標準LSPを
 | `bear_attribute_catalog` | `bear/attribute/catalog` | optional applicationContext、attribute、context path、limit、offset | Composer source mapから見つけたPHP attribute定義、target、constructor signature、docblock、source位置。context指定時はAOP condition参照も示すが、適用の証明ではない |
 | `bear_aop_applications` | `bear/aop/applications` | 必須applicationContext、optional Resource/interceptor/attribute/method、limit、offset | 明示contextにおけるResource methodとsource上で一致したinterceptor候補・順序。未解決pointcutを保持し、PHP実行やruntime weavingは観測しない |
 | `bear_resource_list` | `bear/resource/list` | scheme、prefix、limit、offset | 正規化されたResource URI、FQN、workspace相対pathの決定的なページ一覧 |
-| `bear_resource_describe` | `bear/resource/describe` | Resource URI | public `on*` method、parameter、Link/Embed、template、schema |
+| `bear_resource_describe` | `bear/resource/describe` | Resource URI | public `on*` method、parameter、bodyの最上位キー（`responseBody`）、Link/Embed、template、schema |
 | `bear_resource_attributes` | `bear/resource/attributes` | Resource URI | allowlist済みclass/method属性と明示引数。省略されたconstructor defaultは展開しない |
 | `bear_resource_attribute_index` | `bear/resource/attributeIndex` | scheme、prefix、limit、offset | workspace内Resource属性のページ一覧、Resourceごとのstatus、explicit-only引数policy |
 | `bear_contract_compare` | `bear/contract/compare` | Resource URI、method、schema kind | Resource、JSON Schema、ALPS間の名前presence。型や意味の一致は主張しない |
@@ -38,6 +38,22 @@ BEAR.Sunday MCP Serverは、BEAR Semantic APIとPhpactorの標準LSPを
 | `bear_alps_descriptor_lookup` | `bear/alps/describeDescriptor` | descriptor ID | ALPS descriptor factsと明示されたlocal relationship |
 | `bear_resource_references` | `bear/resource/references` | Resource URI、limit | 同じcanonical Resourceへ解決されたstatic URI/Route参照とsource range |
 | `bear_resource_incoming_relations` | `bear/resource/incomingRelations` | Resource URI | 対象Resourceを指すLink/Embed relation |
+
+`bear_resource_describe`の`responseBody`は、methodごとにbodyの最上位キーの名前を返します。値の中身や型、
+入れ子のキーは返しません。対象は、`$this->body`にキーが文字列の配列を1回代入し、その後に
+`$this->body['key'] = …`でキーを足す書き方です。途中に、`else`のない`if`で`return $this;`して早めに抜ける
+分岐があってもかまいません（条件式でヘルパーを呼んだり、bodyに触れたりしないもの）。その場合、`names`は最後まで進んだときのキーで、抜ける分岐は`earlyExits`に
+行番号と、その時点のbody（分かる場合）を並べます。代入の右辺で`$this->getArticles()`のようなヘルパーを
+呼ぶのはかまいませんが、それ以外（ループや`else`のある分岐、ヘルパーの単独呼び出し、キーが変数）は
+`status: unsupported`と理由（`reason`）を返し、キーを推測しません。実際のアプリでは`unsupported`も多く出ます。
+
+`#[Embed]`の`rel`は、methodが動く前にbodyのキーとして入ります（`_self`は相手のbodyを写します）。
+その後に`$this->body = […]`と丸ごと代入すると、そのキーは消えます。`responseBody.embedReplacements`と、
+`bear_project_diagnostics`の`embed_body_replaced`がこれを知らせます。`return`か`throw`でメソッドを抜ける
+ブロック（`if`・`elseif`・`else`）の中での代入は`embed_body_replaced_on_early_exit`になり、エラー時に
+わざと置き換えている場合がほとんどです。閉包・アロー関数・無名クラスの中の代入は数えません。
+
+Resourceの参照・Link/Embed・Resource呼び出しの位置は、バイト位置に加えて1始まりの行番号（`line`）でも返ります。
 
 ## 標準LSP tools
 
