@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.12.12] - 2026-11-05
+
 - Two more patches for the bundled Phpactor stop it from piling up `find` processes over the workspace.
   Phpactor restarts its file watcher on every reindex (every 300 seconds), and each restart during a
   search left one more poll loop running for the life of the process; on a large application dozens of
