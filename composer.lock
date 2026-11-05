@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4de84a37ea0da692d81fb0650a802df1",
+    "content-hash": "0cb74b80df4bcf39e7125f2f65630717",
     "packages": [
         {
             "name": "amphp/amp",
@@ -3571,20 +3571,21 @@
         },
         {
             "name": "suzumaze/bear-phpactor-extension",
-            "version": "v0.3.8",
+            "version": "v0.3.9",
             "source": {
                 "type": "git",
                 "url": "https://github.com/suzumaze/bear-phpactor-extension.git",
-                "reference": "97915f8a3ea9f6db61ae9154d7c914b14a9f5c7c"
+                "reference": "d4430611e14112eb84f3c056019ea24ab09aeb55"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/suzumaze/bear-phpactor-extension/zipball/97915f8a3ea9f6db61ae9154d7c914b14a9f5c7c",
-                "reference": "97915f8a3ea9f6db61ae9154d7c914b14a9f5c7c",
+                "url": "https://api.github.com/repos/suzumaze/bear-phpactor-extension/zipball/d4430611e14112eb84f3c056019ea24ab09aeb55",
+                "reference": "d4430611e14112eb84f3c056019ea24ab09aeb55",
                 "shasum": ""
             },
             "require": {
-                "php": "^8.2"
+                "php": "^8.2",
+                "phpstan/phpdoc-parser": "^2.0"
             },
             "require-dev": {
                 "phpactor/language-server-protocol": "3.17.4",
@@ -3612,9 +3613,9 @@
             "description": "BEAR.Sunday extension for phpactor",
             "support": {
                 "issues": "https://github.com/suzumaze/bear-phpactor-extension/issues",
-                "source": "https://github.com/suzumaze/bear-phpactor-extension/tree/v0.3.8"
+                "source": "https://github.com/suzumaze/bear-phpactor-extension/tree/v0.3.9"
             },
-            "time": "2026-11-03T11:03:02+00:00"
+            "time": "2026-11-05T09:58:11+00:00"
         },
         {
             "name": "symfony/console",
