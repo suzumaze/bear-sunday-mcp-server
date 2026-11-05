@@ -341,7 +341,11 @@ final class McpServerFactory
                 . 'in earlyExits; names are for the path that reaches the end. Other control flow, helper calls '
                 . 'as statements and dynamic keys give status unsupported with a reason; many real methods are '
                 . 'unsupported. #[Embed] keys are added before the method runs; embedReplacements lists full '
-                . 'body assignments that drop them. Relations and Resource calls carry a 1-based line.',
+                . 'body assignments that drop them. If the class docblock declares the body (@property '
+                . 'array{...} $body), declaredBody lists its variants with keys and types as written (not '
+                . 'resolved); responseBody.declaredVariant and earlyExits[].declaredVariant give the index of '
+                . 'the variant the proven names fit, or "none" (the docblock may be out of date). The '
+                . 'declaration never changes names. Relations and Resource calls carry a 1-based line.',
             annotations: $annotations,
             inputSchema: self::objectSchema([
                 'applicationContext' => self::applicationContextSchema(),
