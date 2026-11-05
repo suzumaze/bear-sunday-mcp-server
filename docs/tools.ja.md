@@ -53,6 +53,16 @@ BEAR.Sunday MCP Serverは、BEAR Semantic APIとPhpactorの標準LSPを
 ブロック（`if`・`elseif`・`else`）の中での代入は`embed_body_replaced_on_early_exit`になり、エラー時に
 わざと置き換えている場合がほとんどです。閉包・アロー関数・無名クラスの中の代入は数えません。
 
+Resourceクラス自身のdocblockがbodyの形を宣言している場合（`@property array{...} $body`、`-read`や
+`@phpstan-`・`@psalm-`付きの書き方も含む）、`declaredBody`にその宣言が入ります。`|`で並べた形の1つずつが
+`variants`の1要素になり、配列の形ならキーの名前・書かれたままの型・省略できるか（`optional`）を、それ以外なら
+型（`type`）を返します。型は書かれた文字列のままで、クラス名を解決したりはしません（`typesResolved: false`）。
+親クラスやtraitのdocblockは読みません。読めないdocblockは`status: unsupported`になります。
+宣言は書き手が書いたもので、コードから確かめたものではないので、`names`や`status`は変えません。
+キーの名前が確かめられた所では、`responseBody.declaredVariant`（最後まで進んだとき）と
+`earlyExits[].declaredVariant`（早く抜けるとき）に、その名前に合う最初の形の番号（0始まり）が入ります。
+どの形にも合わなければ`"none"`で、docblockが古くなっていることが多いです。比べるものがなければこの項目はありません。
+
 Resourceの参照・Link/Embed・Resource呼び出しの位置は、バイト位置に加えて1始まりの行番号（`line`）でも返ります。
 
 ## 標準LSP tools

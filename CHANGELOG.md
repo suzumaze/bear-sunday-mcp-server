@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.12.13] - 2026-11-05
+
+- Bundles BEAR extension v0.3.9. `bear_resource_describe` returns `declaredBody`, the body a
+  Resource class declares in its own docblock (`@property array{...} $body`, also `-read` and the
+  `@phpstan-` / `@psalm-` forms): each union member is a variant with its top-level keys, their
+  types as written (not resolved) and whether they are optional. `responseBody.declaredVariant` and
+  `earlyExits[].declaredVariant` give the index of the variant the proven names fit, or `"none"`
+  when none fits, which usually means the docblock is out of date. The declaration never changes
+  the proven `names`. Parents and traits are not read.
+
 ## [0.12.12] - 2026-11-05
 
 - Two more patches for the bundled Phpactor stop it from piling up `find` processes over the workspace.

@@ -80,7 +80,7 @@ for task-oriented workflows.
 - Git (the install applies small patches to the bundled Phpactor; see `patches/`)
 
 The standard installation bundles Phpactor 2026.07.22.0 and
-`suzumaze/bear-phpactor-extension` in the `^0.3.8` range. If you override `--phpactor`
+`suzumaze/bear-phpactor-extension` in the `^0.3.9` range. If you override `--phpactor`
 with an older compatible installation, each MCP tool checks that its backing semantic
 request is advertised; an unavailable request returns `unsupported` without being sent.
 
@@ -303,7 +303,7 @@ The complete Japanese reference is available in [MCPツール一覧](docs/tools.
 | `bear_attribute_catalog` | `bear/attribute/catalog` | Attribute definitions, targets, constructor signatures, docs, and optional context-specific AOP condition references |
 | `bear_aop_applications` | `bear/aop/applications` | Source-matched Resource methods and interceptor order for an explicit context; no runtime weaving claim |
 | `bear_resource_list` | `bear/resource/list` | Deterministic paginated Resource URI inventory with scheme and prefix filters |
-| `bear_resource_describe` | `bear/resource/describe` | Resource methods with top-level body key names when the source proves them (early-exit guards allowed), Link/Embed relations, templates, and schemas |
+| `bear_resource_describe` | `bear/resource/describe` | Resource methods with top-level body key names when the source proves them (early-exit guards allowed), the body shape the class docblock declares and which variant the proven names fit, Link/Embed relations, templates, and schemas |
 | `bear_resource_attributes` | `bear/resource/attributes` | Allowlisted class/method attributes with explicit source arguments and dynamic markers; constructor defaults are not expanded |
 | `bear_resource_attribute_index` | `bear/resource/attributeIndex` | Paginated workspace attribute facts with per-Resource status and explicit-only argument policy |
 | `bear_contract_compare` | `bear/contract/compare` | Exact name presence across Resource request parameters, JSON Schema, and ALPS; no type/meaning claim |
@@ -495,7 +495,7 @@ mistaken for exhaustive absence.
 
 These tools require an engine advertising their corresponding requests:
 `bear/app/contexts`, `bear/di/bindingLookup`, `bear/di/moduleGraph`,
-`bear/attribute/catalog`, and `bear/aop/applications`. The bundled extension v0.3.8 provides
+`bear/attribute/catalog`, and `bear/aop/applications`. The bundled extension v0.3.9 provides
 these requests. An older or otherwise incompatible engine returns `unsupported` instead of
 fabricating a result. The matching extension checkout is tested with:
 
