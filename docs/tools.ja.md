@@ -26,7 +26,7 @@ BEAR.Sunday MCP Serverは、BEAR Semantic APIとPhpactorの標準LSPを
 | `bear_attribute_catalog` | `bear/attribute/catalog` | optional applicationContext、attribute、context path、limit、offset | Composer source mapから見つけたPHP attribute定義、target、constructor signature、docblock、source位置。context指定時はAOP condition参照も示すが、適用の証明ではない |
 | `bear_aop_applications` | `bear/aop/applications` | 必須applicationContext、optional Resource/interceptor/attribute/method、limit、offset | 明示contextにおけるResource methodとsource上で一致したinterceptor候補・順序。未解決pointcutを保持し、PHP実行やruntime weavingは観測しない |
 | `bear_resource_list` | `bear/resource/list` | scheme、prefix、limit、offset | 正規化されたResource URI、FQN、workspace相対pathの決定的なページ一覧 |
-| `bear_resource_describe` | `bear/resource/describe` | Resource URI | public `on*` method、parameter、bodyの最上位キー（`responseBody`）、Link/Embed、template、schema |
+| `bear_resource_describe` | `bear/resource/describe` | Resource URI | public `on*` method、parameter、bodyの最上位キーと値の型の推論（`responseBody`）、Link/Embed、template、schema |
 | `bear_resource_attributes` | `bear/resource/attributes` | Resource URI | allowlist済みclass/method属性と明示引数。省略されたconstructor defaultは展開しない |
 | `bear_resource_attribute_index` | `bear/resource/attributeIndex` | scheme、prefix、limit、offset | workspace内Resource属性のページ一覧、Resourceごとのstatus、explicit-only引数policy |
 | `bear_contract_compare` | `bear/contract/compare` | Resource URI、method、schema kind | Resource、JSON Schema、ALPS間の名前presence。型や意味の一致は主張しない |
@@ -39,8 +39,8 @@ BEAR.Sunday MCP Serverは、BEAR Semantic APIとPhpactorの標準LSPを
 | `bear_resource_references` | `bear/resource/references` | Resource URI、limit | 同じcanonical Resourceへ解決されたstatic URI/Route参照とsource range |
 | `bear_resource_incoming_relations` | `bear/resource/incomingRelations` | Resource URI | 対象Resourceを指すLink/Embed relation |
 
-`bear_resource_describe`の`responseBody`は、methodごとにbodyの最上位キーの名前を返します。値の中身や型、
-入れ子のキーは返しません。対象は、`$this->body`にキーが文字列の配列を1回代入し、その後に
+`bear_resource_describe`の`responseBody`は、methodごとにbodyの最上位キーの名前を返します。値の中身や
+入れ子のキーは返しません（値の型は、後で説明する`inferredTypes`に推論として入ります）。対象は、`$this->body`にキーが文字列の配列を1回代入し、その後に
 `$this->body['key'] = …`でキーを足す書き方です。途中に、`else`のない`if`で`return $this;`して早めに抜ける
 分岐があってもかまいません（条件式でヘルパーを呼んだり、bodyに触れたりしないもの）。その場合、`names`は最後まで進んだときのキーで、抜ける分岐は`earlyExits`に
 行番号と、その時点のbody（分かる場合）を並べます。代入の右辺で`$this->getArticles()`のようなヘルパーを
@@ -62,6 +62,16 @@ Resourceクラス自身のdocblockがbodyの形を宣言している場合（`@p
 キーの名前が確かめられた所では、`responseBody.declaredVariant`（最後まで進んだとき）と
 `earlyExits[].declaredVariant`（早く抜けるとき）に、その名前に合う最初の形の番号（0始まり）が入ります。
 どの形にも合わなければ`"none"`で、docblockが古くなっていることが多いです。比べるものがなければこの項目はありません。
+
+キーの名前が確かめられたmethodでは、`responseBody.inferredTypes`（`source: "phpactor"`）に、キーごとの値の型が入ります。
+最後まで進んだときに、そのキーへ最後に書いた値の式を、Phpactorの型推論にかけたものです。`type`は推論した型
+（分からなければ`<missing>`）、`kind`は外側の型の大まかな分類（`scalar`・`array`・`object`・`null`・`union`・`unknown`）、
+`classes`は型の中に出てくるクラス名の一覧です。`classes`は配列の要素型・null許容・union・ジェネリクスの中まで
+たどるので、Entityの配列やpagerが入っているかは、`kind`が`array`でもここで分かります。推論は証明ではなく、
+実際より狭いことも広いこともあります（`$deleted === 1`は`true`と推論されます）。そのため、`names`や`declaredBody`
+とは別の欄にしています。`#[Embed]`だけで入るキーと、早く抜ける分岐のbodyは推論しません。型はほかのファイルにも
+左右されるので、describeのたびに計算します。MCPを起動してから、PHPの標準関数を使う値を初めて推論するときだけ、
+関数の定義の読み込みに時間がかかります（BEAR.Kataで約5秒）。
 
 Resourceの参照・Link/Embed・Resource呼び出しの位置は、バイト位置に加えて1始まりの行番号（`line`）でも返ります。
 
