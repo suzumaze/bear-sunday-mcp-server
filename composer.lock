@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "0cb74b80df4bcf39e7125f2f65630717",
+    "content-hash": "24c722669ea10b034eb60628703ac473",
     "packages": [
         {
             "name": "amphp/amp",
@@ -3571,16 +3571,16 @@
         },
         {
             "name": "suzumaze/bear-phpactor-extension",
-            "version": "v0.3.9",
+            "version": "v0.3.10",
             "source": {
                 "type": "git",
                 "url": "https://github.com/suzumaze/bear-phpactor-extension.git",
-                "reference": "d4430611e14112eb84f3c056019ea24ab09aeb55"
+                "reference": "9a1f1f6022cebc922740e0fa1114cb537c601e27"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/suzumaze/bear-phpactor-extension/zipball/d4430611e14112eb84f3c056019ea24ab09aeb55",
-                "reference": "d4430611e14112eb84f3c056019ea24ab09aeb55",
+                "url": "https://api.github.com/repos/suzumaze/bear-phpactor-extension/zipball/9a1f1f6022cebc922740e0fa1114cb537c601e27",
+                "reference": "9a1f1f6022cebc922740e0fa1114cb537c601e27",
                 "shasum": ""
             },
             "require": {
@@ -3613,9 +3613,9 @@
             "description": "BEAR.Sunday extension for phpactor",
             "support": {
                 "issues": "https://github.com/suzumaze/bear-phpactor-extension/issues",
-                "source": "https://github.com/suzumaze/bear-phpactor-extension/tree/v0.3.9"
+                "source": "https://github.com/suzumaze/bear-phpactor-extension/tree/v0.3.10"
             },
-            "time": "2026-11-05T09:58:11+00:00"
+            "time": "2026-11-07T01:52:57+00:00"
         },
         {
             "name": "symfony/console",

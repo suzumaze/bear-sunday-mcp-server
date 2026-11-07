@@ -61,7 +61,7 @@ normal agent workflow.
 | Inspect Module relationships or one Module's direct declarations | `bear_di_module_tree_read`, `bear_di_module_declarations` |
 | Explain a binding for an explicit context | `bear_di_binding_lookup` |
 | Find available attribute definitions or source-matched Resource AOP | `bear_attribute_catalog`, `bear_aop_applications` |
-| Inspect a Resource contract, including top-level body key names when provable (`methods[].responseBody`; often `unsupported`) and the body shape its docblock declares (`declaredBody`; `declaredVariant` is the fitting variant or `"none"`) | `bear_resource_describe`, `bear_resource_attributes` |
+| Inspect a Resource contract, including top-level body key names when provable (`methods[].responseBody`; often `unsupported`) and the body shape its docblock declares (`declaredBody`; `declaredVariant` is the fitting variant or `"none"`), plus Phpactor's inferred type of each value (`responseBody.inferredTypes`; check `classes` for objects such as entities or pagers, nested ones included) | `bear_resource_describe`, `bear_resource_attributes` |
 | Review attributes across Resources | `bear_resource_attribute_index` |
 | Compare Resource, schema, and ALPS names | `bear_contract_compare` |
 | Inspect request or response schema | `bear_schema_lookup` |

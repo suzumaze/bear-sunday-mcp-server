@@ -335,7 +335,7 @@ final class McpServerFactory
             name: 'bear_resource_describe',
             title: 'Describe a BEAR Resource',
             description: 'Resolve a Resource URI and return methods, Link/Embed relations, templates, and schemas. '
-                . 'Each method has responseBody with the top-level body key names (not values or types) when the '
+                . 'Each method has responseBody with the top-level body key names (not values) when the '
                 . 'source proves them: one literal-keyed $this->body = [...] assignment, later literal key '
                 . 'additions, and early-exit guards (if without else ending in return $this), which are listed '
                 . 'in earlyExits; names are for the path that reaches the end. Other control flow, helper calls '
@@ -345,7 +345,11 @@ final class McpServerFactory
                 . 'array{...} $body), declaredBody lists its variants with keys and types as written (not '
                 . 'resolved); responseBody.declaredVariant and earlyExits[].declaredVariant give the index of '
                 . 'the variant the proven names fit, or "none" (the docblock may be out of date). The '
-                . 'declaration never changes names. Relations and Resource calls carry a 1-based line.',
+                . 'declaration never changes names. When names are proven, responseBody.inferredTypes (source '
+                . 'phpactor) gives each value\'s inferred type, a kind (scalar, array, object, null, union, '
+                . 'unknown) and classes: every class the type mentions, nested ones included, so entities or '
+                . 'pagers inside arrays show up. It is inference, not proof, and can be narrower or wider than '
+                . 'what runs. Relations and Resource calls carry a 1-based line.',
             annotations: $annotations,
             inputSchema: self::objectSchema([
                 'applicationContext' => self::applicationContextSchema(),
