@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.12.14] - 2026-11-07
+
+- Bundles BEAR extension v0.3.10. `bear_resource_describe` adds `responseBody.inferredTypes` to
+  methods whose body names are proven: for each name, Phpactor's inferred type of the value written
+  last, a coarse `kind` (`scalar`, `array`, `object`, `null`, `union` or `unknown`) and `classes`,
+  every class the type mentions, nested ones included, so entities and pagers inside an array are
+  visible. It is labelled `source: "phpactor"` and kept apart from the proven `names` and the
+  docblock declaration, since inference can be narrower or wider than what runs. The first describe
+  that infers a value calling a PHP built-in function after startup takes a few seconds longer while
+  Phpactor loads its stubs.
+- The bundled extension's documentation now says that null members are absent on the stdio wire.
+
 ## [0.12.13] - 2026-11-05
 
 - Bundles BEAR extension v0.3.9. `bear_resource_describe` returns `declaredBody`, the body a
