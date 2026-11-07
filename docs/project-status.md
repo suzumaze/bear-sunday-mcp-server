@@ -38,7 +38,7 @@ flowchart TB
         D1 -.-> D2
     end
 
-    M5 --> R1["core v0.3.10 / MCP v0.12.14<br/>bundled installation"]
+    M5 --> R1["core v0.3.11 / MCP v0.12.15<br/>bundled installation"]
     R1 --> S1["bear-semantic skill bundled<br/>context, DI, and AOP workflow included"]
 ```
 
@@ -46,11 +46,11 @@ flowchart TB
 
 | Component | Version | Status |
 |---|---|---|
-| `suzumaze/bear-phpactor-extension` | `v0.3.10` | Source-derived Module relationships, binding routes, attribute catalog, and AOP applications |
-| `suzumaze/bear-sunday-mcp-server` | `v0.12.14` | 32 read-only tools with bundled Phpactor and BEAR extension v0.3.10 |
-| MCP tool inventory | 32 in `v0.12.14` | English and Japanese manuals complete |
+| `suzumaze/bear-phpactor-extension` | `v0.3.11` | Source-derived Module relationships, binding routes, attribute catalog, and AOP applications |
+| `suzumaze/bear-sunday-mcp-server` | `v0.12.15` | 32 read-only tools with bundled Phpactor and BEAR extension v0.3.11 |
+| MCP tool inventory | 32 in `v0.12.15` | English and Japanese manuals complete |
 | Contract coverage UI | optional MCP Apps view | Read-only; structured/text fallback retained |
-| `bear-semantic` agent skill | bundled with `v0.12.14` | Project, contract-adoption, context, DI, and AOP workflows included |
+| `bear-semantic` agent skill | bundled with `v0.12.15` | Project, contract-adoption, context, DI, and AOP workflows included |
 
 ## What improved beyond grep
 

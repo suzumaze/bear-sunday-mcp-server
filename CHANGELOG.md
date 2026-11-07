@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.12.15] - 2026-11-07
+
+- Bundles BEAR extension v0.3.11. In `responseBody.inferredTypes`, a value declared `iterable` (for
+  example a Ray.Query `RowListInterface` result) now has `kind` `iterable` instead of `unknown`,
+  since it may be an array or a Traversable. A plain assignment in the value position
+  (`'id' => $id = $this->save($x)`) is inferred from its right-hand side, and a union's `kind` is
+  taken from its members, so `iterable<mixed>|array{}` is `union` instead of `unknown`.
+
 ## [0.12.14] - 2026-11-07
 
 - Bundles BEAR extension v0.3.10. `bear_resource_describe` adds `responseBody.inferredTypes` to
