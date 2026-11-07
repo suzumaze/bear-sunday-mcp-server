@@ -346,8 +346,9 @@ final class McpServerFactory
                 . 'resolved); responseBody.declaredVariant and earlyExits[].declaredVariant give the index of '
                 . 'the variant the proven names fit, or "none" (the docblock may be out of date). The '
                 . 'declaration never changes names. When names are proven, responseBody.inferredTypes (source '
-                . 'phpactor) gives each value\'s inferred type, a kind (scalar, array, object, null, union, '
-                . 'unknown) and classes: every class the type mentions, nested ones included, so entities or '
+                . 'phpactor) gives each value\'s inferred type, a kind (scalar, array, iterable: an array or '
+                . 'Traversable, object, null, union, unknown) and classes: every class the type mentions, '
+                . 'nested ones included, so entities or '
                 . 'pagers inside arrays show up. It is inference, not proof, and can be narrower or wider than '
                 . 'what runs. Relations and Resource calls carry a 1-based line.',
             annotations: $annotations,

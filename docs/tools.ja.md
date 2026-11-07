@@ -65,7 +65,7 @@ Resourceクラス自身のdocblockがbodyの形を宣言している場合（`@p
 
 キーの名前が確かめられたmethodでは、`responseBody.inferredTypes`（`source: "phpactor"`）に、キーごとの値の型が入ります。
 最後まで進んだときに、そのキーへ最後に書いた値の式を、Phpactorの型推論にかけたものです。`type`は推論した型
-（分からなければ`<missing>`）、`kind`は外側の型の大まかな分類（`scalar`・`array`・`object`・`null`・`union`・`unknown`）、
+（分からなければ`<missing>`）、`kind`は外側の型の大まかな分類（`scalar`・`array`・`iterable`・`object`・`null`・`union`・`unknown`。`iterable`は、配列か、繰り返し処理できるオブジェクトのどちらか）、
 `classes`は型の中に出てくるクラス名の一覧です。`classes`は配列の要素型・null許容・union・ジェネリクスの中まで
 たどるので、Entityの配列やpagerが入っているかは、`kind`が`array`でもここで分かります。推論は証明ではなく、
 実際より狭いことも広いこともあります（`$deleted === 1`は`true`と推論されます）。そのため、`names`や`declaredBody`
