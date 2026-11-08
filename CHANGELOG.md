@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.12.16] - 2026-11-08
+
+- Bundles BEAR extension v0.3.12. `bear_resource_describe` steps over `if`, loop, `switch` and
+  `try` statements that never touch `$this->body`, call no `$this` method and do not leave the
+  method, so a method that builds a local list in a `foreach` before assigning the body now gets
+  proven names. A value that reads a variable an earlier loop writes is inferred as `unknown`.
+- Qiq templates are found in the directory the application gives BEAR.QiqModule, read from the DI
+  modules without running them, instead of only in `var/qiq/template`. A directory known only at
+  runtime is `unsupported`, and `bear_resource_describe` reports it as
+  `templatesUnresolved: ["qiq"]`. The Qiq and JSON Schema directories are reused across calls while
+  the files they were read from are unchanged.
+
 ## [0.12.15] - 2026-11-07
 
 - Bundles BEAR extension v0.3.11. In `responseBody.inferredTypes`, a value declared `iterable` (for
