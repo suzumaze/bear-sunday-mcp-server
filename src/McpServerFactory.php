@@ -338,9 +338,11 @@ final class McpServerFactory
                 . 'Each method has responseBody with the top-level body key names (not values) when the '
                 . 'source proves them: one literal-keyed $this->body = [...] assignment, later literal key '
                 . 'additions, and early-exit guards (if without else ending in return $this), which are listed '
-                . 'in earlyExits; names are for the path that reaches the end. Other control flow, helper calls '
-                . 'as statements and dynamic keys give status unsupported with a reason; many real methods are '
-                . 'unsupported. #[Embed] keys are added before the method runs; embedReplacements lists full '
+                . 'in earlyExits; names are for the path that reaches the end. if, loop, switch and try '
+                . 'statements that never touch $this->body, call no $this method and do not return, throw or '
+                . 'exit are stepped over. Other control flow, helper calls as statements and dynamic keys give '
+                . 'status unsupported with a reason; many real methods are unsupported. #[Embed] keys are '
+                . 'added before the method runs; embedReplacements lists full '
                 . 'body assignments that drop them. If the class docblock declares the body (@property '
                 . 'array{...} $body), declaredBody lists its variants with keys and types as written (not '
                 . 'resolved); responseBody.declaredVariant and earlyExits[].declaredVariant give the index of '
@@ -350,7 +352,9 @@ final class McpServerFactory
                 . 'Traversable, object, null, union, unknown) and classes: every class the type mentions, '
                 . 'nested ones included, so entities or '
                 . 'pagers inside arrays show up. It is inference, not proof, and can be narrower or wider than '
-                . 'what runs. Relations and Resource calls carry a 1-based line.',
+                . 'what runs; a value that reads a variable an earlier loop writes is unknown. When the Qiq '
+                . 'template directory is known only at runtime, the Qiq template is left out of templates and '
+                . 'templatesUnresolved lists qiq. Relations and Resource calls carry a 1-based line.',
             annotations: $annotations,
             inputSchema: self::objectSchema([
                 'applicationContext' => self::applicationContextSchema(),
@@ -493,9 +497,11 @@ final class McpServerFactory
             [$tools, 'templateForResource'],
             name: 'bear_template_for_resource',
             title: 'Resolve a Resource template',
-            description: 'Resolve a convention-based Twig or Qiq template for a BEAR Resource URI. When the '
-                . 'Resource exists but no template does, not_found has no success data and includes the Resource '
-                . 'and searched paths in partial.',
+            description: 'Resolve a convention-based Twig or Qiq template for a BEAR Resource URI. Qiq templates '
+                . 'are looked up in the directory the application gives QiqModule, read from its DI modules '
+                . 'without running them, or var/qiq/template when none is given; a directory known only at '
+                . 'runtime gives unsupported. When the Resource exists but no template does, not_found has no '
+                . 'success data and includes the Resource and searched paths in partial.',
             annotations: $annotations,
             inputSchema: self::objectSchema([
                 'resourceUri' => self::uriSchema(),

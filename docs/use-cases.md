@@ -213,7 +213,7 @@ Use `bear_contract_compare` with `schemaKind: request`. Each surface reports its
 `status`, `subject`, and names. A comparison appears only when two or more surfaces are
 available. Equal names are evidence of spelling presence only—not type, constraint,
 meaning, or runtime compatibility. For response comparison the Resource body surface is
-available only when straight-line source proves a complete literal-key `$this->body` shape;
+available only when the source proves a complete literal-key `$this->body` shape;
 dynamic or conditional construction remains `unsupported`.
 
 ## 10. Navigate from an exact source position
