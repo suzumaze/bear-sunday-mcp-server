@@ -44,7 +44,9 @@ BEAR.Sunday MCP Serverは、BEAR Semantic APIとPhpactorの標準LSPを
 `$this->body['key'] = …`でキーを足す書き方です。途中に、`else`のない`if`で`return $this;`して早めに抜ける
 分岐があってもかまいません（条件式でヘルパーを呼んだり、bodyに触れたりしないもの）。その場合、`names`は最後まで進んだときのキーで、抜ける分岐は`earlyExits`に
 行番号と、その時点のbody（分かる場合）を並べます。代入の右辺で`$this->getArticles()`のようなヘルパーを
-呼ぶのはかまいませんが、それ以外（ループや`else`のある分岐、ヘルパーの単独呼び出し、キーが変数）は
+呼ぶのはかまいません。`if`・ループ・`switch`・`try`も、中で`$this->body`に触れず、`$this`のメソッドを呼ばず、
+`return`・`throw`・`exit`でメソッドを抜けないもの（ローカル変数に一覧を作る`foreach`など）は読み飛ばします。
+それ以外（bodyに触れるループや`else`のある分岐、ヘルパーの単独呼び出し、キーが変数）は
 `status: unsupported`と理由（`reason`）を返し、キーを推測しません。実際のアプリでは`unsupported`も多く出ます。
 
 `#[Embed]`の`rel`は、methodが動く前にbodyのキーとして入ります（`_self`は相手のbodyを写します）。
@@ -68,7 +70,8 @@ Resourceクラス自身のdocblockがbodyの形を宣言している場合（`@p
 （分からなければ`<missing>`）、`kind`は外側の型の大まかな分類（`scalar`・`array`・`iterable`・`object`・`null`・`union`・`unknown`。`iterable`は、配列か、繰り返し処理できるオブジェクトのどちらか）、
 `classes`は型の中に出てくるクラス名の一覧です。`classes`は配列の要素型・null許容・union・ジェネリクスの中まで
 たどるので、Entityの配列やpagerが入っているかは、`kind`が`array`でもここで分かります。推論は証明ではなく、
-実際より狭いことも広いこともあります（`$deleted === 1`は`true`と推論されます）。そのため、`names`や`declaredBody`
+実際より狭いことも広いこともあります（`$deleted === 1`は`true`と推論されます）。前のループで書き込む変数を
+読む値は`unknown`にします（Phpactorはループが1回だけ回ったものとして型を付けるため）。そのため、`names`や`declaredBody`
 とは別の欄にしています。`#[Embed]`だけで入るキーと、早く抜ける分岐のbodyは推論しません。型はほかのファイルにも
 左右されるので、describeのたびに計算します。MCPを起動してから、PHPの標準関数を使う値を初めて推論するときだけ、
 関数の定義の読み込みに時間がかかります（BEAR.Kataで約5秒）。
@@ -117,6 +120,10 @@ BEAR Semantic APIの結果は、coreの共通envelopeを保ちます。
 `bear_template_for_resource`では、Resourceが解決済みでtemplateだけが無い場合に
 `status: not_found`で成功`data`を持たず、`partial`へResourceと実際に確認した規約pathを格納します。
 Resource自体が無い場合は`partial`もありません。
+Qiqのtemplateは、アプリが`QiqModule`に渡すディレクトリ（`new QiqModule(dirname(__DIR__, 2) . '/templates')`など）
+から探します。ディレクトリはDIモジュールを実行せずに読み取り、渡していなければ規約の`var/qiq/template`を探します。
+ディレクトリが実行時にしか決まらない場合は`status: unsupported`を返し、`bear_resource_describe`ではQiqの
+templateを`templates`から外して`templatesUnresolved: ["qiq"]`を付けます。
 
 `lsp_workspace_symbols`は`data.coverage`に対象record種別、method非対応、index freshness、空結果が
 決定的でないことを返します。既知fileのmemberは`lsp_document_symbols`、method名やindex未反映の
