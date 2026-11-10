@@ -36,8 +36,8 @@ BEAR.Sunday MCP Serverは、BEAR Semantic APIとPhpactorの標準LSPを
 | `bear_template_lookup` | `bear/template/resolve` | engine、template名 | 明示的なTwig/Qiq template名からworkspace内ファイルへの解決結果 |
 | `bear_template_for_resource` | `bear/template/forResource` | Resource URI、engine | 規約template。Resourceだけ解決できた`not_found`では成功`data`を持たず、`partial`にResourceと探索pathを保持 |
 | `bear_alps_descriptor_lookup` | `bear/alps/describeDescriptor` | descriptor ID | ALPS descriptor factsと明示されたlocal relationship |
-| `bear_resource_references` | `bear/resource/references` | Resource URI、limit | 同じcanonical Resourceへ解決されたstatic URI/Route参照とsource range |
-| `bear_resource_incoming_relations` | `bear/resource/incomingRelations` | Resource URI | 対象Resourceを指すLink/Embed relation |
+| `bear_resource_references` | `bear/resource/references` | Resource URI、limit | 同じcanonical Resourceへ解決されたstatic URI/Route参照とsource range。1つの文字列リテラルで書かれたURIだけを見つけ、定数をつないだURIは対象外 |
+| `bear_resource_incoming_relations` | `bear/resource/incomingRelations` | Resource URI | 対象Resourceを指すLink/Embed relation。行き先がリテラルのURIでないLink/Embed（例：`src: self::BASE . '/item'`）はプロジェクト全体から`unresolved`に式・理由・行番号付きで返り、どれもここを指している可能性があるので、`unresolvedTotal`が0でなければ`total`は下限 |
 
 `bear_resource_describe`の`responseBody`は、methodごとにbodyの最上位キーの名前を返します。値の中身や
 入れ子のキーは返しません（値の型は、後で説明する`inferredTypes`に推論として入ります）。対象は、`$this->body`にキーが文字列の配列を1回代入し、その後に
