@@ -354,7 +354,10 @@ final class McpServerFactory
                 . 'pagers inside arrays show up. It is inference, not proof, and can be narrower or wider than '
                 . 'what runs; a value that reads a variable an earlier loop writes is unknown. When the Qiq '
                 . 'template directory is known only at runtime, the Qiq template is left out of templates and '
-                . 'templatesUnresolved lists qiq. Relations and Resource calls carry a 1-based line.',
+                . 'templatesUnresolved lists qiq. Relations and Resource calls carry a 1-based line. A Link '
+                . 'or Embed whose target is not a literal URI, such as src: self::BASE . \'/item\', is not '
+                . 'in relationsOut: relationsOutCoverage.unresolved lists it with the expression, a reason '
+                . 'and the line, and unresolvedTotal counts it.',
             annotations: $annotations,
             inputSchema: self::objectSchema([
                 'applicationContext' => self::applicationContextSchema(),
@@ -530,7 +533,9 @@ final class McpServerFactory
             [$tools, 'resourceReferences'],
             name: 'bear_resource_references',
             title: 'Find BEAR Resource references',
-            description: 'Find bounded, deterministic static URI and Route references to a Resource.',
+            description: 'Find bounded, deterministic static URI and Route references to a Resource. Only '
+                . 'URIs written as one string literal are found, not ones built from constants; '
+                . 'bear_resource_incoming_relations lists Link and Embed targets that cannot be read.',
             annotations: $annotations,
             inputSchema: self::objectSchema([
                 'resourceUri' => self::uriSchema(),
@@ -543,7 +548,10 @@ final class McpServerFactory
             [$tools, 'resourceIncomingRelations'],
             name: 'bear_resource_incoming_relations',
             title: 'Find incoming BEAR Resource relations',
-            description: 'Find bounded, deterministic Link and Embed relations targeting a Resource.',
+            description: 'Find bounded, deterministic Link and Embed relations targeting a Resource. Links '
+                . 'and embeds anywhere in the project whose target is not a literal URI are listed in '
+                . 'unresolved (unresolvedTotal, unresolvedTruncated) because any of them may point here; '
+                . 'total is a lower bound when unresolvedTotal is not 0.',
             annotations: $annotations,
             inputSchema: self::objectSchema([
                 'resourceUri' => self::uriSchema(),
@@ -678,7 +686,8 @@ final class McpServerFactory
             'type' => 'string',
             'maxLength' => 2048,
             'pattern' => '^[A-Za-z0-9_]+(?:-[A-Za-z0-9_]+)*$',
-            'description' => 'Explicit BEAR context, such as prod-html-app; do not infer it from candidate order.',
+            'description' => 'Explicit BEAR context, such as prod-html-app. List the candidates with '
+                . 'bear_app_context_list first; do not infer it from candidate order.',
         ];
     }
 

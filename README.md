@@ -313,8 +313,8 @@ The complete Japanese reference is available in [MCPツール一覧](docs/tools.
 | `bear_template_lookup` | `bear/template/resolve` | Explicit Twig or Qiq template name to file |
 | `bear_template_for_resource` | `bear/template/forResource` | Convention-based Twig or Qiq template; missing templates have no success `data` and retain resolved Resource and searched paths in `partial` |
 | `bear_alps_descriptor_lookup` | `bear/alps/describeDescriptor` | ALPS descriptor facts and explicit local relationships |
-| `bear_resource_references` | `bear/resource/references` | Static Resource URI and Route references with bounded source ranges |
-| `bear_resource_incoming_relations` | `bear/resource/incomingRelations` | Link/Embed relations targeting a Resource URI |
+| `bear_resource_references` | `bear/resource/references` | Static Resource URI and Route references with bounded source ranges (one string literal only, not URIs built from constants) |
+| `bear_resource_incoming_relations` | `bear/resource/incomingRelations` | Link/Embed relations targeting a Resource URI, plus `unresolved` Link/Embed targets that are not literal URIs and may point here |
 | `lsp_definition` | `textDocument/definition` | Definition locations at a saved workspace position |
 | `lsp_type_definition` | `textDocument/typeDefinition` | Type-definition locations, including Resource convention JSON Schemas |
 | `lsp_references` | `textDocument/references` | Reference locations at a saved workspace position |
