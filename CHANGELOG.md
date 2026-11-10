@@ -4,9 +4,12 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-- `bear_resource_describe` no longer leaves out a `#[Link]` or `#[Embed]` whose target is not a
-  literal URI, such as `src: self::BASE . '/item'`, without a word: `relationsOutCoverage.unresolved`
-  lists it with the expression, a reason and the line, and `unresolvedTotal` counts it.
+## [0.12.17] - 2026-11-10
+
+- Bundles BEAR extension v0.3.13. `bear_resource_describe` no longer leaves out a `#[Link]` or
+  `#[Embed]` whose target is not a literal URI, such as `src: self::BASE . '/item'`, without a word:
+  `relationsOutCoverage.unresolved` lists it with the expression, a reason and the line, and
+  `unresolvedTotal` counts it.
   `bear_resource_incoming_relations` and `relationsIn` return the same items from the whole project,
   since any of them may point at the target, so `total` is a lower bound when `unresolvedTotal` is
   not 0. `bear_resource_references` now says it finds only URIs written as one string literal.
