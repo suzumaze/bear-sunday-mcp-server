@@ -125,6 +125,8 @@ app://self/userを変更する前に、public method、外向きLink/Embed、inc
 
 返されたpathとrangeから、関係するファイルだけを開けます。件数制限された結果には`total`と
 `truncated`があります。`truncated`がtrueなら、返されたpageを全件と判断してはいけません。
+incoming relationの`unresolvedTotal`が0でなければ、行き先が式で書かれたLink/Embedがあり、
+`total`は下限です。
 
 ## 5. Request surfaceを追跡する
 
@@ -248,7 +250,98 @@ recordだけを返し、methodは対象外です。index freshnessは`unknown`�
 
 これは規約や解決の誤りを検出します。runtime behaviorを証明するものではありません。
 
-## 12. 結果を安全に解釈する
+## 12. Resourceのbodyのキーと型を調べる
+
+質問例:
+
+```text
+page://self/articleListのテンプレートを書く前に、onGetがbodyに入れるキーと、それぞれの型を教えてください。
+```
+
+代表的なtool sequence:
+
+1. `bear_resource_describe`
+2. 必要なら、`inferredTypes`の`classes`に出たEntityを開く
+
+BEAR.Kataでの結果（一部の項目を省略）:
+
+```json
+"responseBody": {
+  "status": "ok",
+  "names": ["articles", "author", "category", "filter", "hasNext", "page", "perPage", "tag"],
+  "declaredVariant": 0,
+  "inferredTypes": {
+    "source": "phpactor",
+    "items": [
+      {"name": "articles", "type": "array<int,BEAR\\Kata\\Entity\\Article>", "kind": "array",
+       "classes": ["BEAR\\Kata\\Entity\\Article"]},
+      {"name": "author", "type": "null|BEAR\\Kata\\Entity\\Author", "kind": "object",
+       "classes": ["BEAR\\Kata\\Entity\\Author"]},
+      {"name": "hasNext", "type": "bool", "kind": "scalar", "classes": []}
+    ]
+  }
+}
+```
+
+読み方:
+
+- `names`は、sourceから証明できたキーだけです。証明できないmethodは`status: unsupported`と`reason`を
+  返します。BEAR.Kataでは61 methodのうち39が`ok`、22が`unsupported`でした。`unsupported`なら
+  sourceを読みます。
+- `inferredTypes`はPhpactorの型推論で、証明ではありません。`classes`に出たEntityを開けば、
+  templateで使えるpropertyが分かります。
+- `declaredVariant`は、classのdocblockにある`@property array{...} $body`宣言のうち、証明できたキーに
+  合う形の番号です。`none`なら、docblockが古い可能性があります。
+- `#[Embed]`で入るキーは、methodが`$this->body`を丸ごと置き換えると消えます。そうした箇所は
+  `embedReplacements`に行番号付きで出ます。
+
+## 13. キャッシュされる親が、どの子に頼っているかをたどる
+
+質問例:
+
+```text
+app://self/cache/authorを変更します。これを埋め込んだりリンクしたりしている親と、
+そのうちキャッシュされるものを洗い出してください。
+```
+
+代表的なtool sequence:
+
+1. 子に対する`bear_resource_incoming_relations`（子を指すLink/Embed）
+2. 見つかった親ごとの`bear_resource_attributes`（`#[Cacheable]`などのcache属性）
+3. 子に対する`bear_resource_references`（1つの文字列リテラルで書かれたURI）
+4. 親ごとの`bear_resource_describe`の`referencesOut`（`$this->resource->get()`などの直接呼び出し）
+
+BEAR.Kataでの結果（一部の項目を省略）:
+
+```json
+{
+  "items": [
+    {"kind": "embed", "rel": "author", "sourceUri": "app://self/cache/authorProfile",
+     "targetUri": "app://self/cache/author", "sourcePath": "src/Resource/App/Cache/AuthorProfile.php",
+     "line": 38}
+  ],
+  "total": 1,
+  "truncated": false,
+  "unresolved": [],
+  "unresolvedTotal": 0
+}
+```
+
+親の`app://self/cache/authorProfile`には、classに`#[Cacheable]`があります。
+
+読み方:
+
+- Embedによる関係と、Resource clientによる直接呼び出しは、別々の答えとして返ります。
+  子の変更が親のcacheへどう届くかは、子の使い方で変わりえます。BEAR.Kataの`AuthorProfile`の
+  docblockは、Embedした子のSurrogate-Keyが親へ自動で合わさると説明しています。
+  直接呼び出しの場合は、親の`referencesOut`を見て、sourceで確かめます。
+- `unresolvedTotal`が0でなければ、行き先が式で書かれたLink/Embed（例:
+  `src: self::BASE . '/item'`）がprojectにあります。そのどれかがこの子を指しているかもしれないので、
+  `total`は下限です。`unresolved`の`expression`と`line`から、sourceを確かめます。
+- MCPはcacheの実際の動きを観測しません。interceptorが足すheader、親classの`onGet`が書くheader、
+  template helperから描画する部品は対象外なので、sourceを読みます。
+
+## 14. 結果を安全に解釈する
 
 すべてのBEAR Semantic API resultは同じenvelopeを保ちます。
 
@@ -269,6 +362,8 @@ recordだけを返し、methodは対象外です。index freshnessは`unknown`�
 - `candidates`は推測で1件を選ばず、件数制限された候補を保持します。
 - `provenance`は結果の根拠となった保存済みworkspace fileとrangeを示します。
 - pathはworkspace相対です。固定されたrootの外にあるファイルは公開しません。
+- sourceから読めなかったものは、黙って落とさず`unresolved`などで返します。例えば、行き先が式で
+  書かれたLink/Embedは`relationsOutCoverage.unresolved`に式と行番号付きで入ります。
 
 空配列が常に「その概念は存在しない」を意味するとは限りません。結論を出す前に`status`、
 capabilities、`available`、`truncated`を確認します。

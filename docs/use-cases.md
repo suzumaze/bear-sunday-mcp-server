@@ -117,7 +117,8 @@ Typical tool sequence:
 
 Use the returned paths and ranges to open only the relevant files. A bounded result reports
 `total` and `truncated`; do not treat the returned page as the complete set when
-`truncated` is true.
+`truncated` is true. When an incoming relation result has a non-zero `unresolvedTotal`, some
+Link/Embed targets are expressions and `total` is a lower bound.
 
 ## 5. Trace a request surface
 
@@ -256,7 +257,102 @@ same semantic layer used by the IDE:
 
 This catches convention and resolution mistakes. It does not prove runtime behavior.
 
-## 12. Interpret results safely
+## 12. Inspect the keys and types a Resource puts in its body
+
+Ask:
+
+```text
+Before I write the template for page://self/articleList, list the keys onGet puts in the
+body and the type of each.
+```
+
+Typical tool sequence:
+
+1. `bear_resource_describe`
+2. If needed, open the entities listed in `classes` of `inferredTypes`
+
+Result on BEAR.Kata (some items left out):
+
+```json
+"responseBody": {
+  "status": "ok",
+  "names": ["articles", "author", "category", "filter", "hasNext", "page", "perPage", "tag"],
+  "declaredVariant": 0,
+  "inferredTypes": {
+    "source": "phpactor",
+    "items": [
+      {"name": "articles", "type": "array<int,BEAR\\Kata\\Entity\\Article>", "kind": "array",
+       "classes": ["BEAR\\Kata\\Entity\\Article"]},
+      {"name": "author", "type": "null|BEAR\\Kata\\Entity\\Author", "kind": "object",
+       "classes": ["BEAR\\Kata\\Entity\\Author"]},
+      {"name": "hasNext", "type": "bool", "kind": "scalar", "classes": []}
+    ]
+  }
+}
+```
+
+How to read it:
+
+- `names` holds only the keys the source proves. A method the source cannot prove returns
+  `status: unsupported` with a `reason`. On BEAR.Kata, 39 of 61 methods are `ok` and 22 are
+  `unsupported`; read the source for those.
+- `inferredTypes` is Phpactor's inference, not proof. Open the entities in `classes` to see the
+  properties a template can use.
+- `declaredVariant` is the index of the shape in the class docblock's `@property array{...} $body`
+  that fits the proven keys. `none` means the docblock may be out of date.
+- Keys set by `#[Embed]` are lost when the method replaces `$this->body` as a whole. Such
+  assignments are listed in `embedReplacements` with their line.
+
+## 13. Trace which children a cached parent depends on
+
+Ask:
+
+```text
+I am changing app://self/cache/author. List the parents that embed or link to it, and which
+of them are cached.
+```
+
+Typical tool sequence:
+
+1. `bear_resource_incoming_relations` for the child (Link/Embed pointing at it)
+2. `bear_resource_attributes` for each parent found (cache attributes such as `#[Cacheable]`)
+3. `bear_resource_references` for the child (URIs written as one string literal)
+4. `referencesOut` of `bear_resource_describe` for each parent (direct calls such as
+   `$this->resource->get()`)
+
+Result on BEAR.Kata (some items left out):
+
+```json
+{
+  "items": [
+    {"kind": "embed", "rel": "author", "sourceUri": "app://self/cache/authorProfile",
+     "targetUri": "app://self/cache/author", "sourcePath": "src/Resource/App/Cache/AuthorProfile.php",
+     "line": 38}
+  ],
+  "total": 1,
+  "truncated": false,
+  "unresolved": [],
+  "unresolvedTotal": 0
+}
+```
+
+The parent `app://self/cache/authorProfile` has `#[Cacheable]` on its class.
+
+How to read it:
+
+- Embed relations and direct Resource client calls come back as separate answers. How a
+  child's change reaches the parent's cache can depend on which one is used. The docblock of
+  BEAR.Kata's `AuthorProfile` explains that an embedded child's Surrogate-Key is merged into the
+  parent automatically. For a direct call, look at the parent's `referencesOut` and check the
+  source.
+- When `unresolvedTotal` is not 0, the project has Link/Embed whose target is an expression,
+  such as `src: self::BASE . '/item'`. Any of them may point at this child, so `total` is a
+  lower bound. Check the source from `expression` and `line` in `unresolved`.
+- The server does not observe cache behavior. Headers added by interceptors or written by a
+  parent class's `onGet`, and parts rendered from template helpers, are out of scope; read the
+  source for those.
+
+## 14. Interpret results safely
 
 Every BEAR Semantic API result preserves the same envelope:
 
@@ -278,6 +374,9 @@ Every BEAR Semantic API result preserves the same envelope:
 - `candidates` preserves bounded alternatives instead of selecting one by guesswork.
 - `provenance` identifies saved workspace files and ranges that support the result.
 - Paths are workspace-relative. The adapter does not expose files outside its fixed root.
+- What the source cannot settle is reported, not dropped. For example, a Link/Embed whose
+  target is an expression is listed in `relationsOutCoverage.unresolved` with the expression and
+  the line.
 
 An empty list is not always equivalent to "the concept does not exist." Check `status`,
 capabilities, `available`, and `truncated` before drawing a conclusion.
